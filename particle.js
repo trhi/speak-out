@@ -1,4 +1,4 @@
-var particleDiameter;
+var particleDiameter = 10;
 
 //This is all the code which describes the internal life of particles
 
@@ -6,17 +6,99 @@ var particleDiameter;
 //removed diameter of particle from constructor...
 function particle(tempX, tempY) {
 
+      //yeah, the gradual increase in the diameter looks cute :)
+      //looks like a bubble floating up..
       this.display = function() {
         fill(this.color);
+
+        //as particle is born, it gradually grows into its full size
+        if(this.counter < 10){
+          this.diameter = this.counter;
+        } else {
+          this.diameter = particleDiameter;
+        }
+
+        //as particle is dying, it gradually fades out:
+        //starting at lifespan = 300, we fade them out:
+        //if(this.lifespan < 100){
+        //  this.diameter += 1;
+        //}
+
         ellipse(this.positionVector.x, this.positionVector.y, this.diameter, this.diameter);
+        this.lifespan -= 0.1;
+        this.counter += 0.1;
+
+        //now they just pop out of the world:
+        if(this.lifespan <= 0){
+           this.remove();
+        }
+
+
+
       };
+
+      //an attempt at animating death....
+      //not succesful. Too much going on visually with this feature.
+      this.flickerOut = function(){
+
+        if(this.lifespan <= 10){
+          this.color = [255, 255, 255, 255];
+          this.particleBirthColorSTRING = this.color.toString();
+        }
+
+        if(this.lifespan <= 6){
+          this.color = [0, 0, 0, 255];
+        }
+
+        if(this.lifespan <= 4){
+          this.color = [255, 255, 255, 255];
+        }
+
+        if(this.lifespan <= 3.5){
+          this.color = [0, 0, 0, 255];
+        }
+
+        if(this.lifespan <= 3){
+          this.color = [255, 255, 255, 255];
+        }
+
+        if(this.lifespan <= 2.5){
+          this.color = [255, 255, 255, 255];
+        }
+
+        if(this.lifespan <= 2){
+          this.color = [0, 0, 0, 255];
+        }
+
+        if(this.lifespan <= 1.5){
+          this.color = [255, 255, 255, 255];
+        }
+
+        if(this.lifespan <= 1){
+          this.color = [0, 0, 0, 255];
+        }
+
+        if(this.lifespan <= 0.5){
+          this.color = [255, 255, 255, 255];
+        }
+
+        if(this.lifespan <= 0){
+           this.remove();
+        }//endif
+
+
+      }
 
       //set the x,y coordinates of the origin of the particle
       //we can use these originX and originY coordinates to check the bugs current x,y position relative to the generator of the cell, ie. relative to the cell.
       //ie. we can measure distance between the current x,y and the generators of all the voronoicells to determine which cell the particle is currently in
       //and thus we can translate its x,y to make it "collide" away from the boundary delimiting its origin cell
 
-      particleDiameter = 10;
+      this.lifespan = random(100,2000);
+      this.counter = 0;
+      console.log("this.counter is:" + this.counter);
+
+      //particleDiameter = 10;
       this.diameter = particleDiameter;
 
       this.isAttractedTo = random(attractorQualities);
@@ -76,10 +158,13 @@ function particle(tempX, tempY) {
       var gravityOfHome;
       this.gravityOfHome = random(2, 3);
       this.originalGravityOfHome = this.gravityOfHome;
-      console.log("Gravity of Home is: " + this.gravityOfHome);
+      //console.log("Gravity of Home is: " + this.gravityOfHome);
 
-      this.factor = 3 * random(1, 10);
-      console.log("My factor is: " + this.factor);
+      //used to be: 3 * random(1, 10);
+      //lets see what happens to the particles' movement when it is set to
+      //lower values.. ie. between 1 and 10.
+      this.factor = random(1, 10);
+      //console.log("My factor is: " + this.factor);
 
       var cellId = voronoiGetSite(tempX, tempY, false);
 
@@ -90,7 +175,7 @@ function particle(tempX, tempY) {
       var particleBirthColor = voronoiGetColor(cellId);
 
       this.particleBirthColor = particleBirthColor;
-      console.log("Particle birth color is:" + particleBirthColor);
+      //console.log("Particle birth color is:" + particleBirthColor);
 
 
 
@@ -109,8 +194,10 @@ function particle(tempX, tempY) {
       this.particleBirthColor = roundedBirthColor;
       */
 
+
       var particleBirthColorSTRING = this.particleBirthColor.toString();
-      console.log("This is the particle birth color as a string:" + particleBirthColorSTRING);
+      this.particleBirthColorSTRING = particleBirthColorSTRING;
+      //console.log("This is the particle birth color as a string:" + particleBirthColorSTRING);
 
       //console.log("Particle birth color is now:" + this.particleBirthColor);
       this.color = particleBirthColor;
@@ -385,6 +472,18 @@ function particle(tempX, tempY) {
             } //close else
 
       } //close amIHome()
+
+
+      this.remove = function(){
+        var myIndex = particles.indexOf(this);
+        //console.log(myIndex);
+        particles.splice(myIndex,1);
+        console.log("Removed me! At index:" + myIndex);
+        //console.log("Particles array now looks like this:");
+        //console.log(attractors);
+
+      }//close this.remove
+
 
 
 }//close particle()

@@ -1,5 +1,4 @@
-var particleDiameter;
-
+//this is the drawing border around the world
 var drawingBorderX = 0;
 var drawingBorderY = 0;
 
@@ -22,9 +21,7 @@ function setup() {
         noSmooth();
         frameRate(30);
 
-        //initialising particle diameter to 10px
         //and the qualitites of the attractors which exist in this world
-        particleDiameter = 10;
         attractorQualities = ["nothing", "work", "love", "study", "culture", "freedom", "peace", "exploration"];
 
         //
@@ -78,6 +75,7 @@ function setup() {
         //printing the voronoi diagram generated(full detailed diagram):
         console.log("This is the world: ");
         console.log(theWorld);
+        console.log("This is the number of cells I have:" + theWorld.cells.length);
 
         //Get simplified cells without jitter, for more advanced use
         var normal = voronoiGetCells();
@@ -154,7 +152,10 @@ function draw() {
 
 
         //spawnNewParticles method
-        if (frameCount == 100 || frameCount % 400 == 0) {
+        //here, we set the frequency at which particles are spawned
+        //at 30 frames per second, %120 frames means there is a chance
+        //of new particles spawning every four seconds:
+        if (frameCount%10 == 0) {
           spawnNewParticles();
         } //close if framecount
 
@@ -204,6 +205,41 @@ function spawnNewAttractor() {
 //SPAWN NEW PARTICLE (POP FROM ARRAY)
 
 function spawnNewParticles() {
+
+    //makeover for spawnNewParticles() to make particle distribution more random
+    //Due to particles no longer jittering around their generators, we can just
+    //spawn them around their voronoi site..
+
+    //first: at every x:th framecount, decide how many particles will be spawned:
+    //        now, it is choosing between zero and the number of cells that exist
+    //        in the voronoi...
+    //       var newParticles = round(random(0, theWorld.cells.length));
+    //
+    //second: after choosing number of particles to spawn, choose randomly which
+    //       sites they will be spawned at:
+    //       for every particle to be spawned, decide which voronoi it will be
+    //       generated at:
+    //       for( i=0 ; i < newParticles ; i++){
+    //            //chooses one of the voronoi cells:
+    //            var newHome = round(random(0, theWorld.cells.length-1));
+    //            var newParticle = new particle(theWorld.cells[newHome].site.x, theWorld.cells[newHome].site.y);
+    //            particles.push(newParticle);
+    //        }
+
+    //        now, it is choosing between zero and the number of cells that exist
+    //        in the voronoi.. eg. between 0 and 6.
+    var numberOfNewParticles = random([0,0,0,0,0,1,2]);
+
+    //for each of the particles to be born, assigns random cell to be born into:
+    for( i = 0 ; i < numberOfNewParticles ; i++){
+          //chooses one of the voronoi cells:
+          var newHome = round(random(0, theWorld.cells.length-1));
+          var newParticle = new particle(theWorld.cells[newHome].site.x, theWorld.cells[newHome].site.y);
+          particles.push(newParticle);
+    }
+
+
+/*
       for (i = 0; i < voronoiGetCells().length; i++) {
             var birthX;
             var birthY;
@@ -226,4 +262,7 @@ function spawnNewParticles() {
             }//close if()
 
       } //close for()
+*/
+
+
 } //close spawnNewParticles()
