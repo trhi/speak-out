@@ -1,58 +1,7 @@
-//This does not work:
-if (this.positionVector.x == this.originX && this.positionVector.y == this.originY){
-  return true;
-} else if ((this.positionVector.x > this.originX-10 &&
-this.positionVector.x < this.originX+10)
-&& (this.positionVector.y > this.originY-10 &&
-  this.positionVector.y < this.originY+10)){
-  return true;
-} else if (this.particleBirthColor == colorOfTheLand){
-  return true;
-}else{
-  return false;
-}//close else
-
-
-
-
-//Now this works way better................
-//BUT they still jitter around the generator, albeit at a
-//larger radius..
-if(this.particleBirthColor == colorOfTheLand){
-  return true;
-}else if(
-  (this.positionVector.x == this.originX
-    ||
-    (this.positionVector.x > this.originX-10 &&
-    this.positionVector.x < this.originX+10))
-     ||
-  (this.positionVector.y == this.originY
-    ||
-    (this.positionVector.y > this.originY-10 &&
-      this.positionVector.y < this.originY+10))
-  ){
-    return true;
-} else {
-  return false
-} //close else
-
-
-
-
-
-
-/*
-**********************************************************************
-**********************************************************************
-*********** This was when I tried to add voronoi stuff ***************
-***************** into its own .js file world.js *********************
-******************* Code copied from: world.js ***********************
-**********************************************************************
-**********************************************************************
-*/
-
-
-
+//This was an attempt to move all things related to creating the voronoi
+//outside of particles-moving.js
+//BUT IT DID NOT WORK. THIS DOES NOT WORK.
+//TRANSITION ON HOLD until more important tasks are complete.
 
 //an array that contains an array of allowed/recommended
 //random sites to choose from if the user does not specify
