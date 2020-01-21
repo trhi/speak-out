@@ -338,7 +338,7 @@ function particle(tempX, tempY) {
 
       /*
       *
-      *   Removes particle from particles [].
+      *   Remove particle from particles [].
       *
       */
 
