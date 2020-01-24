@@ -92,12 +92,55 @@ function draw() {
         textSize(20);
         text(frameCount, 20, 30);
 
-        if (frameCount == 200) {
+        if (frameCount == 200 || frameCount == 400 || frameCount == 600) {
           spawnNewAttractor();
-          //console.log("There is a new attractor in the attractors array, with the quality: " + attractors[0].quality);
-          //console.log(attractors[0].quality);
+          for(i=0; i < attractors.length; i++){
+              console.log("There is a new attractor in the attractors array, with the quality: " + attractors[i].quality);
+              //console.log(attractors[0].quality);
+          }
         }
 
+
+        /*
+        *
+        *   Display all attractors.
+        *
+        */
+
+        //for some reason this is only displaying attractor[0],
+        //it is not going beyond index 0 to display 1, 2, even though the
+        //other attractors exist in the array as valid objects.....
+        //this currently only displays one attractor at a time....
+        //why is this not looping through to display all the attractors in the
+        //attractors array?
+        //the problem was that this variable was possibly being confused
+        //with the for() loop for particles??
+        //Problem fixed by initialising i using var i =0. 
+        for (var i=0; i < attractors.length; i++) {
+
+            console.log("Length of attractors array is:" + attractors.length);
+            console.log("Displaying attractor number:" + i);
+            //displays all attractors in the world
+            //this was failing because at the last cycle of the attractors
+            //life, the particle was first being removed (through display())
+            //and only then did it try to attractParticles().....!!!
+
+                //console.log("Framecount = " + frameCount);
+            attractors[i].display();
+
+
+            /*if(frameCount > 404 && frameCount < 600){
+            console.log("Second attractor is: ");
+            attractors[1].display();
+            console.log(attractors[1]);
+            }
+            if(frameCount > 606){
+              attractors[2].display();
+              console.log("Third attractor is: " + attractors[2]);
+            }
+            */
+
+        } //close for
 
 
         /*
@@ -106,7 +149,7 @@ function draw() {
         *
         */
 
-        for (i = 0; i < particles.length; i++) {
+        for (var i = 0; i < particles.length; i++) {
           particles[i].move();
           particles[i].display();
         } //close for
@@ -119,29 +162,6 @@ function draw() {
         }
         */
 
-        /*
-        *
-        *   Display all attractors.
-        *
-        */
-
-        for (i = 0; i < attractors.length; i++) {
-
-
-          //displays all attractors in the world
-          //this was failing because at the last cycle of the attractors
-          //life, the particle was first being removed (through display())
-          //and only then did it try to attractParticles().....!!!
-          //if(typeof attractors[i] !== "undefined"){
-              //moves particles towards attractor:
-              console.log("Framecount = " + frameCount);
-              attractors[i].display();
-
-
-
-          //}
-
-        } //close for
 
 
         //spawnNewParticles method

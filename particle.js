@@ -152,9 +152,7 @@ function particle(tempX, tempY) {
             //if the particle is not at home, we make it move towards home
             //before we add the movement determined by perlin noise:
             if (!this.amIHome()) {
-
                   this.goTowardsHome();
-
             }//close if (!this.amIHome()
 
 
@@ -183,9 +181,16 @@ function particle(tempX, tempY) {
       } // close this.move()
 
 
+      /*
+      *
+      *   Particle goes towards home.
+      *
+      */
+
+      //separated this from the move function
       this.goTowardsHome = function(){
 
-        console.log("Going towards home!");
+        //console.log("Going towards home!");
 
         //if the particle is not at home, increase accelerationVector
         //by multiplying it with the gravityOfHome vector
@@ -312,6 +317,10 @@ function particle(tempX, tempY) {
 
       this.amIHome = function() {
 
+            //need to implement a new check here:
+            //if the particles home has been changed to something other than
+            //its birthSpot, then amIHome returns true.
+
             //get the color of the current pixel that the particle is in:
             var colorOfTheLand = get(this.positionVector.x, this.positionVector.y);
             var colorOfTheLandSTRING = colorOfTheLand.toString();
@@ -347,6 +356,10 @@ function particle(tempX, tempY) {
                   this.gravityOfHome = this.originalGravityOfHome;
                   return true;
 
+            //if this.home is not equal to this.birthSpot then:
+            //return false:
+            } else if (!this.home.equals(this.birthSpot)){
+                  return false;
             } else {
               //console.log("I am not at home");
               return false
