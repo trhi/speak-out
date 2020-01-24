@@ -92,22 +92,13 @@ function draw() {
         textSize(20);
         text(frameCount, 20, 30);
 
-        if (frameCount % 200 == 0) {
+        if (frameCount == 200) {
           spawnNewAttractor();
           //console.log("There is a new attractor in the attractors array, with the quality: " + attractors[0].quality);
           //console.log(attractors[0].quality);
         }
 
-        /*
-        *
-        *   Display all attractors.
-        *
-        */
 
-        for (i = 0; i < attractors.length; i++) {
-          //displays all attractors in the world
-          attractors[i].display();
-        } //close for
 
         /*
         *
@@ -127,6 +118,30 @@ function draw() {
               spawnNewParticle();
         }
         */
+
+        /*
+        *
+        *   Display all attractors.
+        *
+        */
+
+        for (i = 0; i < attractors.length; i++) {
+
+
+          //displays all attractors in the world
+          //this was failing because at the last cycle of the attractors
+          //life, the particle was first being removed (through display())
+          //and only then did it try to attractParticles().....!!!
+          //if(typeof attractors[i] !== "undefined"){
+              //moves particles towards attractor:
+              console.log("Framecount = " + frameCount);
+              attractors[i].display();
+
+
+
+          //}
+
+        } //close for
 
 
         //spawnNewParticles method
@@ -199,7 +214,7 @@ function spawnNewAttractor() {
         var attractorY = random(0, height);
         var quality = random(attractorQualities);
         //sets a random lifespan
-        var lifespan = random(600,1000);
+        var lifespan = random(600,800);
 
         attractors.push(new attractor(quality, attractorX, attractorY, lifespan));
 

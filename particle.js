@@ -85,9 +85,16 @@ function particle(tempX, tempY) {
 
       //saves coordinates of particles' origin
       //deleted this.originX, this.originY.
-      //we just need originVector, because we can access .x and .y through it:
-      this.originVector = createVector(tempX, tempY);
-      //print("originVector is:" + this.originVector);
+      //we just need this.birthSpot/this.home, because we can access .x and .y through it:
+      //we save two: this.birthSpot and this.home
+      //they are fundamentally different in the course of a particles' lifetime:
+      //this.birthSpot will forever be the particles' birthspot, no question about it
+      //HOWEVER, over the course of its lifetime, this.home can change, as the
+      //particle moves(migrates) and passes its framecounts(life) at an attractor.
+      this.birthSpot = createVector(tempX, tempY);
+      this.home = this.birthSpot;
+      //console.log("this.birthSpot is:" + this.birthSpot);
+      //console.log("this.home is:" + this.home);
 
       //set the x,y coordinates of the particle. These are altered everytime the .move() -method is called.
       this.positionVector = createVector(tempX, tempY);
@@ -146,43 +153,7 @@ function particle(tempX, tempY) {
             //before we add the movement determined by perlin noise:
             if (!this.amIHome()) {
 
-                  //console.log("Going towards home!");
-
-                  //if the particle is not at home, increase accelerationVector
-                  //by multiplying it with the gravityOfHome vector
-                  //accelerationVector will thus be incremented at each
-                  //draw cycle, if the particle is not at home
-
-                  //increment gravityOfHome for as long as they are not at home.
-                  //small increments like 0.01 hardly make a huge difference
-
-                  //IF you do not increment gravityOfHome,
-                  //ie. += 0, then some Particles
-                  //will venture deeper beyond home, than others, before returning
-                  //all determined by their gravityOfHome -factor
-                  //if you increment gravityOfHome, ALL particles will bounce
-                  //back towards home much quicker.
-
-                  //IF you increment gravityOfHome for every frame that Particles
-                  //spend away from home, particles will in general tend to
-                  //wander around their home rather than elsewhere,
-                  //speedily returning once they realise they are away from home.
-                  // eg. values like 0.1 or 0.3
-
-                  //For next steps, I am going to continue using this rather
-                  //conservative value for gravityOfHome,
-                  //ie. I'll be working with a simulation where particles tend
-                  //to gravitate towards their home, ie. where they tend to stay
-                  //within the borders of their cells.
-                  this.gravityOfHome += 0.1;
-                  //console.log("Increasing gravity of home!");
-                  this.towardsHome = p5.Vector.sub(this.originVector, this.positionVector);
-                  this.towardsHome.normalize();
-
-                  this.towardsHome.mult(this.gravityOfHome);
-                  //print("This is the towarards home vector:" + this.towardsHome);
-                  //print("This is the originVector:" + this.originVector);
-                  this.positionVector.add(this.towardsHome);
+                  this.goTowardsHome();
 
             }//close if (!this.amIHome()
 
@@ -209,7 +180,54 @@ function particle(tempX, tempY) {
             //does not really work, particles start zooming all over the world..
             //this.amIOnTheEdge();
 
-      } //close this.move()
+      } // close this.move()
+
+
+      this.goTowardsHome = function(){
+
+        console.log("Going towards home!");
+
+        //if the particle is not at home, increase accelerationVector
+        //by multiplying it with the gravityOfHome vector
+        //accelerationVector will thus be incremented at each
+        //draw cycle, if the particle is not at home
+
+        //increment gravityOfHome for as long as they are not at home.
+        //small increments like 0.01 hardly make a huge difference
+
+        //IF you do not increment gravityOfHome,
+        //ie. += 0, then some Particles
+        //will venture deeper beyond home, than others, before returning
+        //all determined by their gravityOfHome -factor
+        //if you increment gravityOfHome, ALL particles will bounce
+        //back towards home much quicker.
+
+        //IF you increment gravityOfHome for every frame that Particles
+        //spend away from home, particles will in general tend to
+        //wander around their home rather than elsewhere,
+        //speedily returning once they realise they are away from home.
+        // eg. values like 0.1 or 0.3
+
+        //For next steps, I am going to continue using this rather
+        //conservative value for gravityOfHome,
+        //ie. I'll be working with a simulation where particles tend
+        //to gravitate towards their home, ie. where they tend to stay
+        //within the borders of their cells.
+        this.gravityOfHome += 0.1;
+        //console.log("Increasing gravity of home!");
+
+        //An attractor will take over the this.home as well as
+        //this.gravityOfHome in order to propel the particle
+        //towards itself:
+        this.towardsHome = p5.Vector.sub(this.home, this.positionVector);
+        this.towardsHome.normalize();
+
+        this.towardsHome.mult(this.gravityOfHome);
+        //print("This is the towarards home vector:" + this.towardsHome);
+        //print("This is the home vector:" + this.home);
+        this.positionVector.add(this.towardsHome);
+
+      } // close this.goTowardsHome
 
 
       /*
@@ -324,7 +342,7 @@ function particle(tempX, tempY) {
                   this.gravityOfHome = this.originalGravityOfHome;
                   return true;
 
-            } else if (this.positionVector.equals(this.originVector)) {
+            } else if (this.positionVector.equals(this.birthSpot)) {
                   //console.log("I am at my birth spot!");
                   this.gravityOfHome = this.originalGravityOfHome;
                   return true;
