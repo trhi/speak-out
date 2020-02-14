@@ -4,6 +4,8 @@
 *
 */
 
+var attractorDiameter = 40;
+
 function attractor(quality, attractorX, attractorY, lifespan) {
 
         this.quality = quality;
@@ -13,10 +15,16 @@ function attractor(quality, attractorX, attractorY, lifespan) {
         //console.log("My gravity is: " + this.gravityOfAttractor)
         //console.log("My lifespan is:" + this.lifespan);
 
+        //attempt to create unique identifiers for attractors based on their
+        //position in the array:
+        //this.existance = exists/defined
+        //this.existance = removed/undefined
+        this.existance = "defined";
+
         //corresponds to the cellID of the cell in which the attractor is
         this.existsIn = voronoiGetSite(this.attractorPosition.x, this.attractorPosition.y, false);
-        console.log("A new attractor was created. This attractor is for: " + this.quality +
-          " , and exists in cell: " + this.existsIn);
+        //console.log("A new attractor was created. This attractor is for: " + this.quality +
+        //  " , and exists in cell: " + this.existsIn);
 
           /*
           *
@@ -94,15 +102,30 @@ function attractor(quality, attractorX, attractorY, lifespan) {
               //console.log("My lifespan is now: " + this.lifespan);
               if(this.lifespan <= 0){
                 //console.log("Framecount = " + frameCount);
-                 this.remove();
+                //INSTEAD: we could simply give attractors and particles
+                //a this.state = removed/existing;
+                //that way it would keep its unique position in the array,
+                //yet nevertheless evaluate as either in existance or not.
+                //In fact, we might let particles be removed from the array
+                //yet keep attractors.
+                 //this.remove();
+                 //This essentially does not solve the problem:
+                 console.log("My lifespan is over!");
+                 this.existance = "undefined";
+
               } else {
-                  this.attractParticles();
+                  //this.attractParticles();
+                  //choose the fill color or image or logo based on
+                  //the quality of the attractor?
+                  //White fill color looked extremely awkward
+                  //Changed to transparent, ie. to match background:
+                  //fill(get(this.attractorPosition.x, this.attractorPosition.y));
+                  noFill();
+                  //console.log("Color at my position is:" + get(this.attractorPosition.x, this.attractorPosition.y));
+                  ellipse(this.attractorPosition.x, this.attractorPosition.y, attractorDiameter, attractorDiameter);
               }
 
-              //choose the fill color or image or logo based on
-              //the quality of the attractor?
-              fill("white");
-              ellipse(this.attractorPosition.x, this.attractorPosition.y, 20, 20);
+
 
         }//close this.display
 

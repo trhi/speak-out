@@ -29,8 +29,40 @@ function particle(tempX, tempY) {
       this.diameter = particleDiameter;
 
       //choose random attractorQuality to be attracted towards:
+      //here, particle.js can access attractorQualities, because it was
+      //declared in particles-moving.js as var, making it global in scope
+      //and accessible by other .js files:
       this.isAttractedTo = random(attractorQualities);
       //console.log("This particle is attracted to: " + this.isAttractedTo);
+
+      //Essentially, particles are created first, and then, much later,
+      //attractors are created. SO: as soon as a particle is created, it needs
+      //to be indexed according to attractor quality: eg into an array called
+      //attractorParticleIndex[].                    Then, when an attractor
+      //emerges, it can go and pop a sub array of that bigger index array and
+      //begin to draw all the particles in that sub array towards itself.
+
+      //But what about when particles puff out of existence? We would remove
+      //them from particles[], but how do we update their status in the
+      //attractorParticleIndex[]? By the same method? Ie.
+      //attractorParticleIndex.splice(attractorParticleIndex.indexOf(this), 1);
+      //if attractorParticleIndex.indexOf(this) is undefined, it means that the
+      //particle has been spliced out into a subarray by an attractor.
+      //Else, if attractorParticleIndex.indexOf(this) returns an index, we simply
+      //remove reference to the removed particle from the attractorParticleIndex.
+
+      //In the case that the attractor ceases to exist before the particle, what
+      //we can do is iterate through the subarray, and for all the entries that
+      //are NOT undefined (ie. the particle still exists), we simply append them
+      //to the end of the attractorParticleIndex.
+
+      //assignMeToAnAttractor();
+
+      this.assignMeToAnAttractor = function() {
+
+            //particleAttractorIndex.push
+
+      };
 
       //set random number for how much the particle is attracted to the attractor
       this.gravityOfAttractor = random(4, 10);
@@ -96,6 +128,10 @@ function particle(tempX, tempY) {
       //console.log("this.birthSpot is:" + this.birthSpot);
       //console.log("this.home is:" + this.home);
 
+      //parameter to keep track of whether the particle is matched with
+      //an attractor:
+      this.myDestiny = "undefined";
+
       //set the x,y coordinates of the particle. These are altered everytime the .move() -method is called.
       this.positionVector = createVector(tempX, tempY);
       //print("positionVector is:" + this.positionVector);
@@ -113,33 +149,33 @@ function particle(tempX, tempY) {
       */
 
       this.display = function() {
-        fill(this.color);
+            fill(this.color);
 
-        //as particle is born, it gradually grows into its full size
-        if(this.counter < 10){
-          this.diameter = this.counter;
-        } else {
-          this.diameter = particleDiameter;
-        }
+            //as particle is born, it gradually grows into its full size
+            if(this.counter < 10){
+              this.diameter = this.counter;
+            } else {
+              this.diameter = particleDiameter;
+            }
 
-        //as particle is dying, it gradually fades out:
-        //starting at lifespan = 300, we fade them out:
-        //if(this.lifespan < 100){
-        //  this.diameter += 1;
-        //}
+            //as particle is dying, it gradually fades out:
+            //starting at lifespan = 300, we fade them out:
+            //if(this.lifespan < 100){
+            //  this.diameter += 1;
+            //}
 
-        ellipse(this.positionVector.x, this.positionVector.y, this.diameter, this.diameter);
-        this.lifespan -= 0.1;
-        this.counter += 0.1;
+            ellipse(this.positionVector.x, this.positionVector.y, this.diameter, this.diameter);
+            this.lifespan -= 0.1;
+            this.counter += 0.1;
 
-        //now they just pop out of the world:
-        if(this.lifespan <= 0){
-           this.remove();
-        }
+            //now they just pop out of the world:
+            if(this.lifespan <= 0){
+               this.remove();
+            }
 
 
 
-      };
+      };//close this.display
 
       /*
       *
@@ -147,14 +183,132 @@ function particle(tempX, tempY) {
       *
       */
 
+      //checking the destiny and choosing the destiny should be in the same function...
+      //check whether an attractor exists:
+      //I had a really silly bug here................. I was basically
+      //breaking out of this true/false checking function after index 0 of
+      //the attractors array.... lol!
+      this.canLiveOutItsDestiny = function(){
+          //check this.isAttractedTo against attractors[]
+
+          for(var i=0; i<attractors.length; i++){
+                if(attractors[i].existance !== "undefined" && attractors[i].quality === this.isAttractedTo){
+                  //console.log("There is a destiny! " +
+                  //"My index is at: " + particles.indexOf(this) +
+                  //" and I am attracted to:" + this.isAttractedTo);
+                  return true;
+                }
+          }//close for
+          if(i=attractors.length){
+                return false;
+          }
+
+      }
+
+      this.findMyDestiny = function(){
+        //the problem is here: we are adding all the attractors that at some
+        //point exist/ed to the destinies [], but then once they are removed,
+        //these attractors continue to exist in the destinies [], which means
+        //that random(destinies) will end up returning a destiny which is no
+        //longer available....
+        //console.log("The destinies array looks like this:" + destinies);
+        var destinies = [];
+        //console.log("Going to find my possible destinies..");
+            for(var i=0; i<attractors.length; i++){
+                  if(attractors[i].existance !== "undefined" && attractors[i].quality == this.isAttractedTo){
+                    destinies.push(i);
+                  }
+            }//close for
+            //returns a random index from the list of all possible indexes
+            //for attractors[] which contain attractors of the quality that the
+            //particle is attracted to:
+            let randomDestiny = random(destinies);
+            //console.log("This is the index of my random destiny: " + randomDestiny);
+        return randomDestiny;
+
+      }
+
       this.move = function() {
+
+            /*
+            *
+            *   Attempt to define particle-attractor relationship within
+            *   the particles' .move()
+            *
+            *
+            */
+
+            //case1: the first time we check for this
+            //case2: while the attractor still s
+            //case3: once the actor has ceased to exist:
+
+            //The problem is now:
+            //we revert to myDestiny undefined once the lifespan of the
+            //attractor is <=2. This means that at the next cycle,
+            //the particle will still evaluate canLiveOutItsDestiny() as true
+
+            if (this.canLiveOutItsDestiny()){
+
+                  //console.log("I can live out my destiny!");
+                  //the problem here is that, once the particle has identified
+                  //that a relevant attractor exists for it, it must continue
+                  //to move towards that particular attractor, instead of:
+
+                  //AND: as soon as that specific attractor is removed from
+                  //the attractors array, there will be a new one to take its
+                  //place at that index........ so  attractors[myDestiny] lifespan
+                  //less than zero will NEVER evaluate as false.....
+                  if(this.myDestiny == "undefined"){
+                      this.color = "black";
+                      this.myDestiny = this.findMyDestiny();
+                      this.home = attractors[this.myDestiny].attractorPosition;
+                      /*console.log("Going towards my destiny");
+                      console.log("I am attracted to: " + this.isAttractedTo);
+                      console.log("I exist at:" + particles.indexOf(this));
+                      console.log("And my attractor is at index:" + this.myDestiny);
+                      */
+                      //this.home = attractors[myDestiny].position;
+                  }else{
+                    //console.log("No match with an attractor!");
+                    //if destiny is defined, then,
+                    //do nothing. (ie. follow it.)
+                  }
+                  //which effectively chooses a random attractor at each iteration,
+                  //ie. at every move() cycle, the particle will inch towards
+                  //any of n suitable attractors...............
+                  //HOW TO:
+                  //1. does an attractor that is suitable for me exist?
+                  //2. YES: while that attractor exists, go towards it
+                  //3. NO: go to 1.
+
+                //HOWEVER, if the attractor is nearing the end of its lifespan,
+                //detach from it:
+                //reassign home as birthSpot, and
+                //revert this.myDestiny to undefined:
+                //if the ID was 1 or 2, and now there is just one element
+                //in the attractors [], this will not evaluate:
+                //IE. we do need to keep the attractors' unique index within
+                //the array in order to keep track of the full situation:
+                //if(attractors[this.myDestiny].existance == undefined){
+                if(attractors[this.myDestiny].existance == "undefined" || attractors[this.myDestiny].lifespan <= 1){
+                    this.color = this.particleBirthColor;
+                    //console.log("Reverting back to destiny undefined");
+                    this.home = this.birthSpot;
+                    this.myDestiny = "undefined";
+                }
+                //Now the problem is as follows: once destiny has been
+                //reverted to undefined, it is very likely that already in
+                //the next iteration, the program will assign a new
+                //destiny.
+
+          }// close canLiveOutItsDestiny
+
 
             //if the particle is not at home, we make it move towards home
             //before we add the movement determined by perlin noise:
             if (!this.amIHome()) {
                   this.goTowardsHome();
             }//close if (!this.amIHome()
-
 
             //In the perlin noise version, we will simply iterate through the perlin noice
             //table of numbers by incrementing the xoff and yoff variables for each particle.
@@ -218,7 +372,16 @@ function particle(tempX, tempY) {
         //ie. I'll be working with a simulation where particles tend
         //to gravitate towards their home, ie. where they tend to stay
         //within the borders of their cells.
-        this.gravityOfHome += 0.1;
+
+        //There is something happening here in terms of gravityOfHome,
+        //which is as follows:
+        //IF the particle is at an attractor, they start moving faster and
+        //faster and really jittering around the attractor in a way that is
+        //visually really demanding.. I think this is because they are checking
+        //against bacckground color and realising that although they are at
+        //"home"/their temporary attractor home, they are not in their own
+        //cell, and so they keep increasing their velocity..
+        this.gravityOfHome += 0.05;
         //console.log("Increasing gravity of home!");
 
         //An attractor will take over the this.home as well as
@@ -309,6 +472,18 @@ function particle(tempX, tempY) {
 
       } //close this.amIOnTheEdge()
 
+
+      this.hasADestiny = function() {
+          if(!this.home.equals(this.birthSpot)){
+            //meaning that this.home has been changed to equal the
+            //position of the attractor:
+            return true;
+          }else{
+            return false;
+          }
+      }
+
+
       /*
       *
       *   Check whether particle is at home.
@@ -317,16 +492,28 @@ function particle(tempX, tempY) {
 
       this.amIHome = function() {
 
+            var attractorDistance;
             //need to implement a new check here:
             //if the particles home has been changed to something other than
             //its birthSpot, then amIHome returns true.
 
+            //In preparation of the if/else decision tree below:
             //get the color of the current pixel that the particle is in:
             var colorOfTheLand = get(this.positionVector.x, this.positionVector.y);
             var colorOfTheLandSTRING = colorOfTheLand.toString();
             //console.log("This is the color of the land:" + colorOfTheLand);
             //console.log("This is the color of the land as a string:" + colorOfTheLandSTRING);
             //console.log("And this is the color of the particle:" + this.particleBirthColor);
+
+            //In preparation for the if/else decision tree below, and primarily
+            //in order to implement particles moving in a calm way within the
+            //attractors:
+            //check if we can access the attractorDiameter from within this class:
+            //YES WE CAN, wohoo for var scope!!!!!! it does make sense in many
+            //situations, although we do of course appreciate let as well.
+            //console.log("The diameter of the attractor is:" + attractorDiameter);
+            //this calculates the distance between home and attractorDistance
+            //IF home is not equal to birthspot...
 
 
             //NEXT PROBLEM: The particle gets completely stuck at the border.
@@ -346,20 +533,89 @@ function particle(tempX, tempY) {
 
             //Need to change RGBA to type string in order to compare them
             //reliably...
-            if (this.particleBirthColorSTRING == colorOfTheLandSTRING ){
+            //1: am I in my home land? If yes - great!
+            //PROBLEM: if the particle is within its home land at the moment
+            //where its this.home is changed to match that of the attractor,
+            //it will not respond to the presence of the attractor, because
+            //this statement evaluates as yes, I am at home:
+            //If the particle then strays out of its home, it will evaluate
+            //the other checks as false, until it comes to the one that
+            //compares position with this.home, evaluate that as
+            //GREAT!!!! This works much better now: now all particles immediately
+            //start zooming towards the attractors:
+            //change to: if(iHaveADestiny())
+
+            //Great: particles now move quickly towards attractors,
+            //but once they arrive, they flock nicely around the attractor,
+            //even permitting themselves to wander slightly outside of its
+            //limits. Once the attractor ceases to exist, the particles go in
+            //a calm manner towards their own cells.
+            //NEXT UP: implement repulsor!!!!!!!!!!!!!!
+            if ( this.hasADestiny() ) {
+              //how far is the particle from the attractor?
+              attractorDistance = p5.Vector.dist(this.positionVector, this.home);
+              //if the particle is located within the radius of the attractor,
+              //return true;
+              //by changing the radius against which we are checking,
+              //we can make the particles hover more within the attractor
+              //-10 is a pretty good value. Or -5.
+              if (attractorDistance < (attractorDiameter/2)-10) {
+                this.gravityOfHome = this.originalGravityOfHome;
+                return true;
+              } else {
+              //by saying false, we will push the particle goTowardsHome()
+              //and within that function, we also augment the gravityOfHome factor
+                return false;
+              }
+            }else if (this.particleBirthColorSTRING == colorOfTheLandSTRING ){
                   //console.log("I am in my homeland!");
                   this.gravityOfHome = this.originalGravityOfHome;
                   return true;
 
+            //2: am I at my birth spot? If yes - great!
+            //This check seems unnecessary, but it is necessary because
+            //the color of the pixel at the birthSpot is black (because of the
+            //dot that marks the voronoi site....)
             } else if (this.positionVector.equals(this.birthSpot)) {
                   //console.log("I am at my birth spot!");
                   this.gravityOfHome = this.originalGravityOfHome;
                   return true;
 
+            //3: am I at the exact coordinates of
+            //an attractor/temporary "home"? If yes - great!
+            //At the next moment, I will be pushed again towards this
+            //spot because I wont be at that exact spot,
+            //but at least for the while my gravityOfHome will be set
+            //back to the normal... so I will stop jittering around
+            //the attractor...
+            //I could also check for whether I am within the radius of the
+            //attractor, ie: if the distance between my position and
+            //this.home < radius of the attractor.
+            //This would mean that I would engage in a more calm trajectory
+            //within the zone of my attractor. And the attractor size could
+            //later be changed, and this method would keep up with it...
+            //This expression is always evaluating as false, even though
+            //particles do end up spot on at the attractor center..
+            //this check needs to come after the background color check,
+            //so that the background color check will always evaluate first.
+            //Ie: as long as the particle is within its own cell, tudo bem:
+            //if it is outside of its own cell, then we need to see how far it
+            //is from
+          } else if (this.positionVector.equals(this.home)) {
+
+                  //console.log("I am at home!");
+                  //importantly: reset me to my original gravityOfHome:
+                  this.gravityOfHome = this.originalGravityOfHome;
+                  return true;
+
             //if this.home is not equal to this.birthSpot then:
             //return false:
-            } else if (!this.home.equals(this.birthSpot)){
-                  return false;
+            //4. Finally, if none of these conditions match:
+            //Check if: this.home is not equal to this.birthSpot!!!
+            //If home and birthSpot are at different coordinates, it means
+            //that I am in go-towards attractor mode:
+            //it must mean that I am in zoom-towards-attractor-mode,
+            //yet currently not at the very coordinates of the attractor..
             } else {
               //console.log("I am not at home");
               return false
