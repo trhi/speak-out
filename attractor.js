@@ -8,6 +8,9 @@ var attractorDiameter = 40;
 
 function attractor(quality, attractorX, attractorY, lifespan) {
 
+        //first attempt to associate sound with attractors:
+        //var audioElement = createAudio('sound/guterres-migration-is-here-to-stay.mp3');
+
         this.quality = quality;
         this.attractorPosition = new p5.Vector(attractorX, attractorY);
         this.lifespan = lifespan;
@@ -26,12 +29,33 @@ function attractor(quality, attractorX, attractorY, lifespan) {
         //console.log("A new attractor was created. This attractor is for: " + this.quality +
         //  " , and exists in cell: " + this.existsIn);
 
+        //an attempt at implementing a give information on hover
+        //perhaps .mouseOver() only works on html elements?
+        //this.mouseOver(this.giveInformation);
+        //OK: cannot add a .mouseOver() on things that are not html elements..
+        //HOWEVER, attractors always stay in the same position.
+        //This means that, if we see that there is a mouse hovering within
+        //the area of the attractor, we can display information:
+
+        //as the mouse hovers over the attractor, it displays its quality
+        //in white:
+        this.giveInformation = function () {
+            console.log("My quality is: " + this.quality);
+            textSize(20);
+            fill("white");
+            text(this.quality, this.attractorPosition.x, this.attractorPosition.y + 5);
+            //setTimeout();
+            //audioElement.play();
+        }
+
+
           /*
           *
           *    Attract particles
           *
           */
 
+        //currently not being used:
         this.attractParticles = function() {
 
             //console.log("Attracting particles");
@@ -110,7 +134,7 @@ function attractor(quality, attractorX, attractorY, lifespan) {
                 //yet keep attractors.
                  //this.remove();
                  //This essentially does not solve the problem:
-                 console.log("My lifespan is over!");
+                 //console.log("My lifespan is over!");
                  this.existance = "undefined";
 
               } else {
@@ -121,8 +145,21 @@ function attractor(quality, attractorX, attractorY, lifespan) {
                   //Changed to transparent, ie. to match background:
                   //fill(get(this.attractorPosition.x, this.attractorPosition.y));
                   noFill();
+                  if(this.quality == "repulsor"){
+                    fill(0);
+                  }
                   //console.log("Color at my position is:" + get(this.attractorPosition.x, this.attractorPosition.y));
                   ellipse(this.attractorPosition.x, this.attractorPosition.y, attractorDiameter, attractorDiameter);
+              }
+
+              //attractorDistance = p5.Vector.dist(this.positionVector, this.home);
+
+
+              var cursorPosition = createVector(mouseX, mouseY);
+              var attractorCursorDistance = p5.Vector.dist(this.attractorPosition, cursorPosition);
+              if(attractorCursorDistance < attractorDiameter/2){
+                //console.log("Problem!");
+                this.giveInformation();
               }
 
 
@@ -135,6 +172,8 @@ function attractor(quality, attractorX, attractorY, lifespan) {
         *
         */
 
+        //we no longer remove attractors from the array, we simply change
+        //their status to this.existance = "undefined"/"defined"
         this.remove = function(){
 
               var myIndex = attractors.indexOf(this);

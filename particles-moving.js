@@ -5,7 +5,7 @@ var drawingBorderY = 0;
 //it looks absolutely wonderful when it spans a really huge width and
 //you need to scroll around to see it all!
 //BUT with so much canvas and so many sites, processing it all gets really slow
-var canvasX = 1200;
+var canvasX = 1000;
 var canvasY = 600;
 
 const numSites = 6;
@@ -13,7 +13,8 @@ var randomSites = [];
 var theWorld;
 var particles = [];
 var attractors = [];
-var attractorQualities = ["nothing", "work", "love", "study", "culture", "freedom", "peace", "exploration"];
+//to give weight to creating particles that are attracted to nothing:
+var attractorQualities = ["nothing", "nothing", "nothing", "nothing", "nothing", "nothing", "opportunity", "love", "study", "dignity", "freedom", "peace", "exploration", "a better life"];
 
 //This is to sort particles by attractorQuality:
 //var particleAttractorIndex = {love: ["particle1", "particle2", "particle3"], work: ["particle4", "particle5", "particle6"]};
@@ -230,6 +231,23 @@ mic.connect();
 
 
 
+//  <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3
+//  <3                                     <3
+//  <3     This is Lilis idea!!!!!!!!      <3
+//  <3                                     <3
+//  <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3
+
+//and whats nice is this: you can create them by clicking with your mouse
+//ie. you can attempt to guide the migratory movements by creating these
+//attractors in zones where you want particles to flock to.
+
+//BUG: sometimes it doesnt work: sometimes, when you click, it simply does
+//not create a sphere... why..
+function mouseClicked() {
+    spawnNewAttractor(mouseX, mouseY);
+    return false;
+}
+
 function draw() {
 
   //removes trace of former particles
@@ -247,6 +265,25 @@ function draw() {
   textSize(20);
   text(frameCount, 20, 30);
 
+  //create one attractor with the quality: repulsor!
+  //for testing purposes!
+  //by default: this will be the first "attractor" in the array
+  if (frameCount == 10){
+    let attractorX = random(0, width);
+    let attractorY = random(0, height);
+    let quality = "repulsor";
+    let lifespan = random(500,1000);
+    attractors.push(new attractor(quality, attractorX, attractorY, lifespan));
+    console.log("Made me!");
+    //attractors[0].attractorPosition.x
+    //attractors[0].attractorPosition.y
+  }
+
+
+  //BUT its nice that, alongside being able to decide where these attractors
+  //emerge, they also emerge randomly. So as much as you try to control where
+  //the particles flock to, sometimes their movement will be out of your
+  //control.
   if (frameCount % 300 == 0) {
     spawnNewAttractor();
     for(let i=0; i < attractors.length; i++){
@@ -384,14 +421,19 @@ function createRandomSites() {
   *
   */
 
-  function spawnNewAttractor() {
+  function spawnNewAttractor(attractorX, attractorY) {
 
-    let attractorX = random(0, width);
-    let attractorY = random(0, height);
+    if(attractorX == undefined || attractorY == undefined){
+      attractorX = random(0, width);
+      attractorY = random(0, height);
+    }
     let quality = random(attractorQualities);
     //sets a random lifespan
     let lifespan = random(300,600);
 
-    attractors.push(new attractor(quality, attractorX, attractorY, lifespan));
-
+    if (quality == "nothing"){
+      //do not create an attractor
+    } else {
+      attractors.push(new attractor(quality, attractorX, attractorY, lifespan));
+    }
   } //close spawnNewAttractor

@@ -149,13 +149,32 @@ function particle(tempX, tempY) {
       */
 
       this.display = function() {
-            fill(this.color);
+
+        //this is to revert the particle color back to the birth color
+        //once the repulsor has been removed from the cell:
+        //if( attractors[0].existance === "undefined" ){
+        //    this.color = this.particleBirthColor;
+        //}
+
+
+
+
+              fill(this.color);
+
 
             //as particle is born, it gradually grows into its full size
             if(this.counter < 10){
               this.diameter = this.counter;
             } else {
               this.diameter = particleDiameter;
+            }
+
+            var cursorPosition = createVector(mouseX, mouseY);
+            //console.log("This is cursorPosition from within particle.js" + cursorPosition);
+            var particleCursorDistance = p5.Vector.dist(this.positionVector, cursorPosition);
+            if(particleCursorDistance < particleDiameter/2){
+              //console.log("Problem!");
+              this.giveInformation();
             }
 
             //as particle is dying, it gradually fades out:
@@ -177,6 +196,15 @@ function particle(tempX, tempY) {
 
       };//close this.display
 
+      this.giveInformation = function () {
+          //console.log("My quality is: " + this.isAttractedTo);
+          textSize(particleDiameter);
+          fill("white");
+          text(this.isAttractedTo, this.positionVector.x + 5, this.positionVector.y + 5);
+          //setTimeout();
+      }
+
+
       /*
       *
       *   Determine how the particles move.
@@ -188,10 +216,14 @@ function particle(tempX, tempY) {
       //I had a really silly bug here................. I was basically
       //breaking out of this true/false checking function after index 0 of
       //the attractors array.... lol!
+
+      //should change this so that this function returns an array of possible
+      //destinies to pursue. OR if a repulsor is present in their cell, returns
+      //only the repulsor!
       this.canLiveOutItsDestiny = function(){
           //check this.isAttractedTo against attractors[]
 
-          for(var i=0; i<attractors.length; i++){
+          for(var i=0; i<attractors.length ; i++){
                 if(attractors[i].existance !== "undefined" && attractors[i].quality === this.isAttractedTo){
                   //console.log("There is a destiny! " +
                   //"My index is at: " + particles.indexOf(this) +
@@ -199,11 +231,14 @@ function particle(tempX, tempY) {
                   return true;
                 }
           }//close for
-          if(i=attractors.length){
+          if(i == attractors.length){
                 return false;
           }
 
       }
+
+      //In fact, we just need to make destinies[] a global variable?
+      //then, for this.destinies
 
       this.findMyDestiny = function(){
         //the problem is here: we are adding all the attractors that at some
@@ -228,6 +263,15 @@ function particle(tempX, tempY) {
 
       }
 
+      this.feelsPresenceOfRepulosor = function(){
+      }
+
+      this.updateDestinySituation = function() {
+
+
+
+      }
+
       this.move = function() {
 
             /*
@@ -238,6 +282,15 @@ function particle(tempX, tempY) {
             *
             */
 
+            //attempt to implement repulsor/negative attractor
+            //if ( this.feelsPresenceOfRepulsor() ){
+              //make them move away from the repulsor!!!!
+              //(But not beyond the confines of their zone!)
+              //Initial version: just make them go REALLY FAST
+              //away from their repulsor (no matter whether they
+              //cross out of their cell or not)
+            //} else {
+
             //case1: the first time we check for this
             //case2: while the attractor still s
             //case3: once the actor has ceased to exist:
@@ -246,6 +299,12 @@ function particle(tempX, tempY) {
             //we revert to myDestiny undefined once the lifespan of the
             //attractor is <=2. This means that at the next cycle,
             //the particle will still evaluate canLiveOutItsDestiny() as true
+
+            //this method runs at every cycle to see if there are any new
+            //attractors that may be relevant for the particle. It starts
+            //iterating from the last index that it was checking from
+            //because it already knows the attractors at the earlier positions:
+            //this.updateDestinySituation();
 
             if (this.canLiveOutItsDestiny()){
 
@@ -259,7 +318,10 @@ function particle(tempX, tempY) {
                   //place at that index........ so  attractors[myDestiny] lifespan
                   //less than zero will NEVER evaluate as false.....
                   if(this.myDestiny == "undefined"){
-                      this.color = "black";
+                      //used to change particle color to black if this.hasDestiny
+                      //for testing purposes, just to make those particles
+                      //visible....
+                      //this.color = "black";
                       this.myDestiny = this.findMyDestiny();
                       this.home = attractors[this.myDestiny].attractorPosition;
                       /*console.log("Going towards my destiny");
@@ -290,7 +352,9 @@ function particle(tempX, tempY) {
                 //IE. we do need to keep the attractors' unique index within
                 //the array in order to keep track of the full situation:
                 //if(attractors[this.myDestiny].existance == undefined){
+                //once the attractor goes inactive ie: .existance == "undefined"
                 if(attractors[this.myDestiny].existance == "undefined" || attractors[this.myDestiny].lifespan <= 1){
+                    //revert color back to original birthColor:
                     this.color = this.particleBirthColor;
                     //console.log("Reverting back to destiny undefined");
                     this.home = this.birthSpot;
@@ -304,11 +368,64 @@ function particle(tempX, tempY) {
           }// close canLiveOutItsDestiny
 
 
+
+
+          //}//end if this.feelsPresenceOfRepulosor() / else
+
+            // this.hasDestiny will be set to true if there is a repulsor
+            // in the cell of the particle,
+            // the only other condition in which this is true is when the
+            // particle has been matched with an attractor.....
+            // YET, in the case that they feel the presence of a repulsor,
+            // their this.isAttractedTo will not be equal to repulsor.
+            // we need to store: this.isGoingTowards as a reference to the
+            // index of the attractor array at which the particles' destiny
+            // is located: for example: this.hasADestiny could return this index..
+            if ( attractors[0].quality == "repulsor" ){
+
+
+
+                var attractorCellID = voronoiGetSite(attractors[0].attractorPosition.x, attractors[0].attractorPosition.y, false);
+                var attractorCellColor = voronoiGetColor(attractorCellID);
+                //now we know the color of the cell that the attractor is in.
+                var attractorCellColorSTRING = attractorCellColor.toString();
+
+                if (attractorCellColorSTRING === particleBirthColorSTRING){
+
+
+                  //
+                  //console.log("My color is:" + particleBirthColorSTRING +
+                  //"and the attractorCellColorSTRING is:" + attractorCellColorSTRING);
+                  //console.log("The repulsor is in my cell! Turning me to black.");
+                  this.color = "black";
+                  var repulsorLocation = attractors[0].attractorPosition; //A
+                  var repulsorForce = createVector(); //C
+
+                  repulsorForce = p5.Vector.sub(this.positionVector, repulsorLocation);
+                  //var repulsed = createVector();
+                  repulsorForce.mult(0.02);
+                  //console.log("RepulsorForce is: " + repulsorForce);
+                  this.positionVector.add(repulsorForce);
+
+                  if( attractors[0].existance === "undefined" ){
+                      //this.color = [0, 0, 0, 0];
+                      this.color = this.particleBirthColor;
+                  }
+
+                }
+
+            }
+
+
+            //put the amIatHome check AFTER the propel away from repulsor.
+            //This way, the particle should get stuck within its own cell:
+
             //if the particle is not at home, we make it move towards home
             //before we add the movement determined by perlin noise:
             if (!this.amIHome()) {
                   this.goTowardsHome();
             }//close if (!this.amIHome()
+
 
             //In the perlin noise version, we will simply iterate through the perlin noice
             //table of numbers by incrementing the xoff and yoff variables for each particle.
@@ -551,6 +668,16 @@ function particle(tempX, tempY) {
             //limits. Once the attractor ceases to exist, the particles go in
             //a calm manner towards their own cells.
             //NEXT UP: implement repulsor!!!!!!!!!!!!!!
+
+            //IF attractor.quality == "repulsor"
+            //check to see whether the background color at the attractor
+            //position matches the birthColor of the particle.
+            //if yes, propel the particle away from the repulsor,
+            //OR: but not beyond the borders of their zone.
+            //OR: all the way until the edges of the map.
+
+            //At this point, it might make sense to:
+
             if ( this.hasADestiny() ) {
               //how far is the particle from the attractor?
               attractorDistance = p5.Vector.dist(this.positionVector, this.home);
@@ -633,7 +760,7 @@ function particle(tempX, tempY) {
         var myIndex = particles.indexOf(this);
         //console.log(myIndex);
         particles.splice(myIndex,1);
-        console.log("Removed me! At index:" + myIndex);
+        //console.log("Removed me! At index:" + myIndex);
         //console.log("Particles array now looks like this:");
         //console.log(attractors);
 
@@ -642,6 +769,8 @@ function particle(tempX, tempY) {
       /*
       *
       *   Flickers particle out before removing.
+      *         - looks horrible, not -
+      *            - using this -
       *
       */
 
