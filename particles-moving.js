@@ -283,7 +283,7 @@ function draw() {
   //Draw diagram in coordinates 0, 0
   //Filled and without jitter
   voronoiDraw(drawingBorderX, drawingBorderY, true, false);
-  textSize(20);
+  //textSize(20);
   //text(frameCount, 20, 30);
 
   //create one attractor with the quality: repulsor!
@@ -368,7 +368,13 @@ for (let i = 0; i < particles.length; i++) {
   strokeWeight(1);
   particles[i].display();
 
+  /*
   if (frameCount >= 155 && frameCount <= 555){
+    youParticle.giveInformation();
+  }
+  */
+
+  if (frameCount >= 155){
     youParticle.giveInformation();
   }
 
@@ -399,7 +405,7 @@ if (frameCount == 150){
   youParticle.isAttractedTo = you;
   //youParticle.diameter = 40;
   youParticle.lifespan = 50000;
-  youParticle.color = "white";
+  //youParticle.color = "white";
   console.log("Succesfully created you");
   console.log("You are attracted to:" + youParticle.isAttractedTo);
   console.log("Your lifespan is:" + youParticle.lifespan);
