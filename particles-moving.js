@@ -284,7 +284,7 @@ function draw() {
   //Filled and without jitter
   voronoiDraw(drawingBorderX, drawingBorderY, true, false);
   textSize(20);
-  text(frameCount, 20, 30);
+  //text(frameCount, 20, 30);
 
   //create one attractor with the quality: repulsor!
   //for testing purposes!
