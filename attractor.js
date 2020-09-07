@@ -10,7 +10,7 @@ function attractor(quality, attractorX, attractorY, lifespan) {
 
         //first attempt to associate sound with attractors:
         //var audioElement = createAudio('sound/guterres-migration-is-here-to-stay.mp3');
-
+        this.audioElement = createAudio('sound/guterres-migration-is-here-to-stay.mp3');
         this.quality = quality;
         this.attractorPosition = new p5.Vector(attractorX, attractorY);
         this.lifespan = lifespan;
@@ -45,7 +45,7 @@ function attractor(quality, attractorX, attractorY, lifespan) {
             fill("white");
             text(this.quality, this.attractorPosition.x, this.attractorPosition.y + 5);
             //setTimeout();
-            //audioElement.play();
+            this.audioElement.play();
         }
 
 

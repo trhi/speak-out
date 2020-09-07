@@ -15,6 +15,23 @@ var particles = [];
 var attractors = [];
 //to give weight to creating particles that are attracted to nothing:
 var attractorQualities = ["nothing", "nothing", "nothing", "nothing", "nothing", "nothing", "opportunity", "love", "study", "dignity", "freedom", "peace", "exploration", "a better life"];
+var you = ["You"];
+var youParticle;
+
+var palette = [
+  [255, 0, 153, 255], // pink
+  [0, 153, 153, 255], // turquoise
+  [255, 255, 102, 255], // light yellow
+  [153, 51, 204, 255], // purple
+  [51, 204, 255, 255], // light blue
+  [255, 153, 0, 255], // orange
+  [0, 204, 153, 255], // light green
+  [255, 0, 102, 255], // red
+  [255, 204, 102, 255], // light orange
+  [51, 153, 255, 255], // dark blue
+  [255, 153, 153, 255], // light red
+  [204, 102, 204, 255] // light purple
+]
 
 //This is to sort particles by attractorQuality:
 //var particleAttractorIndex = {love: ["particle1", "particle2", "particle3"], work: ["particle4", "particle5", "particle6"]};
@@ -253,6 +270,10 @@ function draw() {
   //removes trace of former particles
   clear();
 
+  if(frameCount >= 151){
+    //youParticle.giveInformation();
+  }
+
   /*
   //attempt to display some feedback from the microphone input:
   var myLevel = mic.getLevel().toString();
@@ -285,7 +306,7 @@ function draw() {
   //the particles flock to, sometimes their movement will be out of your
   //control.
   if (frameCount % 300 == 0) {
-    spawnNewAttractor();
+    //spawnNewAttractor();
     for(let i=0; i < attractors.length; i++){
       //console.log("There is a new attractor in the attractors array, with the quality: " + attractors[i].quality);
       //console.log(attractors[0].quality);
@@ -344,7 +365,13 @@ function draw() {
 
 for (let i = 0; i < particles.length; i++) {
   particles[i].move();
+  strokeWeight(1);
   particles[i].display();
+
+  if (frameCount >= 155 && frameCount <= 555){
+    youParticle.giveInformation();
+  }
+
 } //close for
 
 
@@ -364,6 +391,20 @@ spawnNewParticle();
 if (frameCount%10 == 0) {
   spawnNewParticles();
 } //close if framecount
+
+//Spawn you-particle!
+if (frameCount == 150){
+  youParticle = new particle(canvasX/2, canvasY/2);
+  particles.push(youParticle);
+  youParticle.isAttractedTo = you;
+  //youParticle.diameter = 40;
+  youParticle.lifespan = 50000;
+  youParticle.color = "white";
+  console.log("Succesfully created you");
+  console.log("You are attracted to:" + youParticle.isAttractedTo);
+  console.log("Your lifespan is:" + youParticle.lifespan);
+  youParticle.giveInformation();
+}
 
 
 } //close function draw
@@ -406,14 +447,25 @@ function spawnNewParticle(newHome){
 *
 */
 
+//implement choose site colors from colorPalette
+
 function createRandomSites() {
   for (i = 0; i < numSites; i++) {
-    randomSites.push([random(drawingBorderX, canvasX),
-      random(drawingBorderY, canvasY),
-      [round(random(0, 255)), round(random(0, 255)), round(random(0, 255)), 255]]);
-      print(randomSites);
-    } //close for
+    var paletteIndex = round(random(0, palette.length));
+    randomSites.push(
+      [random(drawingBorderX, canvasX),
+        random(drawingBorderY, canvasY),
+        palette[paletteIndex]
+      ]
+    );
+    palette.splice(paletteIndex, 1);
+    print(randomSites);
+  } //close for
+
   } //close createRandomSites
+
+  //colorPalette
+
 
   /*
   *

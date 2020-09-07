@@ -158,15 +158,24 @@ function particle(tempX, tempY) {
 
 
 
-
+              strokeWeight(1);
               fill(this.color);
+              stroke("white");
 
 
             //as particle is born, it gradually grows into its full size
             if(this.counter < 10){
               this.diameter = this.counter;
             } else {
-              this.diameter = particleDiameter;
+              if(this.isAttractedTo == "You"){
+                //fill("white");
+                //strokeWeight(3);
+                stroke("black");
+                //this.diameter = 15;
+
+              }else{
+                this.diameter = particleDiameter;
+              }
             }
 
             var cursorPosition = createVector(mouseX, mouseY);
@@ -200,6 +209,7 @@ function particle(tempX, tempY) {
           //console.log("My quality is: " + this.isAttractedTo);
           textSize(particleDiameter);
           fill("white");
+          stroke("black");
           text(this.isAttractedTo, this.positionVector.x + 5, this.positionVector.y + 5);
           //setTimeout();
       }
