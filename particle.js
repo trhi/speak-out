@@ -58,6 +58,8 @@ function particle(tempX, tempY) {
 
       //assignMeToAnAttractor();
 
+      this.userDirectionVector = createVector(0, 0);
+
       this.assignMeToAnAttractor = function() {
 
             //particleAttractorIndex.push
@@ -450,6 +452,8 @@ function particle(tempX, tempY) {
             let randomYSpeedFactor = map(randomYNoise, 0, 1, -7, 7);
 
             this.positionVector.add(randomXSpeedFactor, randomYSpeedFactor);
+
+            this.positionVector.add(this.userDirectionVector);
 
             //so that the particles do not go off the visible canvas
             this.positionVector.x = constrain(this.positionVector.x, drawingBorderX, width)

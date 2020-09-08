@@ -401,7 +401,7 @@ if (frameCount%10 == 0) {
 //Spawn you-particle!
 if (frameCount == 150){
   youParticle = new particle(canvasX/2, canvasY/2);
-  particles.push(youParticle);
+  particles.splice(0, 0, youParticle);
   youParticle.isAttractedTo = you;
   //youParticle.diameter = 40;
   youParticle.lifespan = 50000;
@@ -413,7 +413,25 @@ if (frameCount == 150){
 }
 
 
+
+
 } //close function draw
+
+function keyPressed(){
+  console.log("keypressed!");
+    if (keyCode === LEFT_ARROW) {
+      youParticle.userDirectionVector.add(-1, 0);
+      //console.log("keypressed!");
+    } else if (keyCode === RIGHT_ARROW) {
+      youParticle.userDirectionVector.add(1, 0);
+    } else if (keyCode === UP_ARROW) {
+      youParticle.userDirectionVector.add(0, -1);
+    } else if (keyCode === DOWN_ARROW) {
+      youParticle.userDirectionVector.add(0, 1);
+    }
+
+}
+
 
 /*
 *
@@ -457,7 +475,7 @@ function spawnNewParticle(newHome){
 
 function createRandomSites() {
   for (i = 0; i < numSites; i++) {
-    var paletteIndex = round(random(0, palette.length));
+    var paletteIndex = round(random(0, palette.length-1));
     randomSites.push(
       [random(drawingBorderX, canvasX),
         random(drawingBorderY, canvasY),
