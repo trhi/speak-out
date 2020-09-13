@@ -37,6 +37,8 @@ var palette = [
 //var particleAttractorIndex = {love: ["particle1", "particle2", "particle3"], work: ["particle4", "particle5", "particle6"]};
 var particleAttractorIndex = [];
 
+
+
 //var mic;
 
 function setup() {
@@ -103,6 +105,15 @@ function setup() {
   //Get simplified cells without jitter, for more advanced use
   var normal = voronoiGetCells();
   //console.log(normal);
+
+  var audioElement = createAudio('sound/iywstc-XX.mp3');
+  audioElement.autoplay(true);
+  audioElement.volume(0.02);
+  audioElement.loop();
+  console.log("Created audioElement. It is:");
+  console.log(audioElement);
+
+
 
 
 
@@ -289,16 +300,19 @@ function draw() {
   //create one attractor with the quality: repulsor!
   //for testing purposes!
   //by default: this will be the first "attractor" in the array
+
+
   if (frameCount == 10){
     let attractorX = random(0, width);
     let attractorY = random(0, height);
-    let quality = "repulsor";
+    let quality = "nothing"; //this used to be: "repulsor"
     let lifespan = random(500,1000);
     attractors.push(new attractor(quality, attractorX, attractorY, lifespan));
     console.log("Made me!");
     //attractors[0].attractorPosition.x
     //attractors[0].attractorPosition.y
   }
+
 
 
   //BUT its nice that, alongside being able to decide where these attractors
@@ -410,6 +424,7 @@ if (frameCount == 150){
   console.log("You are attracted to:" + youParticle.isAttractedTo);
   console.log("Your lifespan is:" + youParticle.lifespan);
   youParticle.giveInformation();
+
 }
 
 
