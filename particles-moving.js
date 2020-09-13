@@ -43,7 +43,9 @@ var particleAttractorIndex = [];
 
 function setup() {
 
-  createCanvas(canvasX, canvasY);
+  //myCanvas.parent('sketch01');
+
+  var myCanvas = createCanvas(canvasX, canvasY);
   noSmooth();
   //had frameRate(19); changed to frameRate(50);
   //to see how the program processes the particles
@@ -52,66 +54,29 @@ function setup() {
 
   console.log("These are the types of attractors that exist in the world:" + attractorQualities);
 
-  /*
-  *
-  *   Initialise world based on voronoi
-  *
-  */
-
-  //create randomSites for the voronoi diagram
-  createRandomSites();
-
-  //Settings for drawing(these are the default values)
-  //Set Cell Stroke Weight
-  voronoiCellStrokeWeight(1);
-  //Set Site Stroke Weight
-  voronoiSiteStrokeWeight(0);
-  //Set Cell Stroke
-  voronoiCellStroke(0);
-  //Set Site Stroke
-  voronoiSiteStroke(0);
-  //Set flag to draw Site
-  //voronoiSiteFlag(true);
-
-  //Maximum distance between jitters
-  voronoiJitterStepMax(20);
-  //Minimum distance between jitters
-  voronoiJitterStepMin(5);
-  //Scales each jitter
-  voronoiJitterFactor(3);
-  //Jitter edges of diagram
-  voronoiJitterBorder(false);
-
-  //after running createRandomSites();
-  //set the voronoiSites
-  voronoiSites(randomSites);
-
-  //Compute voronoi diagram with size 500 by 300
-  //Without a prepared jitter structure (false)
-  voronoi(canvasX - drawingBorderX, canvasY - drawingBorderY, false);
-
-  //Draw diagram in coordinates 0, 0,
-  //filled (true), without jitter (false)
-  voronoiDraw(drawingBorderX, drawingBorderY, true, false);
-  //voronoiDraw(0, 0, true, false);
-
-  //save the voronoiDiagram as theWorld
-  theWorld = voronoiGetDiagram();
-
-  //printing the voronoi diagram generated(full detailed diagram):
-  console.log("This is the world: " + theWorld);
-  console.log("This is the number of cells I have:" + theWorld.cells.length);
-
-  //Get simplified cells without jitter, for more advanced use
-  var normal = voronoiGetCells();
-  //console.log(normal);
+  //outsourced to its own function for sake of code simplicity
+  doVoronoiSetupStuff();
 
   var audioElement = createAudio('sound/iywstc-XX.mp3');
-  audioElement.autoplay(true);
-  audioElement.volume(0.02);
-  audioElement.loop();
+  //audioElement.autoplay(true);
+
   console.log("Created audioElement. It is:");
   console.log(audioElement);
+
+  button = createButton('i');
+  //button.size(30);
+  button.position(30, 30);
+  button.mousePressed(infobuttonPressed);
+
+
+  function infobuttonPressed(){
+    console.log("infobutton pressed!");
+    audioElement.volume(0.02);
+    audioElement.loop();
+    audioElement.play();
+    //button.disable;
+
+  }
 
 
 
@@ -243,6 +208,75 @@ function setup() {
 
 
 } // close setup()
+// close setup()// close setup()// close setup()// close setup()// close setup()
+// close setup()// close setup()// close setup()// close setup()// close setup()
+// close setup()// close setup()// close setup()// close setup()// close setup()
+// close setup()// close setup()// close setup()// close setup()// close setup()
+
+function doVoronoiSetupStuff(){
+
+
+    /*
+    *
+    *   Initialise world based on voronoi
+    *
+    */
+
+    //create randomSites for the voronoi diagram
+    createRandomSites();
+
+    //Settings for drawing(these are the default values)
+    //Set Cell Stroke Weight
+    voronoiCellStrokeWeight(1);
+    //Set Site Stroke Weight
+    voronoiSiteStrokeWeight(0);
+    //Set Cell Stroke
+    voronoiCellStroke(0);
+    //Set Site Stroke
+    voronoiSiteStroke(0);
+    //Set flag to draw Site
+    //voronoiSiteFlag(true);
+
+    //Maximum distance between jitters
+    voronoiJitterStepMax(20);
+    //Minimum distance between jitters
+    voronoiJitterStepMin(5);
+    //Scales each jitter
+    voronoiJitterFactor(3);
+    //Jitter edges of diagram
+    voronoiJitterBorder(false);
+
+    //after running createRandomSites();
+    //set the voronoiSites
+    voronoiSites(randomSites);
+
+    //Compute voronoi diagram with size 500 by 300
+    //Without a prepared jitter structure (false)
+    voronoi(canvasX - drawingBorderX, canvasY - drawingBorderY, false);
+
+    //Draw diagram in coordinates 0, 0,
+    //filled (true), without jitter (false)
+    voronoiDraw(drawingBorderX, drawingBorderY, true, false);
+    //voronoiDraw(0, 0, true, false);
+
+    //save the voronoiDiagram as theWorld
+    theWorld = voronoiGetDiagram();
+
+    //printing the voronoi diagram generated(full detailed diagram):
+    console.log("This is the world: " + theWorld);
+    console.log("This is the number of cells I have:" + theWorld.cells.length);
+
+    //Get simplified cells without jitter, for more advanced use
+    var normal = voronoiGetCells();
+    //console.log(normal);
+
+
+}
+
+
+
+
+
 
 /*
 //initiate microphone input:
