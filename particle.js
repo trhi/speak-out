@@ -103,6 +103,7 @@ function particle(tempX, tempY) {
       cellID = voronoiGetSite(tempX, tempY, false);
       this.cellID = cellID;
       var particleBirthColor = voronoiGetColor(this.cellID);
+      //console.log("Voronoi cell color is:" + particleBirthColor);
 
       this.particleBirthColor = particleBirthColor;
       //console.log("Particle birth color is:" + particleBirthColor);
@@ -628,22 +629,44 @@ function particle(tempX, tempY) {
             //OR: all the way until the edges of the map.
 
             if ( this.hasADestiny() ) { //check if particle going towards attractor
-              attractorDistance = p5.Vector.dist(this.positionVector, this.home);
-              if (attractorDistance < (attractorDiameter/2)-10) { //-10 or -5
-                this.gravityOfHome = this.originalGravityOfHome;
-                return true; //if particle within radius of attractor, keep moving as usual
-              } else {
-                return false; //-> goTowardsHome
-              }
+                  attractorDistance = p5.Vector.dist(this.positionVector, this.home);
+                  if (attractorDistance < (attractorDiameter/2)-10) { //-10 or -5
+                    this.gravityOfHome = this.originalGravityOfHome;
+                    return true; //if particle within radius of attractor, keep moving as usual
+                  } else {
+                    return false; //-> goTowardsHome
+                  }
+            }
           //if not going after attractor, check if they are in their home cell:
           //NEXT UP: implement passport modes!
-          }else if (whichCellAmIin(this.positionVector) == this.cellID){
+
+
+            else if (voronoiGetSite(this.positionVector.x, this.positionVector.y) == this.cellID){
               this.gravityOfHome = this.originalGravityOfHome;
               return true;
-            } else {
-              return false //I am not an home
+            }
+
+            else {
+              return false; //I am not an home
             } //close if else structure
 
+            //The above whichCellAmIin needs to consider the passport rules
+            //ie. ^^ the above is like saying:
+            // else if (this.passport == monochrome)
+            //  else if (passportMode == monochrome){
+            //    if(whichCellAmIin(this.positionVector) == this.cellID){
+            //    this.gravityOfHome = this.originalGravityOfHome;
+            //    return true;
+            //    } else {
+            //    return false;
+            //    }
+            //  }
+
+            // else if (passportMode == analogous)
+
+
+            /*
+            //completely unnecessary workaround - library comes with voronoiGetSite()!
             function whichCellAmIin(myPosition){
               var distances = [];
               for(var i=0;i<theWorldSites.length;i++){
@@ -660,6 +683,7 @@ function particle(tempX, tempY) {
               }
                 return index;
             }//close whichCellAmIin
+            */
 
       } //close amIHome()
 

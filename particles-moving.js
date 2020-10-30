@@ -19,6 +19,9 @@ var attractorQualities = ["nothing", "nothing", "nothing", "nothing", "nothing",
 var you = ["You"];
 var youParticle;
 
+var passportModes = "monochromatic", "analogous", "complementary", "triad"
+var passportMode = "analogous";
+
 var palette1 = [
   [255, 0, 153, 127], // pink
   [0, 153, 153, 127], // turquoise
@@ -537,6 +540,11 @@ for (let i = 0; i < particles.length; i++) {
 
   if (frameCount >= 155){
     youParticle.giveInformation();
+    //console.log("Cell ID that You particle is currently at:" + voronoiGetSite(youParticle.positionVector));
+    var currentCellID = voronoiGetSite(youParticle.positionVector.x, youParticle.positionVector.y);
+    youParticle.isAttractedTo = currentCellID;
+    console.log("Cell ID that You particle is currently at:" + currentCellID);
+
   }
 
 } //close for
