@@ -6,6 +6,8 @@
 
 
 var particleDiameter = 10;
+var cellID;
+
 
 /*
 *
@@ -20,6 +22,7 @@ function particle(tempX, tempY) {
       *   Initialise all random variables related to particle.
       *
       */
+
 
       this.lifespan = random(100,2000);
       this.counter = 0;
@@ -97,9 +100,9 @@ function particle(tempX, tempY) {
       *
       */
 
-      var cellId = voronoiGetSite(tempX, tempY, false);
-      this.cellId = cellId;
-      var particleBirthColor = voronoiGetColor(this.cellId);
+      cellID = voronoiGetSite(tempX, tempY, false);
+      this.cellID = cellID;
+      var particleBirthColor = voronoiGetColor(this.cellID);
 
       this.particleBirthColor = particleBirthColor;
       //console.log("Particle birth color is:" + particleBirthColor);
@@ -126,16 +129,23 @@ function particle(tempX, tempY) {
       //HOWEVER, over the course of its lifetime, this.home can change, as the
       //particle moves(migrates) and passes its framecounts(life) at an attractor.
       this.birthSpot = createVector(tempX, tempY);
-      this.home = this.birthSpot;
+      this.home = createVector(tempX, tempY);
+      this.positionVector = createVector(tempX, tempY);
+
+      //this.home = this.birthSpot;
+
       //console.log("this.birthSpot is:" + this.birthSpot);
       //console.log("this.home is:" + this.home);
+      console.log("Made a particle!");
+      console.log("This is my positionVector:" + this.positionVector);
+
 
       //parameter to keep track of whether the particle is matched with
       //an attractor:
       this.myDestiny = "undefined";
 
       //set the x,y coordinates of the particle. These are altered everytime the .move() -method is called.
-      this.positionVector = createVector(tempX, tempY);
+      //this.positionVector = createVector(tempX, tempY);
       //print("positionVector is:" + this.positionVector);
 
       //initialises vector that pulls towards the attractor
@@ -623,6 +633,12 @@ function particle(tempX, tempY) {
 
       this.amIHome = function() {
 
+            //var distanceFromHome;
+            //console.log("Going into amIHome(), checkin if positionVector is still defined" + this.positionVector);
+
+            //console.log("This is my CellID" + this.cellID);
+
+
             var attractorDistance;
             //need to implement a new check here:
             //if the particles home has been changed to something other than
@@ -631,6 +647,14 @@ function particle(tempX, tempY) {
             //In preparation of the if/else decision tree below:
             //get the color of the current pixel that the particle is in:
             var colorOfTheLand = get(this.positionVector.x, this.positionVector.y);
+            //colorOfTheLand[3] = 254;
+
+            //Because we added transparency, I need to be checking here for:
+            // RGB values with a deviation of max 1-2 integers
+            // A value can be anything above 127
+            // What if there are multiple particles at that position? :X
+            // their combined effect will be to
+
             var colorOfTheLandSTRING = colorOfTheLand.toString();
             //console.log("This is the color of the land:" + colorOfTheLand);
             //console.log("This is the color of the land as a string:" + colorOfTheLandSTRING);
@@ -662,107 +686,51 @@ function particle(tempX, tempY) {
             //the border without "trying to cross"
             //OR slow down a lot in their movement for x amount of time.
 
-            //Need to change RGBA to type string in order to compare them
-            //reliably...
-            //1: am I in my home land? If yes - great!
-            //PROBLEM: if the particle is within its home land at the moment
-            //where its this.home is changed to match that of the attractor,
-            //it will not respond to the presence of the attractor, because
-            //this statement evaluates as yes, I am at home:
-            //If the particle then strays out of its home, it will evaluate
-            //the other checks as false, until it comes to the one that
-            //compares position with this.home, evaluate that as
-            //GREAT!!!! This works much better now: now all particles immediately
-            //start zooming towards the attractors:
-            //change to: if(iHaveADestiny())
-
-            //Great: particles now move quickly towards attractors,
-            //but once they arrive, they flock nicely around the attractor,
-            //even permitting themselves to wander slightly outside of its
-            //limits. Once the attractor ceases to exist, the particles go in
-            //a calm manner towards their own cells.
-            //NEXT UP: implement repulsor!!!!!!!!!!!!!!
-
             //IF attractor.quality == "repulsor"
-            //check to see whether the background color at the attractor
-            //position matches the birthColor of the particle.
-            //if yes, propel the particle away from the repulsor,
+            //check what cell the repulsor is in, if repulsor cellID = particle cellID
+            //propel the particle away from the repulsor,
             //OR: but not beyond the borders of their zone.
             //OR: all the way until the edges of the map.
 
-            //At this point, it might make sense to:
-
-            if ( this.hasADestiny() ) {
-              //how far is the particle from the attractor?
+            if ( this.hasADestiny() ) { //check if particle going towards attractor
               attractorDistance = p5.Vector.dist(this.positionVector, this.home);
-              //if the particle is located within the radius of the attractor,
-              //return true;
-              //by changing the radius against which we are checking,
-              //we can make the particles hover more within the attractor
-              //-10 is a pretty good value. Or -5.
-              if (attractorDistance < (attractorDiameter/2)-10) {
+              if (attractorDistance < (attractorDiameter/2)-10) { //-10 or -5
                 this.gravityOfHome = this.originalGravityOfHome;
-                return true;
+                return true; //if particle within radius of attractor, keep moving as usual
               } else {
-              //by saying false, we will push the particle goTowardsHome()
-              //and within that function, we also augment the gravityOfHome factor
-                return false;
+                return false; //-> goTowardsHome
               }
-            }else if (this.particleBirthColorSTRING == colorOfTheLandSTRING ){
-                  //console.log("I am in my homeland!");
-                  this.gravityOfHome = this.originalGravityOfHome;
-                  return true;
-
-            //2: am I at my birth spot? If yes - great!
-            //This check seems unnecessary, but it is necessary because
-            //the color of the pixel at the birthSpot is black (because of the
-            //dot that marks the voronoi site....)
-            } else if (this.positionVector.equals(this.birthSpot)) {
-                  //console.log("I am at my birth spot!");
-                  this.gravityOfHome = this.originalGravityOfHome;
-                  return true;
-
-            //3: am I at the exact coordinates of
-            //an attractor/temporary "home"? If yes - great!
-            //At the next moment, I will be pushed again towards this
-            //spot because I wont be at that exact spot,
-            //but at least for the while my gravityOfHome will be set
-            //back to the normal... so I will stop jittering around
-            //the attractor...
-            //I could also check for whether I am within the radius of the
-            //attractor, ie: if the distance between my position and
-            //this.home < radius of the attractor.
-            //This would mean that I would engage in a more calm trajectory
-            //within the zone of my attractor. And the attractor size could
-            //later be changed, and this method would keep up with it...
-            //This expression is always evaluating as false, even though
-            //particles do end up spot on at the attractor center..
-            //this check needs to come after the background color check,
-            //so that the background color check will always evaluate first.
-            //Ie: as long as the particle is within its own cell, tudo bem:
-            //if it is outside of its own cell, then we need to see how far it
-            //is from
-          } else if (this.positionVector.equals(this.home)) {
-
-                  //console.log("I am at home!");
-                  //importantly: reset me to my original gravityOfHome:
-                  this.gravityOfHome = this.originalGravityOfHome;
-                  return true;
-
-            //if this.home is not equal to this.birthSpot then:
-            //return false:
-            //4. Finally, if none of these conditions match:
-            //Check if: this.home is not equal to this.birthSpot!!!
-            //If home and birthSpot are at different coordinates, it means
-            //that I am in go-towards attractor mode:
-            //it must mean that I am in zoom-towards-attractor-mode,
-            //yet currently not at the very coordinates of the attractor..
+          //if not going after attractor, check if they are in their home cell:
+          //NEXT UP: implement passport modes!
+          }else if (whichCellAmIin(this.positionVector) == this.cellID){
+              this.gravityOfHome = this.originalGravityOfHome;
+              return true;
             } else {
-              //console.log("I am not at home");
-              return false
-            } //close else
+              return false //I am not an home
+            } //close if else structure
+
+            function whichCellAmIin(myPosition){
+              var distances = [];
+              for(var i=0;i<theWorldSites.length;i++){
+                  var distance = myPosition.dist(theWorldSites[i]);
+                  distances[i] = distance;
+              }
+              var index = 0;
+              var smallest = distances[0];
+              for (var i=0; i<distances.length;i++){
+                  if (distances[i] < smallest){
+                    smallest = distances[i]
+                    index = i;
+                  }
+              }
+                return index;
+            }//close whichCellAmIin
 
       } //close amIHome()
+
+
+
+
 
       /*
       *

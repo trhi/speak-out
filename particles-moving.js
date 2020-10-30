@@ -8,9 +8,10 @@ var drawingBorderY = 0;
 var canvasX = 1000;
 var canvasY = 600;
 
-const numSites = 6;
+const numSites = 6; //max 12, as there are 12 colors on the palette
 var randomSites = [];
-var theWorld;
+var theWorld; //global variable, can be accessed from particle.js
+var theWorldSites = [];
 var particles = [];
 var attractors = [];
 //to give weight to creating particles that are attracted to nothing:
@@ -18,19 +19,34 @@ var attractorQualities = ["nothing", "nothing", "nothing", "nothing", "nothing",
 var you = ["You"];
 var youParticle;
 
+var palette1 = [
+  [255, 0, 153, 127], // pink
+  [0, 153, 153, 127], // turquoise
+  [255, 255, 102, 127], // light yellow
+  [153, 51, 204, 127], // purple
+  [51, 204, 255, 127], // light blue
+  [255, 153, 0, 127], // orange
+  [0, 204, 153, 127], // light green
+  [255, 0, 102, 127], // red
+  [255, 204, 102, 127], // light orange
+  [51, 153, 255, 127], // dark blue
+  [255, 153, 153, 127], // light red
+  [204, 102, 204, 127] // light purple
+]
+
 var palette = [
-  [255, 0, 153, 255], // pink
-  [0, 153, 153, 255], // turquoise
-  [255, 255, 102, 255], // light yellow
-  [153, 51, 204, 255], // purple
-  [51, 204, 255, 255], // light blue
-  [255, 153, 0, 255], // orange
-  [0, 204, 153, 255], // light green
-  [255, 0, 102, 255], // red
-  [255, 204, 102, 255], // light orange
-  [51, 153, 255, 255], // dark blue
-  [255, 153, 153, 255], // light red
-  [204, 102, 204, 255] // light purple
+  [255, 223, 0, 127], // yellow
+  [241, 181, 11, 127], // yellow orange
+  [241, 135, 29, 127], // orange
+  [241, 97, 33, 127], // orange red
+  [241, 39, 39, 127], // red
+  [200, 2, 134, 127], // red purple
+  [109, 36, 139, 127], // purple
+  [68, 54, 162, 127], // purple blue
+  [18, 120, 196, 127], // blue
+  [0, 168, 196, 127], // blue green
+  [0, 142, 91, 127], // green
+  [139, 186, 37, 127], // green yellow
 ]
 
 //This is to sort particles by attractorQuality:
@@ -42,8 +58,6 @@ var particleAttractorIndex = [];
 //var mic;
 
 function setup() {
-
-  //myCanvas.parent('sketch01');
 
   var myCanvas = createCanvas(canvasX, canvasY);
   noSmooth();
@@ -63,20 +77,93 @@ function setup() {
   console.log("Created audioElement. It is:");
   console.log(audioElement);
 
-  button = createButton('i');
+  var speak;
+
+  button = createButton("i");
   //button.size(30);
+  button.size(40,40);
   button.position(30, 30);
+  button.style("border-radius", "50%");
   button.mousePressed(infobuttonPressed);
+  button.style("cursor", "pointer");
+
+  button.mouseMoved( () => {
+      console.log("Went into button.mouseOver()");
+      textSize(15);
+      fill("black");
+      var position = random()
+      text("use the arrow keys to move You", 80, 45);
+  });
 
 
   function infobuttonPressed(){
     console.log("infobutton pressed!");
     audioElement.volume(0.02);
-    audioElement.loop();
+    audioElement.loop = false;
     audioElement.play();
     //button.disable;
+    //var speak;
 
-  }
+
+
+    setTimeout( () => {
+      console.log("making other button!");
+      speak = createButton("speak out");
+      speak.position(canvasX-100, 30);
+      speak.style("cursor", "pointer");
+      speak.style("border-radius", "12px");
+      speak.style("background-color", "white");
+      //speak.class("active");
+
+
+      //speak.mousePressed(speakButtonPressed);
+
+      //this supposedly creates a checker for whether the mouse is held down
+      //continuously:
+      var intervalId;
+      speak.mousePressed( () => {
+        intervalId = setInterval(do_something, 30);
+      }).mouseReleased( () => {
+        clearInterval(intervalId);
+        console.log("Mouse was released");
+        speak.style("background-color", "pink");
+
+      });
+      speak.mouseOut( () => {
+        clearInterval(intervalId);
+      });
+
+
+    }, 6000);
+    //speak.position(canvasX-200,30);
+
+    }//close setTimeout
+
+    //var foo = new p5.SpeechRec(); // speech recognition object (will prompt for mic access)
+    //foo.onResult = showResult; // bind callback function to trigger when speech is recognized
+    //foo.start(); // start listening
+
+    function do_something() {
+      console.log("Mouse is pressed down continually");
+
+      //speak.class("active");
+
+      //colors the button red while it is being held down
+      //the idea here would be to "activate" speech recognition ONLY
+      //when the user is holding down the *(microphone icon)
+      speak.style("background-color", "red");
+      //speak.style("background-color", "red");
+      //speak.style();
+    }
+
+    function speakButtonPressed(){
+      console.log("Speak out button pressed!");
+        //foo.start();
+
+    }
+
+
+
 
 
 
@@ -191,7 +278,7 @@ function setup() {
   //setTimeout(foo.start(), 200);
   //foo.onEnd = restart;
 
-  function restart(){
+  /*function restart(){
     console.log("Restarting recognition");
     foo.start();
   }
@@ -205,6 +292,9 @@ function setup() {
   {
     console.log(foo.resultString); // log the result
   }
+  */
+
+
 
 
 } // close setup()
@@ -212,6 +302,9 @@ function setup() {
 // close setup()// close setup()// close setup()// close setup()// close setup()
 // close setup()// close setup()// close setup()// close setup()// close setup()
 // close setup()// close setup()// close setup()// close setup()// close setup()
+
+
+
 
 function doVoronoiSetupStuff(){
 
@@ -262,14 +355,29 @@ function doVoronoiSetupStuff(){
     //save the voronoiDiagram as theWorld
     theWorld = voronoiGetDiagram();
 
+    createTheWorldSites();
+    console.log("These are the worlds' sites:");
+    print(theWorldSites);
+    console.log("This is one site:" + theWorldSites[0]);
+
     //printing the voronoi diagram generated(full detailed diagram):
     console.log("This is the world: " + theWorld);
+    print(theWorld);
     console.log("This is the number of cells I have:" + theWorld.cells.length);
 
     //Get simplified cells without jitter, for more advanced use
     var normal = voronoiGetCells();
     //console.log(normal);
 
+
+}
+
+function createTheWorldSites(){
+  //consider adding information about the color of the cell..
+  for(var i=0;i<theWorld.cells.length;i++){
+    var site = createVector(theWorld.cells[i].site.x, theWorld.cells[i].site.y);
+    theWorldSites.push(site);
+  }
 
 }
 
@@ -312,12 +420,17 @@ function mouseClicked() {
 
 function draw() {
 
+
+
+
   //removes trace of former particles
   clear();
 
   if(frameCount >= 151){
     //youParticle.giveInformation();
   }
+
+
 
   /*
   //attempt to display some feedback from the microphone input:
@@ -464,6 +577,9 @@ if (frameCount == 150){
 
 
 
+
+
+
 } //close function draw
 
 function keyPressed(){
@@ -520,7 +636,6 @@ function spawnNewParticle(newHome){
 *
 */
 
-//implement choose site colors from colorPalette
 
 function createRandomSites() {
   for (i = 0; i < numSites; i++) {
