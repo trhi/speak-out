@@ -132,21 +132,8 @@ function particle(tempX, tempY) {
       this.home = createVector(tempX, tempY);
       this.positionVector = createVector(tempX, tempY);
 
-      //this.home = this.birthSpot;
-
-      //console.log("this.birthSpot is:" + this.birthSpot);
-      //console.log("this.home is:" + this.home);
-      console.log("Made a particle!");
-      console.log("This is my positionVector:" + this.positionVector);
-
-
-      //parameter to keep track of whether the particle is matched with
-      //an attractor:
+      //parameter to keep track of whether particle has attractor
       this.myDestiny = "undefined";
-
-      //set the x,y coordinates of the particle. These are altered everytime the .move() -method is called.
-      //this.positionVector = createVector(tempX, tempY);
-      //print("positionVector is:" + this.positionVector);
 
       //initialises vector that pulls towards the attractor
       this.towardsAttractor = createVector();
@@ -169,11 +156,9 @@ function particle(tempX, tempY) {
         //}
 
 
-
               strokeWeight(1);
               fill(this.color);
               stroke("white");
-
 
             //as particle is born, it gradually grows into its full size
             if(this.counter < 10){
@@ -197,12 +182,6 @@ function particle(tempX, tempY) {
               //console.log("Problem!");
               this.giveInformation();
             }
-
-            //as particle is dying, it gradually fades out:
-            //starting at lifespan = 300, we fade them out:
-            //if(this.lifespan < 100){
-            //  this.diameter += 1;
-            //}
 
             ellipse(this.positionVector.x, this.positionVector.y, this.diameter, this.diameter);
             this.lifespan -= 0.1;
@@ -391,7 +370,6 @@ function particle(tempX, tempY) {
 
 
 
-
           //}//end if this.feelsPresenceOfRepulosor() / else
 
             // this.hasDestiny will be set to true if there is a repulsor
@@ -405,17 +383,12 @@ function particle(tempX, tempY) {
             // is located: for example: this.hasADestiny could return this index..
             if ( attractors[0].quality == "repulsor" ){
 
-
-
                 var attractorCellID = voronoiGetSite(attractors[0].attractorPosition.x, attractors[0].attractorPosition.y, false);
                 var attractorCellColor = voronoiGetColor(attractorCellID);
                 //now we know the color of the cell that the attractor is in.
                 var attractorCellColorSTRING = attractorCellColor.toString();
 
                 if (attractorCellColorSTRING === particleBirthColorSTRING){
-
-
-                  //
                   //console.log("My color is:" + particleBirthColorSTRING +
                   //"and the attractorCellColorSTRING is:" + attractorCellColorSTRING);
                   //console.log("The repulsor is in my cell! Turning me to black.");
@@ -468,10 +441,6 @@ function particle(tempX, tempY) {
             //so that the particles do not go off the visible canvas
             this.positionVector.x = constrain(this.positionVector.x, drawingBorderX, width)
             this.positionVector.y = constrain(this.positionVector.y, drawingBorderY, height)
-
-            //for flipping particles to the other side:
-            //does not really work, particles start zooming all over the world..
-            //this.amIOnTheEdge();
 
       } // close this.move()
 
@@ -614,15 +583,14 @@ function particle(tempX, tempY) {
       } //close this.amIOnTheEdge()
 
 
+      //check whether home has been changed to attractor position
       this.hasADestiny = function() {
           if(!this.home.equals(this.birthSpot)){
-            //meaning that this.home has been changed to equal the
-            //position of the attractor:
             return true;
           }else{
             return false;
           }
-      }
+      }//close this.hasADestiny()
 
 
       /*
@@ -633,43 +601,10 @@ function particle(tempX, tempY) {
 
       this.amIHome = function() {
 
-            //var distanceFromHome;
-            //console.log("Going into amIHome(), checkin if positionVector is still defined" + this.positionVector);
-
-            //console.log("This is my CellID" + this.cellID);
-
-
             var attractorDistance;
             //need to implement a new check here:
             //if the particles home has been changed to something other than
             //its birthSpot, then amIHome returns true.
-
-            //In preparation of the if/else decision tree below:
-            //get the color of the current pixel that the particle is in:
-            var colorOfTheLand = get(this.positionVector.x, this.positionVector.y);
-            //colorOfTheLand[3] = 254;
-
-            //Because we added transparency, I need to be checking here for:
-            // RGB values with a deviation of max 1-2 integers
-            // A value can be anything above 127
-            // What if there are multiple particles at that position? :X
-            // their combined effect will be to
-
-            var colorOfTheLandSTRING = colorOfTheLand.toString();
-            //console.log("This is the color of the land:" + colorOfTheLand);
-            //console.log("This is the color of the land as a string:" + colorOfTheLandSTRING);
-            //console.log("And this is the color of the particle:" + this.particleBirthColor);
-
-            //In preparation for the if/else decision tree below, and primarily
-            //in order to implement particles moving in a calm way within the
-            //attractors:
-            //check if we can access the attractorDiameter from within this class:
-            //YES WE CAN, wohoo for var scope!!!!!! it does make sense in many
-            //situations, although we do of course appreciate let as well.
-            //console.log("The diameter of the attractor is:" + attractorDiameter);
-            //this calculates the distance between home and attractorDistance
-            //IF home is not equal to birthspot...
-
 
             //NEXT PROBLEM: The particle gets completely stuck at the border.
             //NOTE: I kind of like this jitter around the border, because
@@ -730,8 +665,6 @@ function particle(tempX, tempY) {
 
 
 
-
-
       /*
       *
       *   Remove particle from particles [].
@@ -747,63 +680,5 @@ function particle(tempX, tempY) {
         //console.log(attractors);
 
       }//close this.remove
-
-      /*
-      *
-      *   Flickers particle out before removing.
-      *         - looks horrible, not -
-      *            - using this -
-      *
-      */
-
-      this.flickerOut = function(){
-
-        if(this.lifespan <= 10){
-          this.color = [255, 255, 255, 255];
-          this.particleBirthColorSTRING = this.color.toString();
-        }
-
-        if(this.lifespan <= 6){
-          this.color = [0, 0, 0, 255];
-        }
-
-        if(this.lifespan <= 4){
-          this.color = [255, 255, 255, 255];
-        }
-
-        if(this.lifespan <= 3.5){
-          this.color = [0, 0, 0, 255];
-        }
-
-        if(this.lifespan <= 3){
-          this.color = [255, 255, 255, 255];
-        }
-
-        if(this.lifespan <= 2.5){
-          this.color = [255, 255, 255, 255];
-        }
-
-        if(this.lifespan <= 2){
-          this.color = [0, 0, 0, 255];
-        }
-
-        if(this.lifespan <= 1.5){
-          this.color = [255, 255, 255, 255];
-        }
-
-        if(this.lifespan <= 1){
-          this.color = [0, 0, 0, 255];
-        }
-
-        if(this.lifespan <= 0.5){
-          this.color = [255, 255, 255, 255];
-        }
-
-        if(this.lifespan <= 0){
-           this.remove();
-        }//endif
-
-
-      }//close this.flickerOut
 
 }//close particle()
