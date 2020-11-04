@@ -8,34 +8,22 @@ var drawingBorderY = 0;
 var canvasX = 1000;
 var canvasY = 600;
 
-const numSites = 6; //max 12, as there are 12 colors on the palette
+const zones = 12; //max 12, as there are 12 colors on the palette
 var randomSites = [];
 var theWorld; //global variable, can be accessed from particle.js
 var theWorldSites = [];
 var particles = [];
-var attractors = [];
+var attractors = [0];
 //to give weight to creating particles that are attracted to nothing:
 var attractorQualities = ["nothing", "nothing", "nothing", "nothing", "nothing", "nothing", "opportunity", "love", "study", "dignity", "freedom", "peace", "exploration", "a better life"];
 var you = ["You"];
 var youParticle;
 
-var passportModes = "monochromatic", "analogous", "complementary", "triad"
+var passportModes = ["monochromatic", "analogous", "complementary", "triad"];
 var passportMode = "analogous";
 
-var palette1 = [
-  [255, 0, 153, 127], // pink
-  [0, 153, 153, 127], // turquoise
-  [255, 255, 102, 127], // light yellow
-  [153, 51, 204, 127], // purple
-  [51, 204, 255, 127], // light blue
-  [255, 153, 0, 127], // orange
-  [0, 204, 153, 127], // light green
-  [255, 0, 102, 127], // red
-  [255, 204, 102, 127], // light orange
-  [51, 153, 255, 127], // dark blue
-  [255, 153, 153, 127], // light red
-  [204, 102, 204, 127] // light purple
-]
+var worldColors = [];
+var worldColorsNumberCodes = [];
 
 var palette = [
   [255, 223, 0, 127], // yellow
@@ -50,6 +38,36 @@ var palette = [
   [0, 168, 196, 127], // blue green
   [0, 142, 91, 127], // green
   [139, 186, 37, 127], // green yellow
+]
+
+var paletteCopy = [
+  [255, 223, 0, 127], // yellow
+  [241, 181, 11, 127], // yellow orange
+  [241, 135, 29, 127], // orange
+  [241, 97, 33, 127], // orange red
+  [241, 39, 39, 127], // red
+  [200, 2, 134, 127], // red purple
+  [109, 36, 139, 127], // purple
+  [68, 54, 162, 127], // purple blue
+  [18, 120, 196, 127], // blue
+  [0, 168, 196, 127], // blue green
+  [0, 142, 91, 127], // green
+  [139, 186, 37, 127], // green yellow
+]
+
+var palette1 = [
+  [255, 0, 153, 127], // pink
+  [0, 153, 153, 127], // turquoise
+  [255, 255, 102, 127], // light yellow
+  [153, 51, 204, 127], // purple
+  [51, 204, 255, 127], // light blue
+  [255, 153, 0, 127], // orange
+  [0, 204, 153, 127], // light green
+  [255, 0, 102, 127], // red
+  [255, 204, 102, 127], // light orange
+  [51, 153, 255, 127], // dark blue
+  [255, 153, 153, 127], // light red
+  [204, 102, 204, 127] // light purple
 ]
 
 //This is to sort particles by attractorQuality:
@@ -368,6 +386,45 @@ function doVoronoiSetupStuff(){
     print(theWorld);
     console.log("This is the number of cells I have:" + theWorld.cells.length);
 
+    //find all the cellIDs in the world:
+    //might be totally unnecessary
+    var allCells = [];
+    for(var i=0;i<zones;i++){
+      allCells[i] = i;
+    }
+
+    //make an array of all the colors in the world
+
+    for(var i=0;i<zones;i++){
+      //here the position in the worldColors[] == cellID,
+      //ie. cellID of 0 is color at worldColors[0];
+      worldColors[i] = voronoiGetColor(i);
+    }
+    console.log("World colors are:");
+    console.log(worldColors);
+
+    //make an array with number names
+
+    //make an array with number codes
+    //this is an array of just the G values:
+
+    //the G-value of each color just happens to be unique!!!!
+    //easiest way is to check against this...
+    //AT THIS POINT, we should save the colorID of that color after the G value:
+    for(var i=0;i<zones;i++){
+      worldColorsNumberCodes[i] = [worldColors[i][1], 0] ;
+    }
+
+    //FIRST: identify what is the colorCode of this color?
+    for(var i=0;i<zones;i++){
+        for(var j=0;j<zones;j++){
+          //compare the color of the cell (G) at i with color (G) at index j in palette
+          if(worldColorsNumberCodes[i][0] == paletteCopy[j][1]){
+            worldColorsNumberCodes[i][1] = j;
+          }
+        }
+    }
+
     //Get simplified cells without jitter, for more advanced use
     var normal = voronoiGetCells();
     //console.log(normal);
@@ -452,9 +509,10 @@ function draw() {
   //by default: this will be the first "attractor" in the array
 
 
+  /*
   if (frameCount == 10){
-    let attractorX = random(0, width);
-    let attractorY = random(0, height);
+    let attractorX = random(0, canvasX);
+    let attractorY = random(0, canvasY);
     let quality = "nothing"; //this used to be: "repulsor"
     let lifespan = random(500,1000);
     attractors.push(new attractor(quality, attractorX, attractorY, lifespan));
@@ -462,6 +520,7 @@ function draw() {
     //attractors[0].attractorPosition.x
     //attractors[0].attractorPosition.y
   }
+  */
 
 
 
@@ -469,6 +528,7 @@ function draw() {
   //emerge, they also emerge randomly. So as much as you try to control where
   //the particles flock to, sometimes their movement will be out of your
   //control.
+  /*
   if (frameCount % 300 == 0) {
     //spawnNewAttractor();
     for(let i=0; i < attractors.length; i++){
@@ -476,6 +536,7 @@ function draw() {
       //console.log(attractors[0].quality);
     }
   }
+  */
 
 
   /*
@@ -504,6 +565,7 @@ function draw() {
     if(attractors[i].existance == "defined"){
       //console.log("Framecount = " + frameCount);
       attractors[i].display();
+
     }
 
 
@@ -538,12 +600,30 @@ for (let i = 0; i < particles.length; i++) {
   }
   */
 
-  if (frameCount >= 155){
+
+
+  if (frameCount >= 21){
     youParticle.giveInformation();
     //console.log("Cell ID that You particle is currently at:" + voronoiGetSite(youParticle.positionVector));
     var currentCellID = voronoiGetSite(youParticle.positionVector.x, youParticle.positionVector.y);
-    youParticle.isAttractedTo = currentCellID;
-    console.log("Cell ID that You particle is currently at:" + currentCellID);
+    if(currentCellID == undefined){
+      //this only evaluates as undefined at the edges... grah!!!
+      //at the borders it evaluates as either the one cell or the other..
+      console.log("Current cell is undefined at:" + youParticle.positionVector.x);
+      //currentCell = this.cellID;
+    }
+    //youParticle.isAttractedTo = currentCellID + ", " + youParticle.cellID;
+    //SO: when the particle is located over a voronoi cell border,
+    //it is understood as not being in a cell at all,
+    //ie. voronoiGetSite(x,y) will return undefined.
+    //
+    //if(currentCellID == undefined){
+      youParticle.infoText = currentCellID;
+    //}
+    //youParticle.isAttractedTo = voronoiGetColor(youParticle.positionVector.x, youParticle.positionVector.y);
+    //console.log("Cell ID that You particle is currently at:" + currentCellID);
+
+    //console.log("Their colors are:" + neighborsColors);
 
   }
 
@@ -563,24 +643,66 @@ spawnNewParticle();
 //here, we set the frequency at which particles are spawned
 //at 30 frames per second, %120 frames means there is a chance
 //of new particles spawning every four seconds:
-if (frameCount%10 == 0) {
+
+
+if (frameCount%200 == 0) {
   spawnNewParticles();
 } //close if framecount
 
+
 //Spawn you-particle!
-if (frameCount == 150){
+if (frameCount == 20){
   youParticle = new particle(canvasX/2, canvasY/2);
   particles.splice(0, 0, youParticle);
-  youParticle.isAttractedTo = you;
+  youParticle.isAttractedTo = "love";
+  youParticle.infoText = "You";
+  youParticle.passport = "analogous";
   //youParticle.diameter = 40;
-  youParticle.lifespan = 50000;
+  youParticle.lifespan = 100000;
   //youParticle.color = "white";
   console.log("Succesfully created you");
   console.log("You are attracted to:" + youParticle.isAttractedTo);
   console.log("Your lifespan is:" + youParticle.lifespan);
   youParticle.giveInformation();
 
-}
+  //find out who your immediate neighbors are:
+  var yourNeighbors = voronoiNeighbors(youParticle.cellID);
+  console.log("My neighbors are:" + yourNeighbors);
+  var neighborsColors = [];
+  for(i=0;i<yourNeighbors.length;i++){
+    neighborsColors[i] = voronoiGetColor(yourNeighbors[i]);
+    console.log(neighborsColors[i]);
+  }
+
+
+
+
+  //or we could just check the G values of voronoiGetColor(theworld.cells.site[whereparticleisat])
+
+  //let's pretend that the passport rule is: analogous
+  //how do I tell youParticle where it is allowed to go?
+  //I will now allow youParticle to go only into neighboring cells:
+
+
+/*
+  var palette = [
+    [255, 223, 0, 127], // yellow
+    [241, 181, 11, 127], // yellow orange
+    [241, 135, 29, 127], // orange
+    [241, 97, 33, 127], // orange red
+    [241, 39, 39, 127], // red
+    [200, 2, 134, 127], // red purple
+    [109, 36, 139, 127], // purple
+    [68, 54, 162, 127], // purple blue
+    [18, 120, 196, 127], // blue
+    [0, 168, 196, 127], // blue green
+    [0, 142, 91, 127], // green
+    [139, 186, 37, 127], // green yellow
+  ]
+*/
+
+
+}//close if() for spawning youParticle
 
 
 
@@ -590,17 +712,19 @@ if (frameCount == 150){
 
 } //close function draw
 
+//THIS IS PROBLEMATIC:
+//because the effect of this is super long-lasting..
 function keyPressed(){
   console.log("keypressed!");
     if (keyCode === LEFT_ARROW) {
-      youParticle.userDirectionVector.add(-1, 0);
+      youParticle.userDirectionVector.add(-1.5, 0);
       //console.log("keypressed!");
     } else if (keyCode === RIGHT_ARROW) {
-      youParticle.userDirectionVector.add(1, 0);
+      youParticle.userDirectionVector.add(1.5, 0);
     } else if (keyCode === UP_ARROW) {
-      youParticle.userDirectionVector.add(0, -1);
+      youParticle.userDirectionVector.add(0, -1.5);
     } else if (keyCode === DOWN_ARROW) {
-      youParticle.userDirectionVector.add(0, 1);
+      youParticle.userDirectionVector.add(0, 1.5);
     }
 
 }
@@ -622,21 +746,24 @@ function spawnNewParticles() {
   for(let i = 0 ; i < numberOfNewParticles ; i++){
     //chooses one of the voronoi cells:
     var newHome = round(random(0, theWorld.cells.length-1));
-    spawnNewParticle(newHome);
+    var newParticle = new particle(theWorld.cells[newHome].site.x, theWorld.cells[newHome].site.y);
+    particles.push(newParticle);
+    //spawnNewParticle(newHome);
   }
 
 } //close spawnNewParticles()
 
 /*
 *
-*   Spawn one particle.
+*   Spawn one particle. //redundant
 *
 */
-
+/*
 function spawnNewParticle(newHome){
   var newParticle = new particle(theWorld.cells[newHome].site.x, theWorld.cells[newHome].site.y);
   particles.push(newParticle);
 } //close spawnNewParticle
+*/
 
 /*
 *
@@ -646,7 +773,7 @@ function spawnNewParticle(newHome){
 
 
 function createRandomSites() {
-  for (i = 0; i < numSites; i++) {
+  for (i = 0; i < zones; i++) {
     var paletteIndex = round(random(0, palette.length-1));
     randomSites.push(
       [random(drawingBorderX, canvasX),
@@ -672,8 +799,8 @@ function createRandomSites() {
   function spawnNewAttractor(attractorX, attractorY) {
 
     if(attractorX == undefined || attractorY == undefined){
-      attractorX = random(0, width);
-      attractorY = random(0, height);
+      attractorX = random(0, canvasX);
+      attractorY = random(0, canvasY);
     }
     let quality = random(attractorQualities);
     //sets a random lifespan

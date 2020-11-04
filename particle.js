@@ -7,6 +7,9 @@
 
 var particleDiameter = 10;
 var cellID;
+var myColorID;
+
+var currentCellID;
 
 
 /*
@@ -23,6 +26,12 @@ function particle(tempX, tempY) {
       *
       */
 
+      //attempt to implement passport modes:
+      //this.passport = "monochromatic";
+      this.passport = "analogous";
+      this.analogous = 2; //+/- two colors from my color
+
+      this.selected = false;
 
       this.lifespan = random(100,2000);
       this.counter = 0;
@@ -37,6 +46,8 @@ function particle(tempX, tempY) {
       //and accessible by other .js files:
       this.isAttractedTo = random(attractorQualities);
       //console.log("This particle is attracted to: " + this.isAttractedTo);
+
+      this.infoText = "";
 
       //Essentially, particles are created first, and then, much later,
       //attractors are created. SO: as soon as a particle is created, it needs
@@ -132,6 +143,7 @@ function particle(tempX, tempY) {
       this.birthSpot = createVector(tempX, tempY);
       this.home = createVector(tempX, tempY);
       this.positionVector = createVector(tempX, tempY);
+      this.lastMovementVector = createVector(0,0);
 
       //parameter to keep track of whether particle has attractor
       this.myDestiny = "undefined";
@@ -156,16 +168,28 @@ function particle(tempX, tempY) {
         //    this.color = this.particleBirthColor;
         //}
 
+              if(this.selected){
 
-              strokeWeight(1);
-              fill(this.color);
-              stroke("white");
+                strokeWeight(3);
+                fill(this.color);
+                stroke("white");
+                var x= int(this.positionVector.x);
+                var y= int(this.positionVector.y);
+                //this.isAttractedTo += (" , " + x + " - " + y);
+
+
+              } else {
+
+                  strokeWeight(1);
+                  fill(this.color);
+                  stroke("white");
+              }
 
             //as particle is born, it gradually grows into its full size
             if(this.counter < 10){
               this.diameter = this.counter;
             } else {
-              if(this.isAttractedTo == "You"){
+              if(this.infoText == "You"){
                 //fill("white");
                 //strokeWeight(3);
                 stroke("black");
@@ -182,6 +206,11 @@ function particle(tempX, tempY) {
             if(particleCursorDistance < particleDiameter/2){
               //console.log("Problem!");
               this.giveInformation();
+              if(this.selected == true){
+                this.selected = false;
+              } else {
+                this.selected = true;
+              }
             }
 
             ellipse(this.positionVector.x, this.positionVector.y, this.diameter, this.diameter);
@@ -202,7 +231,10 @@ function particle(tempX, tempY) {
           textSize(particleDiameter);
           fill("white");
           stroke("black");
-          text(this.isAttractedTo, this.positionVector.x + 5, this.positionVector.y + 5);
+          if(this.infoText == ""){
+            this.infoText = this.isAttractedTo;
+          }
+          text(this.infoText, this.positionVector.x + 5, this.positionVector.y + 5);
           //setTimeout();
       }
 
@@ -275,6 +307,9 @@ function particle(tempX, tempY) {
       }
 
       this.move = function() {
+
+            currentCellID = voronoiGetSite(this.positionVector.x, this.positionVector.y);
+
 
             /*
             *
@@ -382,7 +417,7 @@ function particle(tempX, tempY) {
             // we need to store: this.isGoingTowards as a reference to the
             // index of the attractor array at which the particles' destiny
             // is located: for example: this.hasADestiny could return this index..
-            if ( attractors[0].quality == "repulsor" ){
+            if ( attractors[0].quality == "repulsor"){
 
                 var attractorCellID = voronoiGetSite(attractors[0].attractorPosition.x, attractors[0].attractorPosition.y, false);
                 var attractorCellColor = voronoiGetColor(attractorCellID);
@@ -419,10 +454,12 @@ function particle(tempX, tempY) {
             //if the particle is not at home, we make it move towards home
             //before we add the movement determined by perlin noise:
             if (!this.amIHome()) {
+                  //this.infoText = " going home!";
                   this.goTowardsHome();
             }//close if (!this.amIHome()
 
 
+            //this.infoText = " MOVING!";
             //In the perlin noise version, we will simply iterate through the perlin noice
             //table of numbers by incrementing the xoff and yoff variables for each particle.
             let randomXNoise = noise(this.xoff)
@@ -435,13 +472,38 @@ function particle(tempX, tempY) {
             let randomXSpeedFactor = map(randomXNoise, 0, 1, -7, 7);
             let randomYSpeedFactor = map(randomYNoise, 0, 1, -7, 7);
 
+            /*
+            console.log("randomXSpeedFactor" + randomXSpeedFactor);
+            console.log("randomYSpeedFactor" + randomYSpeedFactor);
+            console.log("this.lastMovementVector");
+            console.log(this.lastMovementVector);
+            */
+            this.lastMovementVector.x = (randomXSpeedFactor);
+            this.lastMovementVector.y = (randomYSpeedFactor);
+
             this.positionVector.add(randomXSpeedFactor, randomYSpeedFactor);
 
-            this.positionVector.add(this.userDirectionVector);
+            if(this.userDirectionVector == (0,0)){
+            }else{
+              //after adding the user direction vector to the movement,
+              //diminish it, or set it to zero!
+              //otherwise your particles motion will be extremely prejudiced
+              // and defined by the motion that was asked for by pressing
+              //the arrow keys!
+              //this.infoText += " " + this.userDirectionVector;
+              this.positionVector.add(this.userDirectionVector);
+              //diminish the effect of the users input over time:
+              //0.99 seems to be a good factor:
+              this.userDirectionVector.mult(0.99);
+              //limit to magnitude 6 seems to be a good value:
+              //this keeps the particle from bouncing back
+              //too much from the border of a wrong cell..
+              this.userDirectionVector.limit(6);
+            }
 
             //so that the particles do not go off the visible canvas
-            this.positionVector.x = constrain(this.positionVector.x, drawingBorderX, width)
-            this.positionVector.y = constrain(this.positionVector.y, drawingBorderY, height)
+            this.positionVector.x = constrain(this.positionVector.x, drawingBorderX, canvasX)
+            this.positionVector.y = constrain(this.positionVector.y, drawingBorderY, canvasY)
 
       } // close this.move()
 
@@ -454,8 +516,6 @@ function particle(tempX, tempY) {
 
       //separated this from the move function
       this.goTowardsHome = function(){
-
-        //console.log("Going towards home!");
 
         //if the particle is not at home, increase accelerationVector
         //by multiplying it with the gravityOfHome vector
@@ -477,21 +537,6 @@ function particle(tempX, tempY) {
         //wander around their home rather than elsewhere,
         //speedily returning once they realise they are away from home.
         // eg. values like 0.1 or 0.3
-
-        //For next steps, I am going to continue using this rather
-        //conservative value for gravityOfHome,
-        //ie. I'll be working with a simulation where particles tend
-        //to gravitate towards their home, ie. where they tend to stay
-        //within the borders of their cells.
-
-        //There is something happening here in terms of gravityOfHome,
-        //which is as follows:
-        //IF the particle is at an attractor, they start moving faster and
-        //faster and really jittering around the attractor in a way that is
-        //visually really demanding.. I think this is because they are checking
-        //against bacckground color and realising that although they are at
-        //"home"/their temporary attractor home, they are not in their own
-        //cell, and so they keep increasing their velocity..
         this.gravityOfHome += 0.05;
         //console.log("Increasing gravity of home!");
 
@@ -569,16 +614,16 @@ function particle(tempX, tempY) {
 
       this.amIOnTheEdge = function() {
 
-            if (this.positionVector.x == width) {
+            if (this.positionVector.x == canvasX) {
               this.positionVector.x = 0;
             } else if (this.positionVector.x == 0) {
-              this.positionVector.x = width;
+              this.positionVector.x = canvasX;
             }
 
-            if (this.positionVector.y == height) {
+            if (this.positionVector.y == canvasY) {
               this.positionVector.y = 0;
             } else if (this.positionVector.y == 0) {
-              this.positionVector.y = height;
+              this.positionVector.y = canvasY;
             }
 
       } //close this.amIOnTheEdge()
@@ -601,6 +646,7 @@ function particle(tempX, tempY) {
       */
 
       this.amIHome = function() {
+
 
             var attractorDistance;
             //need to implement a new check here:
@@ -628,6 +674,7 @@ function particle(tempX, tempY) {
             //OR: but not beyond the borders of their zone.
             //OR: all the way until the edges of the map.
 
+            //either it is going towards the attractor:
             if ( this.hasADestiny() ) { //check if particle going towards attractor
                   attractorDistance = p5.Vector.dist(this.positionVector, this.home);
                   if (attractorDistance < (attractorDiameter/2)-10) { //-10 or -5
@@ -639,14 +686,45 @@ function particle(tempX, tempY) {
             }
           //if not going after attractor, check if they are in their home cell:
           //NEXT UP: implement passport modes!
+/*
+          else if (passportMode == "analogous"){
+            //get neighboring
+          }*/
 
-
-            else if (voronoiGetSite(this.positionVector.x, this.positionVector.y) == this.cellID){
+            //or it is home:
+            //if on the border, voronoiGetSite() will return undefined... // === this.cellID || undefined
+            else if (currentCellID == this.cellID){
+              this.infoText = currentCellID + " i am HOME!";
               this.gravityOfHome = this.originalGravityOfHome;
               return true;
             }
 
+            //OR it has an analogous passport (youParticle only for testing:)
+            else if (this.passport == "analogous"){
+                  //if the passport is analogous AND it is in one of the
+                  //allowed cells:
+                  if ( this.amIAllowedToBeHere() ) {
+                    this.infoText = currentCellID + " cell is OK!";
+                    this.gravityOfHome = this.originalGravityOfHome;
+                    //console.log("I am allowed to be here <3");
+                      return true;
+                  }
+                  else {
+                    this.infoText =  currentCellID + " WRONG CELL!";
+                    //this.gravityOfHome += 0.05;
+                    //console.log(this.lastMovementVector);
+                    //this.lastMovementVector.add(this.userDirectionVector);
+                    //this.lastMovementVector.rotate(PI);
+                    //this.lastMovementVector.mult(2);
+                    //console.log(this.lastMovementVector);
+                    //this.positionVector.add(this.lastMovementVector);
+                    //console.log("I am NOT allowed to be here <3");
+                    return false;
+                  }
+            }
+
             else {
+
               return false; //I am not an home
             } //close if else structure
 
@@ -686,6 +764,79 @@ function particle(tempX, tempY) {
             */
 
       } //close amIHome()
+
+
+      this.amIAllowedToBeHere = function(){
+
+        myColorID = worldColorsNumberCodes[this.cellID][1];
+
+        //all we need to do here is to compare against passportMode (default is now analogous)
+        //with this.cellID -
+        //look up cellID in worldColorsNumberCodes:
+        //
+
+        //eg. if your cellID is 0,
+        //then:
+        // myColorCode = worldColorsNumberCodes[cellID][2];
+        // let's say myColorCode is 4
+        // and passport mode is analogous:
+        // so that means that I will be allowed to go to:
+        // code: 2, 3, and 5, 6 (whether I am home or not has already been
+        // accounted for previously in the move() method..)
+
+        // now we need to find out what cell numbers are colors 2, 3, and 5, and 6:
+
+        // myColorID (ID of the birth cell color)
+
+
+        var currentCell; //current cell ID
+        //this will return undefine if the particle is at the border: (mua ha ha)
+        currentCell = voronoiGetSite(this.positionVector.x, this.positionVector.y);
+
+        /*
+        if(currentCell == undefined){
+          //console.log("Current cell is undefined:");
+          currentCell = this.cellID;
+        }else{
+          var currentCellColorID = worldColorsNumberCodes[currentCell][1];
+        }
+        */
+
+        /*
+        if(get(this.positionVector.x, this.positionVector.y)[1] == 255){
+          return true;
+        }
+        */
+        //let's say myColorID is 6
+        //currentCellColorID is 8 ==  allowed to be here
+        //currentCellColorID is 3 == not allowed to be here
+        //currentCellColorID is 5 == allowed to be here!
+
+        //check if this currentCellColorID is within the range of
+        //colors that are allowed!
+
+        //analogous means its allowed to be either -2 or +2 from the
+        //myColorID Number:
+
+        //NOT WORKING!
+        if(currentCell == this.cellID){
+          this.gravityOfHome = this.originalGravityOfHome;
+          return true;
+        }
+        else if(currentCell < this.cellID){
+            this.gravityOfHome = this.originalGravityOfHome;
+            return true;
+          }else{
+            this.gravityOfHome += 0.5;
+            //this.isAttractedTo = "I am not allowed to be here!";
+            return false;
+        }
+
+
+
+      }//close amIAllowedToBeHere
+
+
 
 
 

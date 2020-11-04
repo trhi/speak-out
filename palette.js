@@ -98,6 +98,21 @@ var palette2PALE = [
 
 ]
 
+var palette = [
+  [255, 223, 0, 127], // 0 yellow
+  [241, 181, 11, 127], // 1 yellow orange
+  [241, 135, 29, 127], // 2 orange
+  [241, 97, 33, 127], // 3 orange red
+  [241, 39, 39, 127], // 4 red
+  [200, 2, 134, 127], // 5 red purple
+  [109, 36, 139, 127], // 6 purple
+  [68, 54, 162, 127], // 7 purple blue
+  [18, 120, 196, 127], // 8 blue
+  [0, 168, 196, 127], // 9 blue green
+  [0, 142, 91, 127], // 10 green
+  [139, 186, 37, 127], // 11 green yellow
+]
+
 
 function setup() {
   createCanvas(400, 400);
