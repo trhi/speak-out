@@ -139,7 +139,7 @@ function draw() {
   var y;
   var boxDimension = 100;
   var colorIndex = 0;
-  var palette = colorPalette2;
+  var palette = palette2PALE;
 
   for ( y = 0; y < 4; y++ ){
 

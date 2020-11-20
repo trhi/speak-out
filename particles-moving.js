@@ -8,6 +8,14 @@ var drawingBorderY = 0;
 var canvasX = 1000;
 var canvasY = 600;
 
+var canvasX = window.innerWidth - 20;
+var canvasY = window.innerHeight - 20;
+//window.innerWidth;
+//var h = window.innerHeight;
+
+var myCanvas;
+
+
 const zones = 12; //max 12, as there are 12 colors on the palette
 var randomSites = [];
 var theWorld; //global variable, can be accessed from particle.js
@@ -15,7 +23,17 @@ var theWorldSites = [];
 var particles = [];
 var attractors = [0];
 //to give weight to creating particles that are attracted to nothing:
-var attractorQualities = ["nothing", "nothing", "nothing", "nothing", "nothing", "nothing", "opportunity", "love", "study", "dignity", "freedom", "peace", "exploration", "a better life"];
+var attractorQualities = ["nothing", "nothing", "nothing", "nothing", "nothing",
+"nothing",
+"work", "work", "work", "work", "work", "work", "work", "work", "work", "work",
+"opportunity", "love", "shelter", "food",
+"money", "lots of money", "some money", "a coin",
+"a home", "a house", "a shelter", "a child",
+"a job", "a clothing store", "a park", "study",
+"dignity", "freedom", "to do what I love", "to love what I do", "a place to breathe",
+"peace", "some peace of mind", "some time for myself", "time", "some time",
+"exploration", "a mountain", "a better life",
+"a flower shop", "a supermarket", "ikea", "coca cola dreams"];
 var you = ["You"];
 var youParticle;
 
@@ -24,21 +42,7 @@ var passportMode = "analogous";
 
 var worldColors = [];
 var worldColorsNumberCodes = [];
-
-var palette = [
-  [255, 223, 0, 127], // yellow
-  [241, 181, 11, 127], // yellow orange
-  [241, 135, 29, 127], // orange
-  [241, 97, 33, 127], // orange red
-  [241, 39, 39, 127], // red
-  [200, 2, 134, 127], // red purple
-  [109, 36, 139, 127], // purple
-  [68, 54, 162, 127], // purple blue
-  [18, 120, 196, 127], // blue
-  [0, 168, 196, 127], // blue green
-  [0, 142, 91, 127], // green
-  [139, 186, 37, 127], // green yellow
-]
+var worldGIndex = [];
 
 var paletteCopy = [
   [255, 223, 0, 127], // yellow
@@ -70,17 +74,98 @@ var palette1 = [
   [204, 102, 204, 127] // light purple
 ]
 
+var paletteOriginal = [
+  [255, 223, 0, 127], // yellow
+  [241, 181, 11, 127], // yellow orange
+  [241, 135, 29, 127], // orange
+  [241, 97, 33, 127], // orange red
+  [241, 39, 39, 127], // red
+  [200, 2, 134, 127], // red purple
+  [109, 36, 139, 127], // purple
+  [68, 54, 162, 127], // purple blue
+  [18, 120, 196, 127], // blue
+  [0, 168, 196, 127], // blue green
+  [0, 142, 91, 127], // green
+  [139, 186, 37, 127], // green yellow
+]
+
+var palette = [
+  [255, 223, 0, 117], // yellow
+  [241, 181, 11, 117], // yellow orange
+  [241, 135, 29, 117], // orange
+  [241, 97, 33, 117], // orange red
+  [241, 39, 39, 117], // red
+  [200, 2, 134, 117], // red purple
+  [109, 36, 139, 117], // purple
+  [68, 54, 162, 117], // purple blue
+  [18, 120, 196, 117], // blue
+  [0, 168, 196, 117], // blue green
+  [0, 142, 91, 117], // green
+  [139, 186, 37, 117], // green yellow
+]
+
+var paletteVeryPale = [
+  [255, 223, 0, 100], // yellow
+  [241, 181, 11, 100], // yellow orange
+  [241, 135, 29, 100], // orange
+  [241, 97, 33, 100], // orange red
+  [241, 39, 39, 100], // red
+  [200, 2, 134, 100], // red purple
+  [109, 36, 139, 100], // purple
+  [68, 54, 162, 100], // purple blue
+  [18, 120, 196, 100], // blue
+  [0, 168, 196, 100], // blue green
+  [0, 142, 91, 100], // green
+  [139, 186, 37, 100], // green yellow
+]
+
+var analogous = [
+  [223, 181, 135, 97],
+  [181, 223, 135, 97],
+  [135, 223, 181, 97],
+  [97, 223, 181, 135],
+  [39, 97, 2, 36],
+  [2, 39, 36, 54],
+  [36, 2, 54, 120],
+  [54, 36, 120],
+  [120, 54, 168, 142],
+  [168, 120, 142, 186],
+  [142, 168, 186, 223],
+  [186, 142, 223]
+];
+
+/*
+var passport = {
+  name:"analogous",
+  allowed:[]
+};
+*/
+
+//I give you my G number -> you give me my passport!
+//SO: the world could keep a record of what g numbers are allowed to go where
+//in each passport mode:
+//eg. in monochrome: only g number == to my own
+//eg. in all access: all g numbers OK
+//eg. in analogous: for g= x: y,z,a
+//                       = y: z,a,b
+//                       = z: a,b,c
+//and so on....
+//
+
+//an array of objects, where index == position in palette...
+
+
+
+
 //This is to sort particles by attractorQuality:
 //var particleAttractorIndex = {love: ["particle1", "particle2", "particle3"], work: ["particle4", "particle5", "particle6"]};
 var particleAttractorIndex = [];
-
-
 
 //var mic;
 
 function setup() {
 
-  var myCanvas = createCanvas(canvasX, canvasY);
+  myCanvas = createCanvas(canvasX, canvasY);
   noSmooth();
   //had frameRate(19); changed to frameRate(50);
   //to see how the program processes the particles
@@ -103,11 +188,19 @@ function setup() {
   button = createButton("i");
   //button.size(30);
   button.size(40,40);
-  button.position(30, 30);
+  button.position(canvasX-50, canvasY-50);
   button.style("border-radius", "50%");
   button.mousePressed(infobuttonPressed);
   button.style("cursor", "pointer");
+  button.style("border", "3px solid black");
+  //button.style("color", "white");
+  button.style("background-color", "white");
+  button.style("background-color", "white");
+  button.style("font-weight", "bold");
 
+
+  /*
+  //This is very unclear as a user interface:
   button.mouseMoved( () => {
       console.log("Went into button.mouseOver()");
       textSize(15);
@@ -115,6 +208,7 @@ function setup() {
       var position = random()
       text("use the arrow keys to move You", 80, 45);
   });
+  */
 
 
   function infobuttonPressed(){
@@ -122,6 +216,8 @@ function setup() {
     audioElement.volume(0.02);
     audioElement.loop = false;
     audioElement.play();
+    //speak.style("textContent", "Listening...");
+
     //button.disable;
     //var speak;
 
@@ -129,11 +225,19 @@ function setup() {
 
     setTimeout( () => {
       console.log("making other button!");
-      speak = createButton("speak out");
-      speak.position(canvasX-100, 30);
+      speak = createButton("Speak out");
+      speak.position(canvasX-150, canvasY-50);
       speak.style("cursor", "pointer");
-      speak.style("border-radius", "12px");
+      speak.style("border-radius", "50px");
       speak.style("background-color", "white");
+      speak.size(90,40);
+      speak.style("border", "3px solid black");
+      speak.style("font-weight", "bold");
+      //speak.style("textContent", "Listening...");
+
+      //speak.style("color", "white");
+
+      //speak.style("");
       //speak.class("active");
 
 
@@ -147,7 +251,11 @@ function setup() {
       }).mouseReleased( () => {
         clearInterval(intervalId);
         console.log("Mouse was released");
-        speak.style("background-color", "pink");
+        speak.style("background-color", "white");
+        speak.style("color", "black");
+        //speak.style("textContent", "Speak out");
+
+
 
       });
       speak.mouseOut( () => {
@@ -172,13 +280,17 @@ function setup() {
       //colors the button red while it is being held down
       //the idea here would be to "activate" speech recognition ONLY
       //when the user is holding down the *(microphone icon)
-      speak.style("background-color", "red");
+      speak.style("color", "white");
+      //speak.style("textContent", "Listening...");
+      speak.style("background-color", "#3333cc");
       //speak.style("background-color", "red");
       //speak.style();
     }
 
     function speakButtonPressed(){
       console.log("Speak out button pressed!");
+      //speak.html("Listening...");
+
         //foo.start();
 
     }
@@ -362,6 +474,14 @@ function doVoronoiSetupStuff(){
 
     //after running createRandomSites();
     //set the voronoiSites
+    //this method is not adding the sites in randomSites[]
+    //in the same order! WHY NOT?
+    /*
+    for(var i=0; i<randomSites.length;i++){
+      voronoiSite(randomSites[i]);
+    }
+    */
+
     voronoiSites(randomSites);
 
     //Compute voronoi diagram with size 500 by 300
@@ -375,30 +495,50 @@ function doVoronoiSetupStuff(){
 
     //save the voronoiDiagram as theWorld
     theWorld = voronoiGetDiagram();
+    //printing the voronoi diagram generated(full detailed diagram):
+    console.log("This is the world: " + theWorld);
+    print(theWorld);
 
     createTheWorldSites();
     console.log("These are the worlds' sites:");
     print(theWorldSites);
-    console.log("This is one site:" + theWorldSites[0]);
+    console.log("This is the site at index 0:" + theWorldSites[1]);
+    console.log("This is the site color at index 0:" + voronoiGetColor(1));
+    //console.log("this is the color at index 0 in worldColors" + worldColors[0]);
+    console.log("This is the color at palette index 0:" + palette[1]);
+    console.log("These are the worlds colors:" + worldColors);
 
-    //printing the voronoi diagram generated(full detailed diagram):
-    console.log("This is the world: " + theWorld);
-    print(theWorld);
-    console.log("This is the number of cells I have:" + theWorld.cells.length);
+    //Get simplified cells without jitter, for more advanced use
+    var normal = voronoiGetCells();
+    //console.log(normal);
 
-    //find all the cellIDs in the world:
-    //might be totally unnecessary
-    var allCells = [];
-    for(var i=0;i<zones;i++){
-      allCells[i] = i;
-    }
+    //  <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3
+    //  <3                                     <3
+    //  <3             PASSPORT MODE           <3
+    //  <3                                     <3
+    //  <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3
+
+    //What follows here is taking the world apart in terms of the colors of
+    //the cells, in order to implement passports!
+
+    //probably what will be sufficient is worldGIndex, which has the G value
+    //of each RGBA color sorted by cellID. ie. index of worldGIndex correspons
+    //to the cellID - G value of each cell color, which is enough information
+    //to know what is the color of each cell, according to cellID
+
+    //Using this information, it should be possible to build the passports
 
     //make an array of all the colors in the world
-
-    for(var i=0;i<zones;i++){
+    //for(var i=0;i<zones;i++){
+    for(var i=0;i<palette.length;i++){
       //here the position in the worldColors[] == cellID,
       //ie. cellID of 0 is color at worldColors[0];
+      //remember that the G value of each color, ie worldColors[i][1]
+      //is the unique identifier of each color.
+      //This G value can be used to build the passports!
       worldColors[i] = voronoiGetColor(i);
+      //add here as the 5th element the "colorID" of the color?
+      //worldColors[i][4] = ;
     }
     console.log("World colors are:");
     console.log(worldColors);
@@ -411,7 +551,7 @@ function doVoronoiSetupStuff(){
     //the G-value of each color just happens to be unique!!!!
     //easiest way is to check against this...
     //AT THIS POINT, we should save the colorID of that color after the G value:
-    for(var i=0;i<zones;i++){
+    for(var i=0;i<palette.length;i++){
       worldColorsNumberCodes[i] = [worldColors[i][1], 0] ;
     }
 
@@ -424,13 +564,29 @@ function doVoronoiSetupStuff(){
           }
         }
     }
+    console.log("This is the mapping of palette colors to wolrd colors:");
+    console.log(worldColorsNumberCodes);
 
-    //Get simplified cells without jitter, for more advanced use
-    var normal = voronoiGetCells();
-    //console.log(normal);
+    for(var i=0;i<palette.length;i++){
+      worldGIndex[i] = worldColors[i][1];
+    }
+
+    console.log("This is the G index of world colors:");
+    console.log(worldGIndex);
+
+    //  <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3
+    //  <3                                     <3
+    //  <3             PASSPORT MODE           <3
+    //  <3                                     <3
+    //  <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3
+
+}//close doVoronoiSetupStuff()
 
 
-}
+
+
+
+
 
 function createTheWorldSites(){
   //consider adding information about the color of the cell..
@@ -480,11 +636,36 @@ function mouseClicked() {
 
 function draw() {
 
+  if (keyIsDown(LEFT_ARROW)){
+    youParticle.userDirectionVector.add(-0.8, 0);
+    //console.log("going left TWO!");
+  }
+  if (keyIsDown(RIGHT_ARROW)){
+    youParticle.userDirectionVector.add(0.8, 0);
+  }
+  if (keyIsDown(UP_ARROW)){
+    youParticle.userDirectionVector.add(0, -0.8);
+  }
+  if (keyIsDown(DOWN_ARROW)){
+    youParticle.userDirectionVector.add(0, 0.8);
+  }
 
-
+/*
+  if (keyCode === LEFT_ARROW) {
+    youParticle.userDirectionVector.add(-1.5, 0);
+    //console.log("keypressed!");
+  } else if (keyCode === RIGHT_ARROW) {
+    youParticle.userDirectionVector.add(1.5, 0);
+  } else if (keyCode === UP_ARROW) {
+    youParticle.userDirectionVector.add(0, -1.5);
+  } else if (keyCode === DOWN_ARROW) {
+    youParticle.userDirectionVector.add(0, 1.5);
+  }
+  */
 
   //removes trace of former particles
   clear();
+  cursor(ARROW);
 
   if(frameCount >= 151){
     //youParticle.giveInformation();
@@ -603,6 +784,7 @@ for (let i = 0; i < particles.length; i++) {
 
 
   if (frameCount >= 21){
+
     youParticle.giveInformation();
     //console.log("Cell ID that You particle is currently at:" + voronoiGetSite(youParticle.positionVector));
     var currentCellID = voronoiGetSite(youParticle.positionVector.x, youParticle.positionVector.y);
@@ -618,7 +800,7 @@ for (let i = 0; i < particles.length; i++) {
     //ie. voronoiGetSite(x,y) will return undefined.
     //
     //if(currentCellID == undefined){
-      youParticle.infoText = currentCellID;
+      //youParticle.infoText = currentCellID;
     //}
     //youParticle.isAttractedTo = voronoiGetColor(youParticle.positionVector.x, youParticle.positionVector.y);
     //console.log("Cell ID that You particle is currently at:" + currentCellID);
@@ -645,9 +827,11 @@ spawnNewParticle();
 //of new particles spawning every four seconds:
 
 
-if (frameCount%200 == 0) {
+
+if (frameCount%100 == 0) {
   spawnNewParticles();
 } //close if framecount
+
 
 
 //Spawn you-particle!
@@ -673,6 +857,9 @@ if (frameCount == 20){
     neighborsColors[i] = voronoiGetColor(yourNeighbors[i]);
     console.log(neighborsColors[i]);
   }
+
+  console.log("My g is:" + youParticle.g);
+
 
 
 
@@ -712,6 +899,9 @@ if (frameCount == 20){
 
 } //close function draw
 
+
+
+/*
 //THIS IS PROBLEMATIC:
 //because the effect of this is super long-lasting..
 function keyPressed(){
@@ -728,6 +918,8 @@ function keyPressed(){
     }
 
 }
+
+*/
 
 
 /*
@@ -773,17 +965,29 @@ function spawnNewParticle(newHome){
 
 
 function createRandomSites() {
-  for (i = 0; i < zones; i++) {
-    var paletteIndex = round(random(0, palette.length-1));
+  //for (i = 0; i < zones; i++) {
+  for (i = 0; i < palette.length; i++) {
+    //here: create the sites so that cellID corresponds
+    //to the index of the color of the cell:
+    /*var paletteIndex = round(random(0, palette.length-1));
     randomSites.push(
       [random(drawingBorderX, canvasX),
         random(drawingBorderY, canvasY),
         palette[paletteIndex]
       ]
     );
-    palette.splice(paletteIndex, 1);
-    print(randomSites);
+    */
+    randomSites.push(
+      [random(drawingBorderX, canvasX),
+        random(drawingBorderY, canvasY),
+        palette[i]
+      ]
+    );
+  //palette.splice(paletteIndex, 1);
+
   } //close for
+  console.log("These are the random sites and their colors:");
+    print(randomSites);
 
   } //close createRandomSites
 

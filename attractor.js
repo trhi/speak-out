@@ -42,8 +42,9 @@ function attractor(quality, attractorX, attractorY, lifespan) {
         this.giveInformation = function () {
             //console.log("My quality is: " + this.quality);
             textSize(20);
-            fill("white");
-            text(this.quality, this.attractorPosition.x, this.attractorPosition.y + 5);
+            fill("black");
+            noStroke();
+            text(this.quality, this.attractorPosition.x + 0.75*attractorDiameter, this.attractorPosition.y + 0.21*attractorDiameter);
             //setTimeout();
             //this.audioElement.play();
         }
@@ -149,6 +150,7 @@ function attractor(quality, attractorX, attractorY, lifespan) {
                     fill(0);
                   }
                   //console.log("Color at my position is:" + get(this.attractorPosition.x, this.attractorPosition.y));
+                  stroke("white");
                   ellipse(this.attractorPosition.x, this.attractorPosition.y, attractorDiameter, attractorDiameter);
               }
 
