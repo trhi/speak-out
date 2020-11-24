@@ -14,7 +14,7 @@ function attractor(quality, attractorX, attractorY, lifespan) {
         this.quality = quality;
         this.attractorPosition = new p5.Vector(attractorX, attractorY);
         this.lifespan = lifespan;
-        this.gravityOfAttractor = random(30,100);
+        this.gravityOfAttractor = random(2,8);
         //console.log("My gravity is: " + this.gravityOfAttractor)
         //console.log("My lifespan is:" + this.lifespan);
 
@@ -40,13 +40,13 @@ function attractor(quality, attractorX, attractorY, lifespan) {
         //as the mouse hovers over the attractor, it displays its quality
         //in white:
         this.giveInformation = function () {
-            //console.log("My quality is: " + this.quality);
-            textSize(20);
-            fill("black");
-            noStroke();
-            text(this.quality, this.attractorPosition.x + 0.75*attractorDiameter, this.attractorPosition.y + 0.21*attractorDiameter);
-            //setTimeout();
-            //this.audioElement.play();
+              //console.log("My quality is: " + this.quality);
+              textSize(20);
+              fill("black");
+              noStroke();
+              text(this.quality, this.attractorPosition.x + 0.75*attractorDiameter, this.attractorPosition.y + 0.21*attractorDiameter);
+              //setTimeout();
+              //this.audioElement.play();
         }
 
 
@@ -123,35 +123,35 @@ function attractor(quality, attractorX, attractorY, lifespan) {
         //in a more natural way... -> particle.js
         this.display = function() {
 
-              this.lifespan -= 1;
+              this.lifespan -= 0.1;
               //console.log("My lifespan is now: " + this.lifespan);
               if(this.lifespan <= 0){
-                //console.log("Framecount = " + frameCount);
-                //INSTEAD: we could simply give attractors and particles
-                //a this.state = removed/existing;
-                //that way it would keep its unique position in the array,
-                //yet nevertheless evaluate as either in existance or not.
-                //In fact, we might let particles be removed from the array
-                //yet keep attractors.
-                 //this.remove();
-                 //This essentially does not solve the problem:
-                 //console.log("My lifespan is over!");
-                 this.existance = "undefined";
+                    //console.log("Framecount = " + frameCount);
+                    //INSTEAD: we could simply give attractors and particles
+                    //a this.state = removed/existing;
+                    //that way it would keep its unique position in the array,
+                    //yet nevertheless evaluate as either in existance or not.
+                    //In fact, we might let particles be removed from the array
+                    //yet keep attractors.
+                     //this.remove();
+                     //This essentially does not solve the problem:
+                     //console.log("My lifespan is over!");
+                     this.existance = "undefined";
 
               } else {
-                  //this.attractParticles();
-                  //choose the fill color or image or logo based on
-                  //the quality of the attractor?
-                  //White fill color looked extremely awkward
-                  //Changed to transparent, ie. to match background:
-                  //fill(get(this.attractorPosition.x, this.attractorPosition.y));
-                  noFill();
-                  if(this.quality == "repulsor"){
-                    fill(0);
-                  }
-                  //console.log("Color at my position is:" + get(this.attractorPosition.x, this.attractorPosition.y));
-                  stroke("white");
-                  ellipse(this.attractorPosition.x, this.attractorPosition.y, attractorDiameter, attractorDiameter);
+                    //this.attractParticles();
+                    //choose the fill color or image or logo based on
+                    //the quality of the attractor?
+                    //White fill color looked extremely awkward
+                    //Changed to transparent, ie. to match background:
+                    //fill(get(this.attractorPosition.x, this.attractorPosition.y));
+                    noFill();
+                    if(this.quality == "repulsor"){
+                      fill(0);
+                    }
+                    //console.log("Color at my position is:" + get(this.attractorPosition.x, this.attractorPosition.y));
+                    stroke("white");
+                    ellipse(this.attractorPosition.x, this.attractorPosition.y, attractorDiameter, attractorDiameter);
               }
 
               //attractorDistance = p5.Vector.dist(this.positionVector, this.home);
@@ -160,12 +160,9 @@ function attractor(quality, attractorX, attractorY, lifespan) {
               var cursorPosition = createVector(mouseX, mouseY);
               var attractorCursorDistance = p5.Vector.dist(this.attractorPosition, cursorPosition);
               if(attractorCursorDistance < attractorDiameter/2){
-                //console.log("Problem!");
-                this.giveInformation();
+                  //console.log("Problem!");
+                  this.giveInformation();
               }
-
-
-
         }//close this.display
 
         /*
@@ -177,7 +174,6 @@ function attractor(quality, attractorX, attractorY, lifespan) {
         //we no longer remove attractors from the array, we simply change
         //their status to this.existance = "undefined"/"defined"
         this.remove = function(){
-
               var myIndex = attractors.indexOf(this);
               console.log("My index is:" + myIndex);
               attractors.splice(myIndex,1);

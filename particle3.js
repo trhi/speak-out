@@ -24,7 +24,7 @@ function particle(tempX, tempY) {
         this.gravityOfHome = random(2, 3);
         this.originalGravityOfHome = this.gravityOfHome;
 
-        this.factor = random(1, 10);
+        this.factor = 0.4;
         this.xoff = random(0, 10000);
         this.yoff = random(0, 10000);
 
@@ -144,77 +144,55 @@ function particle(tempX, tempY) {
               this.lifespan -= 0.1;
               this.counter += 0.1;
 
-              if(this.lifespan <= 0){
+              if(this.lifespan <= 1.5){
                     this.remove();
               }
         }//close this.display
 
         this.move = function() {
-
               this.currentCellID = voronoiGetSite(this.positionVector.x, this.positionVector.y);
-              //this.currentG = voronoiGetColor(this.currentCellID)[1];
-              //PROBLEM: when particle goes off the edges: it doesnt have a cellID!
-              //SOLUTION: limit movement to canvasX- some pixels..
-              //probably will not need these:
-              //var currentCellColor = voronoiGetColor(this.currentCellID);
-              //this.currentG = currentCellColor[1];
-              //are no longer using color at this point,
-              //only when initialising the world in particles-moving
-              //console.log("The G of my current cell is " + this.currentG);
-
               if(this.amIAllowedToBeHere()){
-                    //yes:
+                    //if yes:
+                    //then ask: should I go towards an attractor?
                     if(this.doIFeelThePullOfAnAttractor()){
-                          //yes:
-                          //go towards the attractor,
-                          //this.goTowardsAttractor();
-                          //then, move randomly
+                          //if yes:
+                          //then go towards the attractor,
+                          this.goTowardsAttractor();
+                          //and then, move randomly
                           //this.moveRandomly();
                     }else{
-                          //no:
-                          //then, move randomly
-                          //this.infoText = "";
-                          this.moveRandomly();
+                          //if no:
+                          //then, just move randomly
+                          //this.moveRandomly();
                     }
-
-              }else{
-                    //this.infoText = "NOT ALLOWED TO BE HERE!";
+              } else {
+                    //if no, I am not allowed to be here
+                    //then, go towards the closest site that you are allowed to be at,
+                    this.goTowardsClosestAllowedZone(); //take sites of all allowed
+                    //then, move randomly
                     //this.moveRandomly();
-                //no:
-                //go towards the closest site that you are allowed to be at,
-                this.goTowardsClosestAllowedZone(); //take sites of all allowed
-                this.moveRandomly();
-                //then, move randomly
-                //this.moveRandomly();
-              }
 
+              }
+              this.moveRandomly();
         }//close this.move
 
         this.amIAllowedToBeHere = function(){
               if(this.positionVector.x <= 0 || this.positionVector.y <= 0){
-                this.goTowardsClosestAllowedZone;
-
-              /*if(this.cellID == this.currentCellID){//always allowed to be in your birth cell...
-                //might change this so that there is a mode in which you are
-                //not allowed to be in your home cell:
-                console.log("I am home");
-                return true;*/
-              } else if (passportMode == 0){//monochromatic
+                  this.goTowardsClosestAllowedZone;
+              }
+              //universal code to check if I am allowed to be here:
+            //} for(var i=0; i<this.passports[passportMode];i++){
+            //            if(this.currentCellID == this.passports[passportMode][i]){
+                              //    console.log("I am allowed to be here");
+                                  //return true;
+        //  }
+          //}
+              else if (passportMode == 0){//monochromatic
                   if(this.currentCellID == this.passports[0][0]){
                           console.log("I am in my home cell");
                           this.gravityOfHome = this.originalGravityOfHome;
                           return true;
                   }
-
-                //universal code to check if I am allowed to be here:
-              //} for(var i=0; i<this.passports[passportMode];i++){
-              //            if(this.currentCellID == this.passports[passportMode][i]){
-                                //    console.log("I am allowed to be here");
-                                    //return true;
-          //  }
-            //}
-
-
               } else if (passportMode == 1){//analogous
                 //console.log("Passport mode is analogous");
                   for(var i=0;i<this.passports[1].length;i++){
@@ -243,8 +221,6 @@ function particle(tempX, tempY) {
                           }
                   }
               } else if (passportMode == 4) {//all
-                //IMPLEMENT: a record in passports[4] that represents this:
-                //an array of all the cellIDs
                 //console.log("Passport mode is all!");
                     for(var i=0;i<this.passports[4].length;i++){
                             if(this.currentCellID == this.passports[4][i]){
@@ -253,12 +229,8 @@ function particle(tempX, tempY) {
                                 return true;
                             }
                     }
-                    //this.gravityOfHome = this.originalGravityOfHome;
-                    //return true;
               } else if (passportMode == 5) {//all but my own
                 //console.log("Passport mode is all but my own!");
-                //IMPLEMENT: a record in passports[5] that represents this:
-                //an array of all the cellIDs
                       for(var i=0;i<this.passports[5].length;i++){
                               if(this.currentCellID == this.passports[5][i]){
                                   //console.log("I am not in my home cell, BUT I am in one of my triad color cells");
@@ -266,24 +238,85 @@ function particle(tempX, tempY) {
                                   return true;
                               }
                       }
-                    /*if(this.currentCellID != this.cellID){
-                          this.gravityOfHome = this.originalGravityOfHome;
-                          return true;
-                    }*/
               } else {
-
-                  return false;
+                    return false;
               }
         }//close amIAllowedToBeHere
 
         //inside this function: is there a repulsor in one of my allowed cells?
         this.doIFeelThePullOfAnAttractor = function(){
-              return false;
-        }
+              //is there an attractor out there for me?
+              //OR: am I already attracted to an attractor which is (still) defined?
+
+              //If I have been assigned an attractor (this.myDestiny != "undefined"),
+              //AND this attractor is still defined:
+              if(this.myDestiny !== "undefined" && this.myDestiny.existance !== "undefined"){
+                    //console.log("XXXXXXXXXX I (still) have a destiny! It is this one: " + this.myDestiny.quality);
+                    return true; //and go towards this one
+              }//My attractor still exists
+              else { //I need to see if there is an attractor out there for me:
+                    var destinies = [];
+                    //console.log("Going to find my possible destinies..");
+                    //for all the attractors in the attractors [] that are
+                    //defined AND of the same quality as I,
+                    //push them into the (possible) destinies array:
+                    for(var i=0; i<attractors.length; i++){
+                              if(attractors[i].existance !== "undefined" && attractors[i].quality == this.isAttractedTo){
+                                //can push the actual object itself,
+                                //because pushing an object creates a
+                                //shallow copy ie. a reference!
+                                //therefore, if the object itself is changed
+                                //this.myDestiny will be aware of this
+                                destinies.push(attractors[i]);
+                              }
+                    }//close for
+                    //returns a random index from the list of all possible indexes
+                    //for attractors[] which contain attractors of the quality that the
+                    //particle is attracted to:
+                    //randomDestiny is now equal to an attractor! the one to which I am attracted to
+                    if(destinies.length == 0){ //there were no existing destinies for me :-()
+                          //if there is no attractor in the world for me:
+                          //slow my movement down!!!!
+                          //this.factor -= 0.005;
+                          return false;
+                    }//I did not find an attractor..
+                     else { //there were potential destinies for me!!!
+                          //this.factor = 1;
+                          let randomDestiny = random(destinies); //chooose one of them randomly
+                          //saves the attractor that currently exists in this.myDestiny
+                          this.myDestiny = randomDestiny; //this.myDestiny is no longer undefined
+                          //console.log("XXXXXXXXXX This is my random destiny: " + randomDestiny.quality);
+                          return true; //>> I have a destiny, next up: go towards it!
+                    }//I found an attractor!
+              }//either I found an attractor, or I did not.
+        }//close doIFeelThePullOfAnAttractor
 
         this.goTowardsAttractor = function(){
+              //remember: attractors[i].existsIn returns the cellID that the
+              //attractor is in.
+              var towardsAttractor = createVector();
+              towardsAttractor = p5.Vector.sub(this.myDestiny.attractorPosition, this.positionVector);
+              towardsAttractor.normalize();
 
-        }
+              var attractorDistance = createVector();
+              attractorDistance = p5.Vector.dist(this.positionVector, this.myDestiny.attractorPosition);
+              if (attractorDistance < (attractorDiameter/2)-10) { //-10 or -5
+                    if(this.infoText != "You" && this.infoText != "Tu"){
+                          this.lifespan = this.myDestiny.lifespan;//will lead to this.remove(); once attractor goes out
+                    }
+                    //break out of this function and -> moveRandomly()
+              } else { //first go towards attractor:
+                    towardsAttractor.mult(this.myDestiny.gravityOfAttractor);
+                    this.positionVector.add(towardsAttractor);
+              }
+              //this.myDestiny.gravityOfAttractor += 0.05;//let's see whether you can poke at its values like this!
+
+
+              /*
+              for(var i=0; i<this.passports[passportMode];i++){
+                  if(this.myDestiny.existsIn  )
+                  */
+        }//close goTowardsAttractor
 
         this.goTowardsClosestAllowedZone = function(){
           var distancesToAllowedZones = [];
@@ -324,8 +357,9 @@ function particle(tempX, tempY) {
           this.gravityOfHome += 0.05;
           towardsAllowed.mult(this.gravityOfHome);
           this.positionVector.add(towardsAllowed);
+          //this.factor += 0.5;
 
-          this.moveRandomly();
+          //this.moveRandomly();
         }//close goTowardsClosestAllowedZone
 
         this.moveRandomly = function(){
@@ -338,11 +372,23 @@ function particle(tempX, tempY) {
               let randomXSpeedFactor = map(randomXNoise, 0, 1, -7, 7);
               let randomYSpeedFactor = map(randomYNoise, 0, 1, -7, 7);
 
+              //makes the particles move MUCH slower
+              //effect of this is: that its easier to notice
+              //once they start going very quickly towards an attractor
+              randomXSpeedFactor = this.factor*randomXSpeedFactor;
+              randomYSpeedFactor = this.factor*randomYSpeedFactor;
+
+              //this.factor = 0.2;
+
+              //randomXSpeedFactor = this.factor*randomXSpeedFactor;
+              //randomYSpeedFactor = this.factor*randomYSpeedFactor;
+
               //unnecessary:
               //this.lastMovementVector.x = (randomXSpeedFactor);
               //this.lastMovementVector.y = (randomYSpeedFactor);
 
               //add random number to the position vector:
+
               this.positionVector.add(randomXSpeedFactor, randomYSpeedFactor);
 
               //if the user hasnt pressed the keys:

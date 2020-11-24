@@ -28,7 +28,7 @@ var attractors = [0];
 //to give weight to creating particles that are attracted to nothing:
 var attractorQualities = [];
 var attractorQualitiesEN = ["nothing", "nothing", "nothing", "nothing", "nothing",
-"a good thing", "yourself",
+"a good thing", "yourself", "the impossible",
 "work", "work", "work", "work", "work", "work", "work", "work", "work", "work",
 "my retirement",
 "opportunity", "love", "shelter", "food",
@@ -40,19 +40,21 @@ var attractorQualitiesEN = ["nothing", "nothing", "nothing", "nothing", "nothing
 "peace", "some peace of mind", "some time for myself", "time", "some time",
 "exploration", "a mountain", "a better life",
 "a flower shop", "a supermarket", "ikea", "coca cola dreams"];
+
 var attractorQualitiesPT = ["nada", "nada", "nada", "nada", "nada",
-"uma coisa boa", "ti", "uma surpresa",
+"o impossivel", "eu proprio", "ela", "ele",
+"uma coisa boa", "uma surpresa",
 "a minha familia",
 "o autocarro", "o onibus", "o meu carro",
 "trabalho", "trabalho", "trabalho", "trabalho", "trabalho", "trabalho", "emprego",
-"almoco", "jantar", "algo para comer",
-"algo que eu gosto de fazer",
-"a escola", "a universidade",
+"almoco", "jantar", "comida", "um cafe",
+"algo", "?", "?", "?",
+"a escola", "a universidade", "o creche", "o lar", "o escritorio", "a obra",
 "dinheiro", "um pouco dinheiro", "muito dinheiro",
 "tempo para mim", "tempo", "mais tempo",
 "uma casa", "um abrigo", "um terreno",
 "um parque", "o meu sonho", "uma floresta",
-"ikea", "uma loja", "um cafe",
+"ikea", "uma loja", "um cafe", "uma florista",
 "liberdade", "um sitio seguro", "respirar sem medo"];
 var you = ["You"];
 var youParticle;
@@ -311,12 +313,22 @@ function setup() {
   //console.log(audioElement);
 
   if (lang="pt") {
+    /*
+        passport0 = createButton("A", 0);//monochromatic = 0
+        passport1 = createButton("B", 1);//analogous = 1
+        passport2 = createButton("C", 2);//complementary = 2
+        passport3 = createButton("D", 3);//triad = 3
+        passport4 = createButton("E", 4);//all = 4
+        passport5 = createButton("F", 5);//all but my own = 5
+          */
         passport0 = createButton("passaporte A", 0);//monochromatic = 0
         passport1 = createButton("passaporte B", 1);//analogous = 1
         passport2 = createButton("passaporte C", 2);//complementary = 2
         passport3 = createButton("passaporte D", 3);//triad = 3
         passport4 = createButton("passaporte E", 4);//all = 4
         passport5 = createButton("passaporte F", 5);//all but my own = 5
+
+
 
   } else if (lang="en"){
         passport0 = createButton("passport A", 0);//monochromatic = 0
@@ -353,6 +365,8 @@ function setup() {
         passportButtons[i].style("font-weight", "bold");
         passportButtons[i].mousePressed(passportChosen);
 
+        //if just A, B, etc..
+        //passportButtons[i].position(canvasX-50, i*50+30);
         passportButtons[i].position(canvasX-130, i*50+30);
         passportButtons[i].id(i);
   }
@@ -857,41 +871,21 @@ function mouseClicked() {
 function draw() {
 
   if (keyIsDown(LEFT_ARROW)){
-    youParticle.userDirectionVector.add(-0.9, 0);
-    //console.log("going left TWO!");
+      youParticle.userDirectionVector.add(-0.9, 0);
   }
   if (keyIsDown(RIGHT_ARROW)){
-    youParticle.userDirectionVector.add(0.9, 0);
+      youParticle.userDirectionVector.add(0.9, 0);
   }
   if (keyIsDown(UP_ARROW)){
-    youParticle.userDirectionVector.add(0, -0.9);
+      youParticle.userDirectionVector.add(0, -0.9);
   }
   if (keyIsDown(DOWN_ARROW)){
-    youParticle.userDirectionVector.add(0, 0.9);
+      youParticle.userDirectionVector.add(0, 0.9);
   }
-
-/*
-  if (keyCode === LEFT_ARROW) {
-    youParticle.userDirectionVector.add(-1.5, 0);
-    //console.log("keypressed!");
-  } else if (keyCode === RIGHT_ARROW) {
-    youParticle.userDirectionVector.add(1.5, 0);
-  } else if (keyCode === UP_ARROW) {
-    youParticle.userDirectionVector.add(0, -1.5);
-  } else if (keyCode === DOWN_ARROW) {
-    youParticle.userDirectionVector.add(0, 1.5);
-  }
-  */
 
   //removes trace of former particles
   clear();
   cursor(ARROW);
-
-  if(frameCount >= 151){
-    //youParticle.giveInformation();
-  }
-
-
 
   /*
   //attempt to display some feedback from the microphone input:
@@ -956,29 +950,18 @@ function draw() {
   //with the for() loop for particles??
   //Problem fixed by initialising i using var i =0.
   for (let i=0; i < attractors.length; i++) {
-    //console.log("Length of attractors array is:" + attractors.length);
-    //console.log("Displaying attractor number:" + i);
-    //displays all attractors in the world
-    //this was failing because at the last cycle of the attractors
-    //life, the particle was first being removed (through display())
-    //and only then did it try to attractParticles().....!!!
-    if(attractors[i].existance == "defined"){
-      //console.log("Framecount = " + frameCount);
-      attractors[i].display();
+          //console.log("Length of attractors array is:" + attractors.length);
+          //console.log("Displaying attractor number:" + i);
+          //displays all attractors in the world
+          //this was failing because at the last cycle of the attractors
+          //life, the particle was first being removed (through display())
+          //and only then did it try to attractParticles().....!!!
+          if(attractors[i].existance == "defined"){
+                //console.log("Framecount = " + frameCount);
+                attractors[i].display();
 
-    }
-    /*if(frameCount > 404 && frameCount < 600){
-    console.log("Second attractor is: ");
-    attractors[1].display();
-    console.log(attractors[1]);
-  }
-  if(frameCount > 606){
-  attractors[2].display();
-  console.log("Third attractor is: " + attractors[2]);
-}
-*/
-
-} //close for
+          }
+    } //close for
 
 
 /*
@@ -1034,7 +1017,7 @@ spawnNewParticle();
 
 
 
-if (frameCount%50 == 0) {
+if (frameCount%20 == 0) {
   spawnNewParticles();
 } //close if framecount
 
@@ -1047,11 +1030,11 @@ if (frameCount == 20){
 
   if(lang == "pt"){
       youParticle.infoText = "Tu";
-      youParticle.isAttractedTo = "ti";
+      youParticle.isAttractedTo = "o impossivel";
 
   } else if (lang == "en"){
       youParticle.infoText = "You";
-      youParticle.isAttractedTo = "yourself";
+      youParticle.isAttractedTo = "the impossible";
   }
   //youParticle.passport = "analogous";
   //youParticle.diameter = 40;
@@ -1179,11 +1162,6 @@ function createRandomSites() {
     }
     let quality = random(attractorQualities);
     //sets a random lifespan
-    let lifespan = random(300,600);
-
-    if (quality == "nothing"){
-      //do not create an attractor
-    } else {
-      attractors.push(new attractor(quality, attractorX, attractorY, lifespan));
-    }
+    let lifespan = random(100,500);
+    attractors.push(new attractor(quality, attractorX, attractorY, lifespan));
   } //close spawnNewAttractor
