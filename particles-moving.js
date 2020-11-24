@@ -19,26 +19,48 @@ var myCanvas;
 const zones = 12; //max 12, as there are 12 colors on the palette
 var randomSites = [];
 var theWorld; //global variable, can be accessed from particle.js
-var theWorldSites = [];
+var theWorldSites = []; //this is an array of p5.Vectors in order of cellID
 var particles = [];
+var repulsors = [];
+var repulsorQualities = ["a bad thing"];
+
 var attractors = [0];
 //to give weight to creating particles that are attracted to nothing:
-var attractorQualities = ["nothing", "nothing", "nothing", "nothing", "nothing",
-"nothing",
+var attractorQualities = [];
+var attractorQualitiesEN = ["nothing", "nothing", "nothing", "nothing", "nothing",
+"a good thing", "yourself",
 "work", "work", "work", "work", "work", "work", "work", "work", "work", "work",
+"my retirement",
 "opportunity", "love", "shelter", "food",
+"health",
 "money", "lots of money", "some money", "a coin",
-"a home", "a house", "a shelter", "a child",
+"a home", "a house", "a shelter", "a roof over my head", "a piece of land",
 "a job", "a clothing store", "a park", "study",
 "dignity", "freedom", "to do what I love", "to love what I do", "a place to breathe",
 "peace", "some peace of mind", "some time for myself", "time", "some time",
 "exploration", "a mountain", "a better life",
 "a flower shop", "a supermarket", "ikea", "coca cola dreams"];
+var attractorQualitiesPT = ["nada", "nada", "nada", "nada", "nada",
+"uma coisa boa", "ti", "uma surpresa",
+"a minha familia",
+"o autocarro", "o onibus", "o meu carro",
+"trabalho", "trabalho", "trabalho", "trabalho", "trabalho", "trabalho", "emprego",
+"almoco", "jantar", "algo para comer",
+"algo que eu gosto de fazer",
+"a escola", "a universidade",
+"dinheiro", "um pouco dinheiro", "muito dinheiro",
+"tempo para mim", "tempo", "mais tempo",
+"uma casa", "um abrigo", "um terreno",
+"um parque", "o meu sonho", "uma floresta",
+"ikea", "uma loja", "um cafe",
+"liberdade", "um sitio seguro", "respirar sem medo"];
 var you = ["You"];
 var youParticle;
 
-var passportModes = ["monochromatic", "analogous", "complementary", "triad"];
-var passportMode = "analogous";
+var passportModes = ["monochromatic", "analogous", "complementary", "triad", "all"];
+//var passportMode = passportModes[1];
+var passportMode = 1;
+
 
 var worldColors = [];
 var worldColorsNumberCodes = [];
@@ -119,6 +141,7 @@ var paletteVeryPale = [
   [139, 186, 37, 100], // green yellow
 ]
 
+/*
 var analogous = [
   [223, 181, 135, 97],
   [181, 223, 135, 97],
@@ -133,6 +156,98 @@ var analogous = [
   [142, 168, 186, 223],
   [186, 142, 223]
 ];
+*/
+
+var analogous = [
+    [223, 181, 135, 97],
+    [181, 223, 135, 97],
+    [135, 223, 181, 97],
+    [97, 223, 181, 135],
+    [39, 97, 2, 36],
+    [2, 39, 36, 54],
+    [36, 2, 54, 120],
+    [54, 36, 120],
+    [120, 54, 168, 142],
+    [168, 120, 142, 186],
+    [142, 168, 186, 223],
+    [186, 142, 223]
+];
+
+var analogousColors = [
+  [223, 181, 135, 97],
+  [181, 223, 135, 97],
+  [135, 223, 181, 97],
+  [97, 223, 181, 135],
+  [39, 97, 2, 36],
+  [2, 39, 36, 54],
+  [36, 2, 54, 120],
+  [54, 36, 120],
+  [120, 54, 168, 142],
+  [168, 120, 142, 186],
+  [142, 168, 186, 223],
+  [186, 142, 223]
+];
+
+var complementaryColors = [
+  [223, 36],
+  [181, 54],
+  [135, 120],
+  [97, 168],
+  [39, 142],
+  [2, 186],
+  [36, 223],
+  [54, 181],
+  [120, 135],
+  [168, 97],
+  [142, 39],
+  [186, 2]
+];
+
+var complementary = [
+  [223, 36],
+  [181, 54],
+  [135, 120],
+  [97, 168],
+  [39, 142],
+  [2, 186],
+  [36, 223],
+  [54, 181],
+  [120, 135],
+  [168, 97],
+  [142, 39],
+  [186, 2]
+];
+
+var triadColors = [
+  [223, 39, 120],
+  [181, 2, 168],
+  [135, 36, 142],
+  [97, 54, 186],
+  [39, 120, 223],
+  [2, 168, 181],
+  [36, 142, 135],
+  [54, 186, 97],
+  [120, 223, 39],
+  [168, 181, 2],
+  [142, 135, 36],
+  [186, 97, 54]
+];
+
+var triad = [
+  [223, 39, 120],
+  [181, 2, 168],
+  [135, 36, 142],
+  [97, 54, 186],
+  [39, 120, 223],
+  [2, 168, 181],
+  [36, 142, 135],
+  [54, 186, 97],
+  [120, 223, 39],
+  [168, 181, 2],
+  [142, 135, 36],
+  [186, 97, 54]
+];
+
 
 /*
 var passport = {
@@ -163,7 +278,22 @@ var particleAttractorIndex = [];
 
 //var mic;
 
+var lang = "pt";
+
+
 function setup() {
+
+  attractorQualities = [...attractorQualitiesPT];
+  if (window.parent.location.href.indexOf("/en/") > -1) {
+        lang = "en";
+        attractorQualities = [...attractorQualitiesEN];
+        console.log("Changed attractorQualities to attractorQualitiesEN!");
+  } else {
+        lang = "pt";
+        attractorQualities = [...attractorQualitiesPT];
+        console.log("Changed attractorQualities to attractorQualitiesPT!")
+  }
+  console.log("Language of the parent window is:" + lang);
 
   myCanvas = createCanvas(canvasX, canvasY);
   noSmooth();
@@ -171,20 +301,82 @@ function setup() {
   //to see how the program processes the particles
   //at a higher frame rate: does it get smoother?
   frameRate(30);
-
-  console.log("These are the types of attractors that exist in the world:" + attractorQualities);
-
+  //console.log("These are the types of attractors that exist in the world:" + attractorQualities);
   //outsourced to its own function for sake of code simplicity
   doVoronoiSetupStuff();
 
   var audioElement = createAudio('sound/iywstc-XX.mp3');
   //audioElement.autoplay(true);
+  //console.log("Created audioElement. It is:");
+  //console.log(audioElement);
 
-  console.log("Created audioElement. It is:");
-  console.log(audioElement);
+  if (lang="pt") {
+        passport0 = createButton("passaporte A", 0);//monochromatic = 0
+        passport1 = createButton("passaporte B", 1);//analogous = 1
+        passport2 = createButton("passaporte C", 2);//complementary = 2
+        passport3 = createButton("passaporte D", 3);//triad = 3
+        passport4 = createButton("passaporte E", 4);//all = 4
+        passport5 = createButton("passaporte F", 5);//all but my own = 5
 
-  var speak;
+  } else if (lang="en"){
+        passport0 = createButton("passport A", 0);//monochromatic = 0
+        passport1 = createButton("passport B", 1);//analogous = 1
+        passport2 = createButton("passport C", 2);//complementary = 2
+        passport3 = createButton("passport D", 3);//triad = 3
+        passport4 = createButton("passport E", 4);//all = 4
+        passport5 = createButton("passaporte F", 5);//all but my own = 5
 
+  }
+
+  let buttonDiv = createDiv();
+  passport0.class("passportButton");
+  passport1.class("passportButton");
+  passport2.class("passportButton");
+  passport3.class("passportButton");
+  passport4.class("passportButton");
+  passport5.class("passportButton");
+
+  console.log("Class of passportbutton0 is:" + passport0.class());
+
+  var passportButtons = selectAll(".passportButton");
+  console.log("Selected all passportbuttons: ");
+  console.log(passportButtons)
+
+  for (let i = 0; i < passportButtons.length; i++) {
+        console.log("setting style of buttons");
+        passportButtons[i].parent(buttonDiv);
+        passportButtons[i].size(120, 40);
+        passportButtons[i].style("cursor", "hand");
+        passportButtons[i].style("border", "3px solid black");
+        passportButtons[i].style("border-radius", "50px");
+        passportButtons[i].style("background-color", "white");
+        passportButtons[i].style("font-weight", "bold");
+        passportButtons[i].mousePressed(passportChosen);
+
+        passportButtons[i].position(canvasX-130, i*50+30);
+        passportButtons[i].id(i);
+  }
+
+  //buttonDiv.hide();
+  //console.log("hid button div");
+
+  function passportChosen() {
+        //passportMode = passportID;
+        //this.value();
+        console.log("This is what the function passed to me: ");
+        console.log(this.id());
+        passportMode = this.id();
+        for (let i = 0; i < passportButtons.length; i++) {
+            passportButtons[i].style("background-color", "white");
+            passportButtons[i].style("color", "black");
+        }
+        this.style("background-color", "#3333cc");
+        this.style("color", "white");
+        console.log("Passport changed to: " + passportMode);
+  }
+
+
+  //create i-button:
   button = createButton("i");
   //button.size(30);
   button.size(40,40);
@@ -198,106 +390,68 @@ function setup() {
   button.style("background-color", "white");
   button.style("font-weight", "bold");
 
-
-  /*
-  //This is very unclear as a user interface:
-  button.mouseMoved( () => {
-      console.log("Went into button.mouseOver()");
-      textSize(15);
-      fill("black");
-      var position = random()
-      text("use the arrow keys to move You", 80, 45);
-  });
-  */
-
-
-  function infobuttonPressed(){
-    console.log("infobutton pressed!");
-    audioElement.volume(0.02);
-    audioElement.loop = false;
-    audioElement.play();
-    //speak.style("textContent", "Listening...");
-
-    //button.disable;
-    //var speak;
-
-
-
-    setTimeout( () => {
-      console.log("making other button!");
+  var speak;
+  if(lang="pt"){
+      speak = createButton("Quero falar");
+  } else if (lang="en"){
       speak = createButton("Speak out");
-      speak.position(canvasX-150, canvasY-50);
-      speak.style("cursor", "pointer");
-      speak.style("border-radius", "50px");
-      speak.style("background-color", "white");
-      speak.size(90,40);
-      speak.style("border", "3px solid black");
-      speak.style("font-weight", "bold");
-      //speak.style("textContent", "Listening...");
-
-      //speak.style("color", "white");
-
-      //speak.style("");
-      //speak.class("active");
+  }
+  //window.innerWidth
+  //RETHINK THIS!
+  speak.position(window.innerWidth-170, window.innerHeight-70);
+  speak.style("cursor", "pointer");
+  speak.style("border-radius", "50px");
+  speak.style("background-color", "white");
+  speak.size(90,40);
+  speak.style("border", "3px solid black");
+  speak.style("font-weight", "bold");
+  speak.mousePressed(speakButtonPressed);
 
 
-      //speak.mousePressed(speakButtonPressed);
+      //var foo = new p5.SpeechRec(); // speech recognition object (will prompt for mic access)
+      //foo.onResult = showResult; // bind callback function to trigger when speech is recognized
+      //foo.start(); // start listening
 
-      //this supposedly creates a checker for whether the mouse is held down
-      //continuously:
-      var intervalId;
-      speak.mousePressed( () => {
+
+  var intervalId;
+  speak.mousePressed( () => {
         intervalId = setInterval(do_something, 30);
-      }).mouseReleased( () => {
+  }).mouseReleased( () => {
         clearInterval(intervalId);
         console.log("Mouse was released");
         speak.style("background-color", "white");
         speak.style("color", "black");
         //speak.style("textContent", "Speak out");
-
-
-
-      });
-      speak.mouseOut( () => {
+  });
+  speak.mouseOut( () => {
         clearInterval(intervalId);
-      });
+  });
 
+  function do_something() {
+        console.log("Mouse is pressed down continually");
+        //speak.class("active");
+        //colors the button red while it is being held down
+        //the idea here would be to "activate" speech recognition ONLY
+        //when the user is holding down the *(microphone icon)
+        speak.style("color", "white");
+        //speak.style("textContent", "Listening...");
+        speak.style("background-color", "#3333cc");
+        //speak.style("background-color", "red");
+        //speak.style();
+  }
 
-    }, 6000);
-    //speak.position(canvasX-200,30);
-
-    }//close setTimeout
-
-    //var foo = new p5.SpeechRec(); // speech recognition object (will prompt for mic access)
-    //foo.onResult = showResult; // bind callback function to trigger when speech is recognized
-    //foo.start(); // start listening
-
-    function do_something() {
-      console.log("Mouse is pressed down continually");
-
-      //speak.class("active");
-
-      //colors the button red while it is being held down
-      //the idea here would be to "activate" speech recognition ONLY
-      //when the user is holding down the *(microphone icon)
-      speak.style("color", "white");
-      //speak.style("textContent", "Listening...");
-      speak.style("background-color", "#3333cc");
-      //speak.style("background-color", "red");
-      //speak.style();
-    }
-
-    function speakButtonPressed(){
-      console.log("Speak out button pressed!");
-      //speak.html("Listening...");
-
+  function speakButtonPressed(){
+        console.log("Speak out button pressed!");
+        //speak.html("Listening...");
         //foo.start();
+  }
 
-    }
-
-
-
-
+  function infobuttonPressed(){
+        console.log("infobutton pressed!");
+        audioElement.volume(0.02);
+        audioElement.loop = false;
+        audioElement.play();
+  }
 
 
 
@@ -502,14 +656,17 @@ function doVoronoiSetupStuff(){
     createTheWorldSites();
     console.log("These are the worlds' sites:");
     print(theWorldSites);
-    console.log("This is the site at index 0:" + theWorldSites[1]);
-    console.log("This is the site color at index 0:" + voronoiGetColor(1));
+    //console.log("This is the site at index 0:" + theWorldSites[1]);
+    //console.log("This is the site color at index 0:" + voronoiGetColor(1));
     //console.log("this is the color at index 0 in worldColors" + worldColors[0]);
-    console.log("This is the color at palette index 0:" + palette[1]);
-    console.log("These are the worlds colors:" + worldColors);
+    //console.log("This is the color at palette index 0:" + palette[1]);
+    //console.log("These are the worlds colors:" + worldColors);
+
+    //console.log("This is the length of palette");
+    //console.log(palette.length);
 
     //Get simplified cells without jitter, for more advanced use
-    var normal = voronoiGetCells();
+    //var normal = voronoiGetCells();
     //console.log(normal);
 
     //  <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3
@@ -530,6 +687,9 @@ function doVoronoiSetupStuff(){
 
     //make an array of all the colors in the world
     //for(var i=0;i<zones;i++){
+
+    //THESE ARE ALL THE COLORS IN THE WORLD, ordered by cellID = index:
+    //worldColors //all colors of world (RGBA), index = cellID
     for(var i=0;i<palette.length;i++){
       //here the position in the worldColors[] == cellID,
       //ie. cellID of 0 is color at worldColors[0];
@@ -551,6 +711,8 @@ function doVoronoiSetupStuff(){
     //the G-value of each color just happens to be unique!!!!
     //easiest way is to check against this...
     //AT THIS POINT, we should save the colorID of that color after the G value:
+    //I think we don't need the color ID at all.....
+    //making an array that has: cellID = index of array, at position 0 we have:
     for(var i=0;i<palette.length;i++){
       worldColorsNumberCodes[i] = [worldColors[i][1], 0] ;
     }
@@ -564,13 +726,71 @@ function doVoronoiSetupStuff(){
           }
         }
     }
-    console.log("This is the mapping of palette colors to wolrd colors:");
+    console.log("Unnecessary variable: worldColorsNumberCodes, the mapping of palette colors (by index) to wolrd colors:");
     console.log(worldColorsNumberCodes);
 
     for(var i=0;i<palette.length;i++){
       worldGIndex[i] = worldColors[i][1];
     }
 
+    //Now, what I could already do at this point is: map the
+    //different passports into cellIDs:
+    //console.log("Logging analogousColors");
+    //console.log("Length of analogousColors" + analogousColors.length);
+
+    console.log("PASSPORT MODE IS:" + passportMode);
+
+    console.log("This is the monochrome passport written in g values");
+    console.log(worldGIndex);
+
+    for(var i=0; i<analogousColors.length; i++){
+      for(var k=0; k<analogousColors[i].length;k++){
+        for(var j=0; j<worldGIndex.length; j++){
+          if(analogousColors[i][k] == worldGIndex[j]){
+            //map g to cellID:
+            analogous[i][k] = j;
+          }
+        }
+      }
+    }
+    console.log("This is the analogousColors passport written in g values");
+    console.log(analogousColors);
+    console.log("This is the analogous passport written in cellIDs");
+    console.log(analogous);
+
+    for(var i=0; i<complementaryColors.length; i++){
+      for(var k=0; k<complementaryColors[i].length;k++){
+        for(var j=0; j<worldGIndex.length; j++){
+          if(complementaryColors[i][k] == worldGIndex[j]){
+            //map g to cellID:
+            complementary[i][k] = j;
+          }
+        }
+      }
+    }
+    console.log("This is the complementaryColors passport written in g values");
+    console.log(complementaryColors);
+    console.log("This is the complementary passport written in cellIDs");
+    console.log(complementary);
+
+
+
+    for(var i=0; i<triadColors.length; i++){
+      for(var k=0; k<triadColors[i].length;k++){
+        for(var j=0; j<worldGIndex.length; j++){
+          if(triadColors[i][k] == worldGIndex[j]){
+            //map g to cellID:
+            triad[i][k] = j;
+          }
+        }
+      }
+    }
+    console.log("This is the triad passport written in g values");
+    console.log(triadColors);
+    console.log("This is the triad passport written in cellIDs");
+    console.log(triad);
+
+    //THIS IS A VERY IMPORTANT VARIABLE:
     console.log("This is the G index of world colors:");
     console.log(worldGIndex);
 
@@ -637,17 +857,17 @@ function mouseClicked() {
 function draw() {
 
   if (keyIsDown(LEFT_ARROW)){
-    youParticle.userDirectionVector.add(-0.8, 0);
+    youParticle.userDirectionVector.add(-0.9, 0);
     //console.log("going left TWO!");
   }
   if (keyIsDown(RIGHT_ARROW)){
-    youParticle.userDirectionVector.add(0.8, 0);
+    youParticle.userDirectionVector.add(0.9, 0);
   }
   if (keyIsDown(UP_ARROW)){
-    youParticle.userDirectionVector.add(0, -0.8);
+    youParticle.userDirectionVector.add(0, -0.9);
   }
   if (keyIsDown(DOWN_ARROW)){
-    youParticle.userDirectionVector.add(0, 0.8);
+    youParticle.userDirectionVector.add(0, 0.9);
   }
 
 /*
@@ -736,7 +956,6 @@ function draw() {
   //with the for() loop for particles??
   //Problem fixed by initialising i using var i =0.
   for (let i=0; i < attractors.length; i++) {
-
     //console.log("Length of attractors array is:" + attractors.length);
     //console.log("Displaying attractor number:" + i);
     //displays all attractors in the world
@@ -748,8 +967,6 @@ function draw() {
       attractors[i].display();
 
     }
-
-
     /*if(frameCount > 404 && frameCount < 600){
     console.log("Second attractor is: ");
     attractors[1].display();
@@ -775,25 +992,17 @@ for (let i = 0; i < particles.length; i++) {
   strokeWeight(1);
   particles[i].display();
 
-  /*
-  if (frameCount >= 155 && frameCount <= 555){
-    youParticle.giveInformation();
-  }
-  */
-
-
-
   if (frameCount >= 21){
-
-    youParticle.giveInformation();
-    //console.log("Cell ID that You particle is currently at:" + voronoiGetSite(youParticle.positionVector));
-    var currentCellID = voronoiGetSite(youParticle.positionVector.x, youParticle.positionVector.y);
-    if(currentCellID == undefined){
-      //this only evaluates as undefined at the edges... grah!!!
-      //at the borders it evaluates as either the one cell or the other..
-      console.log("Current cell is undefined at:" + youParticle.positionVector.x);
-      //currentCell = this.cellID;
-    }
+      //youParticle.infoText = "You";
+      youParticle.giveInformation();
+      //console.log("Cell ID that You particle is currently at:" + voronoiGetSite(youParticle.positionVector));
+      var currentCellID = voronoiGetSite(youParticle.positionVector.x, youParticle.positionVector.y);
+      if(currentCellID == undefined){
+        //this only evaluates as undefined at the edges... grah!!!
+        //at the borders it evaluates as either the one cell or the other..
+        console.log("Current cell is undefined at:" + youParticle.positionVector.x);
+        //currentCell = this.cellID;
+      }
     //youParticle.isAttractedTo = currentCellID + ", " + youParticle.cellID;
     //SO: when the particle is located over a voronoi cell border,
     //it is understood as not being in a cell at all,
@@ -804,9 +1013,6 @@ for (let i = 0; i < particles.length; i++) {
     //}
     //youParticle.isAttractedTo = voronoiGetColor(youParticle.positionVector.x, youParticle.positionVector.y);
     //console.log("Cell ID that You particle is currently at:" + currentCellID);
-
-    //console.log("Their colors are:" + neighborsColors);
-
   }
 
 } //close for
@@ -828,7 +1034,7 @@ spawnNewParticle();
 
 
 
-if (frameCount%100 == 0) {
+if (frameCount%50 == 0) {
   spawnNewParticles();
 } //close if framecount
 
@@ -838,60 +1044,25 @@ if (frameCount%100 == 0) {
 if (frameCount == 20){
   youParticle = new particle(canvasX/2, canvasY/2);
   particles.splice(0, 0, youParticle);
-  youParticle.isAttractedTo = "love";
-  youParticle.infoText = "You";
-  youParticle.passport = "analogous";
+
+  if(lang == "pt"){
+      youParticle.infoText = "Tu";
+      youParticle.isAttractedTo = "ti";
+
+  } else if (lang == "en"){
+      youParticle.infoText = "You";
+      youParticle.isAttractedTo = "yourself";
+  }
+  //youParticle.passport = "analogous";
   //youParticle.diameter = 40;
   youParticle.lifespan = 100000;
   //youParticle.color = "white";
-  console.log("Succesfully created you");
-  console.log("You are attracted to:" + youParticle.isAttractedTo);
-  console.log("Your lifespan is:" + youParticle.lifespan);
+  //console.log("Succesfully created you");
+  //console.log("You are attracted to:" + youParticle.isAttractedTo);
+  //console.log("Your lifespan is:" + youParticle.lifespan);
   youParticle.giveInformation();
-
-  //find out who your immediate neighbors are:
-  var yourNeighbors = voronoiNeighbors(youParticle.cellID);
-  console.log("My neighbors are:" + yourNeighbors);
-  var neighborsColors = [];
-  for(i=0;i<yourNeighbors.length;i++){
-    neighborsColors[i] = voronoiGetColor(yourNeighbors[i]);
-    console.log(neighborsColors[i]);
-  }
-
-  console.log("My g is:" + youParticle.g);
-
-
-
-
-
-  //or we could just check the G values of voronoiGetColor(theworld.cells.site[whereparticleisat])
-
-  //let's pretend that the passport rule is: analogous
-  //how do I tell youParticle where it is allowed to go?
-  //I will now allow youParticle to go only into neighboring cells:
-
-
-/*
-  var palette = [
-    [255, 223, 0, 127], // yellow
-    [241, 181, 11, 127], // yellow orange
-    [241, 135, 29, 127], // orange
-    [241, 97, 33, 127], // orange red
-    [241, 39, 39, 127], // red
-    [200, 2, 134, 127], // red purple
-    [109, 36, 139, 127], // purple
-    [68, 54, 162, 127], // purple blue
-    [18, 120, 196, 127], // blue
-    [0, 168, 196, 127], // blue green
-    [0, 142, 91, 127], // green
-    [139, 186, 37, 127], // green yellow
-  ]
-*/
-
-
+  //console.log("My g is:" + youParticle.g);
 }//close if() for spawning youParticle
-
-
 
 
 
