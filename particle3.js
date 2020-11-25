@@ -68,7 +68,7 @@ function particle(tempX, tempY) {
 
                     this.passports[4].push(i);
         }
-        console.log("This is the access all areas passport:" + this.passports[4]);
+        //console.log("This is the access all areas passport:" + this.passports[4]);
         this.passports.push([]);
         for(var i=0;i<theWorldSites.length;i++){
                 //build the same array as before BUT
@@ -78,8 +78,8 @@ function particle(tempX, tempY) {
         }
         this.passports[5].splice(this.cellID, 1);
 
-        console.log("This is my passport collection:");
-        console.log(this.passports);
+        //console.log("This is my passport collection:");
+        //console.log(this.passports);
 
         this.remove = function(){
               var myIndex = particles.indexOf(this);
@@ -189,7 +189,7 @@ function particle(tempX, tempY) {
           //}
               else if (passportMode == 0){//monochromatic
                   if(this.currentCellID == this.passports[0][0]){
-                          console.log("I am in my home cell");
+                          //console.log("I am in my home cell");
                           this.gravityOfHome = this.originalGravityOfHome;
                           return true;
                   }

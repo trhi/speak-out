@@ -28,7 +28,7 @@ var attractors = [0];
 //to give weight to creating particles that are attracted to nothing:
 var attractorQualities = [];
 var attractorQualitiesEN = ["nothing", "nothing", "nothing", "nothing", "nothing",
-"a good thing", "yourself", "the impossible",
+"a good thing", "yourself", "the impossible", "myself", "my true self",
 "work", "work", "work", "work", "work", "work", "work", "work", "work", "work",
 "my retirement",
 "opportunity", "love", "shelter", "food",
@@ -42,20 +42,20 @@ var attractorQualitiesEN = ["nothing", "nothing", "nothing", "nothing", "nothing
 "a flower shop", "a supermarket", "ikea", "coca cola dreams"];
 
 var attractorQualitiesPT = ["nada", "nada", "nada", "nada", "nada",
-"o impossivel", "eu proprio", "ela", "ele",
+"o impossível", "eu próprio", "ela", "ele",
 "uma coisa boa", "uma surpresa",
-"a minha familia",
+"a minha família",
 "o autocarro", "o onibus", "o meu carro",
 "trabalho", "trabalho", "trabalho", "trabalho", "trabalho", "trabalho", "emprego",
-"almoco", "jantar", "comida", "um cafe",
+"almoço", "jantar", "comida", "um café",
 "algo", "?", "?", "?",
-"a escola", "a universidade", "o creche", "o lar", "o escritorio", "a obra",
+"a escola", "a universidade", "o creche", "o lar", "o escritório", "a obra",
 "dinheiro", "um pouco dinheiro", "muito dinheiro",
 "tempo para mim", "tempo", "mais tempo",
 "uma casa", "um abrigo", "um terreno",
 "um parque", "o meu sonho", "uma floresta",
-"ikea", "uma loja", "um cafe", "uma florista",
-"liberdade", "um sitio seguro", "respirar sem medo"];
+"ikea", "uma loja", "um café", "uma florista",
+"liberdade", "um sítio seguro", "respirar sem medo", "um começo", "um começo", "um começo", "um começo", "um começo"];
 var you = ["You"];
 var youParticle;
 
@@ -250,38 +250,14 @@ var triad = [
   [186, 97, 54]
 ];
 
-
-/*
-var passport = {
-  name:"analogous",
-  allowed:[]
-};
-*/
-
-//I give you my G number -> you give me my passport!
-//SO: the world could keep a record of what g numbers are allowed to go where
-//in each passport mode:
-//eg. in monochrome: only g number == to my own
-//eg. in all access: all g numbers OK
-//eg. in analogous: for g= x: y,z,a
-//                       = y: z,a,b
-//                       = z: a,b,c
-//and so on....
-//
-
-//an array of objects, where index == position in palette...
-
-
-
-
-//This is to sort particles by attractorQuality:
-//var particleAttractorIndex = {love: ["particle1", "particle2", "particle3"], work: ["particle4", "particle5", "particle6"]};
-var particleAttractorIndex = [];
-
 //var mic;
 
-var lang = "pt";
+var lang = "pt"; //use this to set the language of the speech recogniser as well
 
+var passportButtons;
+
+var speechToText = "";
+var speechDetected = false;
 
 function setup() {
 
@@ -289,21 +265,22 @@ function setup() {
   if (window.parent.location.href.indexOf("/en/") > -1) {
         lang = "en";
         attractorQualities = [...attractorQualitiesEN];
-        console.log("Changed attractorQualities to attractorQualitiesEN!");
+        //console.log("Changed attractorQualities to attractorQualitiesEN!");
   } else {
         lang = "pt";
         attractorQualities = [...attractorQualitiesPT];
-        console.log("Changed attractorQualities to attractorQualitiesPT!")
+        //console.log("Changed attractorQualities to attractorQualitiesPT!")
   }
-  console.log("Language of the parent window is:" + lang);
+  //console.log("Language of the parent window is:" + lang);
 
   myCanvas = createCanvas(canvasX, canvasY);
-  noSmooth();
+  //for some reason, I have noSmooth() here!! why??
+  //noSmooth();
+
   //had frameRate(19); changed to frameRate(50);
   //to see how the program processes the particles
   //at a higher frame rate: does it get smoother?
   frameRate(30);
-  //console.log("These are the types of attractors that exist in the world:" + attractorQualities);
   //outsourced to its own function for sake of code simplicity
   doVoronoiSetupStuff();
 
@@ -312,22 +289,17 @@ function setup() {
   //console.log("Created audioElement. It is:");
   //console.log(audioElement);
 
+  /*
+  //if using the words "passport"/"passaporte" in the buttons:
+
   if (lang="pt") {
-    /*
-        passport0 = createButton("A", 0);//monochromatic = 0
-        passport1 = createButton("B", 1);//analogous = 1
-        passport2 = createButton("C", 2);//complementary = 2
-        passport3 = createButton("D", 3);//triad = 3
-        passport4 = createButton("E", 4);//all = 4
-        passport5 = createButton("F", 5);//all but my own = 5
-          */
+
         passport0 = createButton("passaporte A", 0);//monochromatic = 0
         passport1 = createButton("passaporte B", 1);//analogous = 1
         passport2 = createButton("passaporte C", 2);//complementary = 2
         passport3 = createButton("passaporte D", 3);//triad = 3
         passport4 = createButton("passaporte E", 4);//all = 4
         passport5 = createButton("passaporte F", 5);//all but my own = 5
-
 
 
   } else if (lang="en"){
@@ -339,6 +311,14 @@ function setup() {
         passport5 = createButton("passaporte F", 5);//all but my own = 5
 
   }
+  */
+
+  passport0 = createButton("A", 0);//monochromatic = 0
+  passport1 = createButton("B", 1);//analogous = 1
+  passport2 = createButton("C", 2);//complementary = 2
+  passport3 = createButton("D", 3);//triad = 3
+  passport4 = createButton("E", 4);//all = 4
+  passport5 = createButton("F", 5);//all but my own = 5
 
   let buttonDiv = createDiv();
   passport0.class("passportButton");
@@ -348,16 +328,13 @@ function setup() {
   passport4.class("passportButton");
   passport5.class("passportButton");
 
-  console.log("Class of passportbutton0 is:" + passport0.class());
-
-  var passportButtons = selectAll(".passportButton");
-  console.log("Selected all passportbuttons: ");
-  console.log(passportButtons)
-
+  passportButtons = selectAll(".passportButton");
   for (let i = 0; i < passportButtons.length; i++) {
-        console.log("setting style of buttons");
         passportButtons[i].parent(buttonDiv);
-        passportButtons[i].size(120, 40);
+        //if just A, B, C, etc:
+        passportButtons[i].size(40, 40);
+        //if with words passaporte/passport:
+        //passportButtons[i].size(120, 40);
         passportButtons[i].style("cursor", "hand");
         passportButtons[i].style("border", "3px solid black");
         passportButtons[i].style("border-radius", "50px");
@@ -365,9 +342,10 @@ function setup() {
         passportButtons[i].style("font-weight", "bold");
         passportButtons[i].mousePressed(passportChosen);
 
-        //if just A, B, etc..
-        //passportButtons[i].position(canvasX-50, i*50+30);
-        passportButtons[i].position(canvasX-130, i*50+30);
+        //if just A, B, C, etc:
+        passportButtons[i].position(canvasX-50, i*50+30);
+        //if with words passaporte/passport:
+        //passportButtons[i].position(canvasX-130, i*50+30);
         passportButtons[i].id(i);
   }
 
@@ -377,8 +355,8 @@ function setup() {
   function passportChosen() {
         //passportMode = passportID;
         //this.value();
-        console.log("This is what the function passed to me: ");
-        console.log(this.id());
+        //console.log("This is what the function passed to me: ");
+        //console.log(this.id());
         passportMode = this.id();
         for (let i = 0; i < passportButtons.length; i++) {
             passportButtons[i].style("background-color", "white");
@@ -386,7 +364,7 @@ function setup() {
         }
         this.style("background-color", "#3333cc");
         this.style("color", "white");
-        console.log("Passport changed to: " + passportMode);
+        //console.log("Passport changed to: " + passportMode);
   }
 
 
@@ -405,13 +383,19 @@ function setup() {
   button.style("font-weight", "bold");
 
   var speak;
+
   if(lang="pt"){
-      speak = createButton("Quero falar");
+        speak = createButton("Quero falar");
   } else if (lang="en"){
-      speak = createButton("Speak out");
+        speak = createButton("Speak out");
   }
   //window.innerWidth
   //RETHINK THIS!
+  //speak.id("speak");
+  var is_chrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
+  if(!is_chrome) {
+        speak.hide();
+  }
   speak.position(window.innerWidth-170, window.innerHeight-70);
   speak.style("cursor", "pointer");
   speak.style("border-radius", "50px");
@@ -421,25 +405,138 @@ function setup() {
   speak.style("font-weight", "bold");
   speak.mousePressed(speakButtonPressed);
 
+  //might be best to just work directly with the speechrecogniser element
+  //instead of the p5.js wraparound...
 
-      //var foo = new p5.SpeechRec(); // speech recognition object (will prompt for mic access)
-      //foo.onResult = showResult; // bind callback function to trigger when speech is recognized
-      //foo.start(); // start listening
 
+    /*
+    //WORKS:
+    //create a button
+    //once pressed, this button initiates voice capture:
+    button = createButton('speak');
+    button.position(canvasX-100, canvasY-50);
+    button.mousePressed(listenToMe);
+
+    //initialise the microphone connect
+    mic = new p5.AudioIn();
+    */
+
+    /*
+    *
+    *     Listen To Me -button
+    *
+    */
+
+    //unfortunately the p5 implementation wraps around an implementation
+    //of the SpeechRecognition API that creates an instance of
+    //webkitSpeechRecognition. For this reason, the new p5.SpeechRec()
+    //will create a new recogniser that only works in chrome.
+    //In order to work in firefox (after having enabled the flags through
+    //about:config), we would need to create the instance of the speech
+    //recogniser as:
+    //var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
+    //thus firefox could point the SpeechRecognition variable to
+    //SpeechRecognition, while chrome could point to webkitSpeechRecognition
+    //var foo = new p5.SpeechRec(); // speech recognition object (will prompt for mic access)
+    //foo.onResult = showResult; // bind callback function to trigger when speech is recognized
+    //foo.start(); // start listening
+    //every time that the user clicks this button,
+    //they also have to allow the recogniser to listen to them...
+    //OR: continous recognition, BUT, only when the user holds down the mouse
+    //is when we log the recognition results.
+    //foo.continuous = true;
+    //button.mousePressed(listenToMe);
+    //setTimeout(foo.start(), 200);
+    //foo.onEnd = restart;
+
+    /*function restart(){
+      console.log("Restarting recognition");
+      foo.start();
+    }
+
+    function listenToMe()
+    {
+      //foo.start();
+    }
+
+    function showResult()
+    {
+      console.log(foo.resultString); // log the result
+    }
+    */
+
+    window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+    var listener = new SpeechRecognition;
+    if(lang == "en"){//listener expects to hear english
+          listener.lang = 'en-US';
+    }
+    if(lang == "pt"){//listener expects to hear portuguese
+          listener.lang = 'pt-PT';
+    }
+    listener.interimResults = true;
+    var transcript = '';
+    var final_transcript = '';
+
+    //var foo = new p5.SpeechRec(); // speech recognition object (will prompt for mic access)
+    //foo.onResult = showResult; // bind callback function to trigger when speech is recognized
+     // start listening
+    //console.log("Started listening");
+
+      /*
+            n.b. p5.SpeechRec() won’t work unless using a secure (HTTPS) server.
+            if you never get a prompt from the browser to allow access to your microphone,
+            that should be the first thing you troubleshoot.
+      */
 
   var intervalId;
   speak.mousePressed( () => {
+        speakButtonPressed();
         intervalId = setInterval(do_something, 30);
+        //speakButtonPressed();
+        //console.log("Started listening");
   }).mouseReleased( () => {
         clearInterval(intervalId);
         console.log("Mouse was released");
         speak.style("background-color", "white");
         speak.style("color", "black");
+        listener.stop();
+        speechDetected = false;
+        speechToText = "";
+        console.log(" *** Stopping listener");
+        console.log(" *** speechDetected is now: " + speechDetected);
+        //foo.stop(); //this is not a method in p5.speech...
         //speak.style("textContent", "Speak out");
   });
   speak.mouseOut( () => {
         clearInterval(intervalId);
+        //speechDetected = false;
+        console.log(" *** mouseOut of button");
+        console.log(" *** speechDetected is now: " + speechDetected);
   });
+
+
+  listener.onresult = (event) => {
+      speechDetected = true;
+      speechToText = event.results[0][0].transcript;
+      console.log(" *** *** " + speechToText);
+      //THIS WORKS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      if(speechToText === "Eu quero ter acesso ao todo o mundo"){
+            console.log("They said the right thing!");
+            for (let i = 0; i < passportButtons.length; i++) {
+                passportButtons[i].style("background-color", "white");
+                passportButtons[i].style("color", "black");
+            }
+            passport4.style("background-color", "#3333cc");
+            passport4.style("color", "white");
+            passportMode = 4;
+      }
+  }
+
+  /*
+  function showResult(){
+        console.log(foo.resultString);
+  }
+  */
 
   function do_something() {
         console.log("Mouse is pressed down continually");
@@ -450,16 +547,40 @@ function setup() {
         speak.style("color", "white");
         //speak.style("textContent", "Listening...");
         speak.style("background-color", "#3333cc");
+
+        textSize(20);
+        text("Eu quero ter acesso ao todo o mundo", canvasX-400, 4*50+47);
         //speak.style("background-color", "red");
         //speak.style();
+        /*
+        if(speechDetected == true){
+              showRecognitionResults();
+              console.log("*** *** " + speechToText);
+              console.log("speechDetected is now: " + speechDetected);
+              textSize(54);
+              fill("black");
+              text(speechToText, 20, 60);
+        }
+        */
+        //DISPLAY INTERIM RESULTS!
+
   }
 
   function speakButtonPressed(){
         console.log("Speak out button pressed!");
         //speak.html("Listening...");
-        //foo.start();
+        audioElement.pause();
+        audioElement.currentTime = 0;
+        //display instructions for what to say in order to select
+        //a passport:
+        //eg. E: Eu quero ter acesso ao mundo todo!
+        //textSize(54);
+        //text("Eu quero ter acesso ao mundo todo", canvasX-200, 4*50+30);
+        listener.start();
+        console.log(" *** Starting listener");
   }
 
+  //make a nicer track for
   function infobuttonPressed(){
         console.log("infobutton pressed!");
         audioElement.volume(0.02);
@@ -467,145 +588,11 @@ function setup() {
         audioElement.play();
   }
 
-
-
-
-  /*
-  *
-  *              Begin implementing particleAttractorIndex
-  *
-  *
-  */
-
-
-  /*
-  *    var attractorQualities = ["nothing", "work", "love", "study", "culture", "freedom", "peace", "exploration"];
-  *    var particleAttractorIndex = [];
-  *   //var particleAttractorIndex = {love: ["particle1", "particle2", "particle3"], work: ["particle4", "particle5", "particle6"]};
-  *    var particleAttractorIndex = [love: ["particle1", "particle2", "particle3"], work: ["particle4", "particle5", "particle6"]];
-  */
-
-  //particleAttractorIndex = {love: ["particle1", "particle2", "particle3"], work: ["particle4", "particle5", "particle6"]};
-  //It should be an array of objects.
-  particleAttractorIndex = [{quality: "love", particles: ["particle1", "particle2", "particle3"]}, {quality: "work", particles: ["particle4", "particle5", "particle6"]}];
-
-  //In many ways, it would be easier to work with an array, HOWEVER,
-  //for my purposes of accessing the list easily by attractorQuality,
-  //I absolutely need to use an object, eg:
-  //particleAttractorIndex[attractorQuality];
-
-
-  //createParticleAttractorIndex();
-
-  function createParticleAttractorIndex() {
-    for (let i=0; i < attractorQualities.length; i++){
-      console.log("This is the attractor quality at i: " + attractorQualities[i]);
-      //let obj = {};
-      //obj[]
-      let keyName = attractorQualities[i];
-      particleAttractorIndex.push({[keyName]:[0,1,2]});
-    }
-  }
-
-  //the difference between .forEach() and .map() is that map returns an []
-  console.table(particleAttractorIndex);
-
-  //console.log("This is particleAttractorIndex: " + particleAttractorIndex);
-  //console.log(particleAttractorIndex);
-
-  //let qualityKey = "quality";
-  console.log("This is what we have at index 0, behind the quality key: " + particleAttractorIndex[0].quality);
-  console.log("This is the valueOf the object at that position in the array: " + particleAttractorIndex[0].valueOf());
-  console.log(particleAttractorIndex[0].valueOf());
-
-
-  //  console.log("This is the first particle at the index for love:" + particleAttractorIndex["love"][0]);
-
-  //here, we can use array methods, because the "love" etc. keys within
-  //the object all point towards an array:
-  //particleAttractorIndex["love"].push("particle90");
-  //console.log("This is the newest particle at the index for love:" + particleAttractorIndex["love"][3]);
-
-  //let myParticles = particleAttractorIndex["love"].splice(0,2);
-  //console.log(myParticles);
-  //console.log(particleAttractorIndex["love"]);
-  //particleAttractorIndex["love"].push(myParticles);
-  //particleAttractorIndex["love"].push.apply(particleAttractorIndex["love"], myParticles);
-  //console.log(particleAttractorIndex["love"]);
-
-
-
-
-  /*
-  //WORKS:
-  //create a button
-  //once pressed, this button initiates voice capture:
-  button = createButton('speak');
-  button.position(canvasX-100, canvasY-50);
-  button.mousePressed(listenToMe);
-
-  //initialise the microphone connect
-  mic = new p5.AudioIn();
-  */
-
-  /*
-  *
-  *     Listen To Me -button
-  *
-  */
-
-  //button = createButton('listen to me');
-  //button.position(canvasX-100, canvasY-50);
-
-  //unfortunately the p5 implementation wraps around an implementation
-  //of the SpeechRecognition API that creates an instance of
-  //webkitSpeechRecognition. For this reason, the new p5.SpeechRec()
-  //will create a new recogniser that only works in chrome.
-  //In order to work in firefox (after having enabled the flags through
-  //about:config), we would need to create the instance of the speech
-  //recogniser as:
-  //var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
-  //thus firefox could point the SpeechRecognition variable to
-  //SpeechRecognition, while chrome could point to webkitSpeechRecognition
-  //var foo = new p5.SpeechRec(); // speech recognition object (will prompt for mic access)
-  //foo.onResult = showResult; // bind callback function to trigger when speech is recognized
-  //foo.start(); // start listening
-  //every time that the user clicks this button,
-  //they also have to allow the recogniser to listen to them...
-  //OR: continous recognition, BUT, only when the user holds down the mouse
-  //is when we log the recognition results.
-  //foo.continuous = true;
-  //button.mousePressed(listenToMe);
-  //setTimeout(foo.start(), 200);
-  //foo.onEnd = restart;
-
-  /*function restart(){
-    console.log("Restarting recognition");
-    foo.start();
-  }
-
-  function listenToMe()
-  {
-    //foo.start();
-  }
-
-  function showResult()
-  {
-    console.log(foo.resultString); // log the result
-  }
-  */
-
-
-
-
 } // close setup()
 // close setup()// close setup()// close setup()// close setup()// close setup()
 // close setup()// close setup()// close setup()// close setup()// close setup()
 // close setup()// close setup()// close setup()// close setup()// close setup()
 // close setup()// close setup()// close setup()// close setup()// close setup()
-
-
-
 
 function doVoronoiSetupStuff(){
 
@@ -664,12 +651,12 @@ function doVoronoiSetupStuff(){
     //save the voronoiDiagram as theWorld
     theWorld = voronoiGetDiagram();
     //printing the voronoi diagram generated(full detailed diagram):
-    console.log("This is the world: " + theWorld);
-    print(theWorld);
+    //console.log("This is the world: " + theWorld);
+    //print(theWorld);
 
     createTheWorldSites();
-    console.log("These are the worlds' sites:");
-    print(theWorldSites);
+    //console.log("These are the worlds' sites:");
+    //print(theWorldSites);
     //console.log("This is the site at index 0:" + theWorldSites[1]);
     //console.log("This is the site color at index 0:" + voronoiGetColor(1));
     //console.log("this is the color at index 0 in worldColors" + worldColors[0]);
@@ -714,8 +701,8 @@ function doVoronoiSetupStuff(){
       //add here as the 5th element the "colorID" of the color?
       //worldColors[i][4] = ;
     }
-    console.log("World colors are:");
-    console.log(worldColors);
+    //console.log("World colors are:");
+    //console.log(worldColors);
 
     //make an array with number names
 
@@ -740,8 +727,8 @@ function doVoronoiSetupStuff(){
           }
         }
     }
-    console.log("Unnecessary variable: worldColorsNumberCodes, the mapping of palette colors (by index) to wolrd colors:");
-    console.log(worldColorsNumberCodes);
+    //console.log("Unnecessary variable: worldColorsNumberCodes, the mapping of palette colors (by index) to wolrd colors:");
+    //console.log(worldColorsNumberCodes);
 
     for(var i=0;i<palette.length;i++){
       worldGIndex[i] = worldColors[i][1];
@@ -752,10 +739,10 @@ function doVoronoiSetupStuff(){
     //console.log("Logging analogousColors");
     //console.log("Length of analogousColors" + analogousColors.length);
 
-    console.log("PASSPORT MODE IS:" + passportMode);
+    //console.log("PASSPORT MODE IS:" + passportMode);
 
-    console.log("This is the monochrome passport written in g values");
-    console.log(worldGIndex);
+    //console.log("This is the monochrome passport written in g values");
+    //console.log(worldGIndex);
 
     for(var i=0; i<analogousColors.length; i++){
       for(var k=0; k<analogousColors[i].length;k++){
@@ -767,10 +754,10 @@ function doVoronoiSetupStuff(){
         }
       }
     }
-    console.log("This is the analogousColors passport written in g values");
-    console.log(analogousColors);
-    console.log("This is the analogous passport written in cellIDs");
-    console.log(analogous);
+    //console.log("This is the analogousColors passport written in g values");
+    //console.log(analogousColors);
+    //console.log("This is the analogous passport written in cellIDs");
+    //console.log(analogous);
 
     for(var i=0; i<complementaryColors.length; i++){
       for(var k=0; k<complementaryColors[i].length;k++){
@@ -782,10 +769,10 @@ function doVoronoiSetupStuff(){
         }
       }
     }
-    console.log("This is the complementaryColors passport written in g values");
-    console.log(complementaryColors);
-    console.log("This is the complementary passport written in cellIDs");
-    console.log(complementary);
+    //console.log("This is the complementaryColors passport written in g values");
+    //console.log(complementaryColors);
+    //console.log("This is the complementary passport written in cellIDs");
+    //console.log(complementary);
 
 
 
@@ -799,14 +786,14 @@ function doVoronoiSetupStuff(){
         }
       }
     }
-    console.log("This is the triad passport written in g values");
-    console.log(triadColors);
-    console.log("This is the triad passport written in cellIDs");
-    console.log(triad);
+    //console.log("This is the triad passport written in g values");
+    //console.log(triadColors);
+    //console.log("This is the triad passport written in cellIDs");
+    //console.log(triad);
 
     //THIS IS A VERY IMPORTANT VARIABLE:
-    console.log("This is the G index of world colors:");
-    console.log(worldGIndex);
+    //console.log("This is the G index of world colors:");
+    //console.log(worldGIndex);
 
     //  <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3 <3
     //  <3                                     <3
@@ -983,7 +970,7 @@ for (let i = 0; i < particles.length; i++) {
       if(currentCellID == undefined){
         //this only evaluates as undefined at the edges... grah!!!
         //at the borders it evaluates as either the one cell or the other..
-        console.log("Current cell is undefined at:" + youParticle.positionVector.x);
+        //console.log("Current cell is undefined at:" + youParticle.positionVector.x);
         //currentCell = this.cellID;
       }
     //youParticle.isAttractedTo = currentCellID + ", " + youParticle.cellID;
@@ -999,6 +986,16 @@ for (let i = 0; i < particles.length; i++) {
   }
 
 } //close for
+
+if(speechDetected == true){
+      //showRecognitionResults();
+      //console.log("*** *** " + speechToText);
+      console.log("*** DRAW *** speechDetected is now: " + speechDetected);
+      textSize(54);
+      fill("black");
+      text(speechToText, 20, 60);
+}
+
 
 
 //new method: spawnNewParticle - for testing purposes originally
@@ -1018,7 +1015,21 @@ spawnNewParticle();
 
 
 if (frameCount%20 == 0) {
-  spawnNewParticles();
+      if(particles.length < 200){//limit the maximum number of particles in the world:
+            spawnNewParticles();
+      } else {
+        console.log(" * -- max number of particles reached --*")
+      }
+} //close if framecount
+
+
+if (frameCount%200 == 0) {
+            //have to give it an x and a y!
+            var randomX = random(0, canvasX);
+            var randomY = random(0, canvasY);;
+            spawnNewAttractor(randomX, randomY);
+            //var randomSite = random(theWorldSites);
+            //spawnNewAttractor(randomSite.x, randomSite.y);
 } //close if framecount
 
 
@@ -1030,7 +1041,7 @@ if (frameCount == 20){
 
   if(lang == "pt"){
       youParticle.infoText = "Tu";
-      youParticle.isAttractedTo = "o impossivel";
+      youParticle.isAttractedTo = "o impossível";
 
   } else if (lang == "en"){
       youParticle.infoText = "You";
@@ -1054,26 +1065,6 @@ if (frameCount == 20){
 } //close function draw
 
 
-
-/*
-//THIS IS PROBLEMATIC:
-//because the effect of this is super long-lasting..
-function keyPressed(){
-  console.log("keypressed!");
-    if (keyCode === LEFT_ARROW) {
-      youParticle.userDirectionVector.add(-1.5, 0);
-      //console.log("keypressed!");
-    } else if (keyCode === RIGHT_ARROW) {
-      youParticle.userDirectionVector.add(1.5, 0);
-    } else if (keyCode === UP_ARROW) {
-      youParticle.userDirectionVector.add(0, -1.5);
-    } else if (keyCode === DOWN_ARROW) {
-      youParticle.userDirectionVector.add(0, 1.5);
-    }
-
-}
-
-*/
 
 
 /*
@@ -1101,52 +1092,36 @@ function spawnNewParticles() {
 
 /*
 *
-*   Spawn one particle. //redundant
-*
-*/
-/*
-function spawnNewParticle(newHome){
-  var newParticle = new particle(theWorld.cells[newHome].site.x, theWorld.cells[newHome].site.y);
-  particles.push(newParticle);
-} //close spawnNewParticle
-*/
-
-/*
-*
 *   Create random sites for voronoi diagram.
 *
 */
 
-
 function createRandomSites() {
-  //for (i = 0; i < zones; i++) {
-  for (i = 0; i < palette.length; i++) {
-    //here: create the sites so that cellID corresponds
-    //to the index of the color of the cell:
-    /*var paletteIndex = round(random(0, palette.length-1));
-    randomSites.push(
-      [random(drawingBorderX, canvasX),
-        random(drawingBorderY, canvasY),
-        palette[paletteIndex]
-      ]
-    );
-    */
-    randomSites.push(
-      [random(drawingBorderX, canvasX),
-        random(drawingBorderY, canvasY),
-        palette[i]
-      ]
-    );
-  //palette.splice(paletteIndex, 1);
+      //for (i = 0; i < zones; i++) {
+      for (i = 0; i < palette.length; i++) {
+                  //here: create the sites so that cellID corresponds
+                  //to the index of the color of the cell:
+                  /*var paletteIndex = round(random(0, palette.length-1));
+                  randomSites.push(
+                    [random(drawingBorderX, canvasX),
+                      random(drawingBorderY, canvasY),
+                      palette[paletteIndex]
+                    ]
+                  );
+                  */
+                  randomSites.push(
+                        [random(drawingBorderX, canvasX),
+                          random(drawingBorderY, canvasY),
+                          palette[i]
+                        ]
+                  );
+                //palette.splice(paletteIndex, 1);
 
-  } //close for
-  console.log("These are the random sites and their colors:");
-    print(randomSites);
+                } //close for
+      //console.log("These are the random sites and their colors:");
+      //print(randomSites);
 
   } //close createRandomSites
-
-  //colorPalette
-
 
   /*
   *
