@@ -15,6 +15,39 @@
 
 <style>
 
+/** NEW CSS **/
+body, html {
+  width:100%;
+  height:100%;
+  padding:0;
+  margin:0;
+}
+
+.toggle {
+background: #FFF;
+color:#000;
+border-radius: 50px;
+padding: 10px 19px;
+border: 2px solid #000;
+z-index: 10;
+transition: color .2s, background .2s;
+position: fixed;
+
+}
+.toggle:hover {
+background: #000;
+color:#FFF;
+}
+.toggle:focus {
+outline: none;
+}
+.speak-out-toggle {
+bottom: 30px;
+right: 90px;
+}
+/** END NEW CSS **/
+
+/*
 .button {
   display: inline-block;
   padding: 15px 25px;
@@ -37,6 +70,7 @@
   box-shadow: 0 5px #666;
   transform: translateY(4px);
 }
+*/
 </style>
 
 </head>

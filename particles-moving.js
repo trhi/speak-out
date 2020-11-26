@@ -15,7 +15,8 @@ var canvasY = window.innerHeight - 20;
 
 var myCanvas;
 
-
+//Reprogram this so that you can actually create any number of zones,
+//the zones after 12 will just be assigned the same colors:
 const zones = 12; //max 12, as there are 12 colors on the palette
 var randomSites = [];
 var theWorld; //global variable, can be accessed from particle.js
@@ -253,11 +254,21 @@ var triad = [
 //var mic;
 
 var lang = "pt"; //use this to set the language of the speech recogniser as well
+var is_chrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
 
 var passportButtons;
+var passportsDiv;
 
 var speechToText = "";
 var speechDetected = false;
+
+/*
+function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
+    clear();
+    doVoronoiSetupStuff();
+}
+*/
 
 function setup() {
 
@@ -284,7 +295,8 @@ function setup() {
   //outsourced to its own function for sake of code simplicity
   doVoronoiSetupStuff();
 
-  var audioElement = createAudio('sound/iywstc-XX.mp3');
+  var iywstc = createAudio('sound/iywstc-XX.mp3');
+  //var sqvamtqf = createAudio('sound/sqvamtqf-XX.mp3');
   //audioElement.autoplay(true);
   //console.log("Created audioElement. It is:");
   //console.log(audioElement);
@@ -320,7 +332,7 @@ function setup() {
   passport4 = createButton("E", 4);//all = 4
   passport5 = createButton("F", 5);//all but my own = 5
 
-  let buttonDiv = createDiv();
+  passportsDiv = createDiv();
   passport0.class("passportButton");
   passport1.class("passportButton");
   passport2.class("passportButton");
@@ -330,17 +342,22 @@ function setup() {
 
   passportButtons = selectAll(".passportButton");
   for (let i = 0; i < passportButtons.length; i++) {
-        passportButtons[i].parent(buttonDiv);
+        passportButtons[i].parent(passportsDiv);
         //if just A, B, C, etc:
         passportButtons[i].size(40, 40);
         //if with words passaporte/passport:
         //passportButtons[i].size(120, 40);
-        passportButtons[i].style("cursor", "hand");
+        passportButtons[i].style("cursor", "pointer");
         passportButtons[i].style("border", "3px solid black");
         passportButtons[i].style("border-radius", "50px");
         passportButtons[i].style("background-color", "white");
         passportButtons[i].style("font-weight", "bold");
-        passportButtons[i].mousePressed(passportChosen);
+        if(is_chrome){
+              passportButtons[i].mousePressed(iywstcPlay);//for chrome users,
+        } else {
+              passportButtons[i].mousePressed(passportChosen);
+        }
+
 
         //if just A, B, C, etc:
         passportButtons[i].position(canvasX-50, i*50+30);
@@ -367,35 +384,38 @@ function setup() {
         //console.log("Passport changed to: " + passportMode);
   }
 
-
+  /*
   //create i-button:
   button = createButton("i");
   //button.size(30);
   button.size(40,40);
   button.position(canvasX-50, canvasY-50);
   button.style("border-radius", "50%");
-  button.mousePressed(infobuttonPressed);
+  button.mousePressed(iywstcPlay);
   button.style("cursor", "pointer");
   button.style("border", "3px solid black");
   //button.style("color", "white");
   button.style("background-color", "white");
   button.style("background-color", "white");
   button.style("font-weight", "bold");
+  */
 
   var speak;
 
-  if(lang="pt"){
+  if(lang=="pt"){
         speak = createButton("Quero falar");
-  } else if (lang="en"){
+  } else if (lang=="en"){
         speak = createButton("Speak out");
   }
   //window.innerWidth
   //RETHINK THIS!
   //speak.id("speak");
-  var is_chrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
+
   if(!is_chrome) {
         speak.hide();
   }
+
+  speak.class("speak-out-toggle");
   speak.position(window.innerWidth-170, window.innerHeight-70);
   speak.style("cursor", "pointer");
   speak.style("border-radius", "50px");
@@ -569,8 +589,13 @@ function setup() {
   function speakButtonPressed(){
         console.log("Speak out button pressed!");
         //speak.html("Listening...");
-        audioElement.pause();
-        audioElement.currentTime = 0;
+        /*if(lang == "pt"){
+              sqvamtqf.pause();
+              sqvamtqf.currentTime = 0;
+        } else {*/
+              iywstc.pause();
+              iywstc.currentTime = 0;
+        //}
         //display instructions for what to say in order to select
         //a passport:
         //eg. E: Eu quero ter acesso ao mundo todo!
@@ -581,11 +606,18 @@ function setup() {
   }
 
   //make a nicer track for
-  function infobuttonPressed(){
-        console.log("infobutton pressed!");
-        audioElement.volume(0.02);
-        audioElement.loop = false;
-        audioElement.play();
+  function iywstcPlay(){
+        console.log("playing iywstcPlay/sqvamtqf!");
+        /*if(lang == "pt"){
+            sqvamtqf.volume(0.05);
+            sqvamtqf.loop = false;
+            sqvamtqf.play();
+        } else {
+        */
+            iywstc.volume(0.02);
+            iywstc.loop = false;
+            iywstc.play();
+        //}
   }
 
 } // close setup()
@@ -850,10 +882,29 @@ mic.connect();
 
 //BUG: sometimes it doesnt work: sometimes, when you click, it simply does
 //not create a sphere... why..
-function mouseClicked() {
+//and why does this return false...
+
+function mousePressed(){ //works better across browsers
+    /*console.log("Passports div is positioned at:");
+    console.log(buttonDiv.position());
+    console.log("MouseY is at:");
+    console.log(mouseY);
+*/  //describe the zone of the A B C D E F buttons, 320 IF THERE ARE 6 BUTTONS
+    //then describe the zone of the speak out butotn
+    if((mouseX > window.innerWidth-70 && mouseY < 320) || (mouseX > window.innerWidth-190 && mouseY > window.innerHeight-80)){
+      //do not create an attractor (in the zone of the buttons)
+    } else {
+          spawnNewAttractor(mouseX, mouseY);
+    }
+    return false;
+}
+
+/*
+function mouseClicked() { //may behave differently across browsers
     spawnNewAttractor(mouseX, mouseY);
     return false;
 }
+*/
 
 function draw() {
 
