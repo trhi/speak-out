@@ -50,13 +50,13 @@ var attractorQualitiesPT = ["nada", "nada", "nada", "nada", "nada",
 "trabalho", "trabalho", "trabalho", "trabalho", "trabalho", "trabalho", "emprego",
 "almoço", "jantar", "comida", "um café",
 "algo", "?", "?", "?",
-"a escola", "a universidade", "o creche", "o lar", "o escritório", "a obra",
+"a escola", "a universidade", "o creche", "o meu lar", "o escritório", "a obra",
 "dinheiro", "um pouco dinheiro", "muito dinheiro",
 "tempo para mim", "tempo", "mais tempo",
 "uma casa", "um abrigo", "um terreno",
 "um parque", "o meu sonho", "uma floresta",
 "ikea", "uma loja", "um café", "uma florista",
-"liberdade", "um sítio seguro", "respirar sem medo", "um começo", "um começo", "um começo", "um começo", "um começo"];
+"liberdade", "um sítio seguro", "segurança", "respirar sem medo", "um começo", "um começo"];
 var you = ["You"];
 var youParticle;
 
@@ -253,15 +253,58 @@ var triad = [
 
 //var mic;
 
-var lang = "pt"; //use this to set the language of the speech recogniser as well
+var lang = ""; //use this to set the language of the speech recogniser as well
+//NEED TO check for all browsers here!!!
+//IF chrome = use voice interface
+//if chrome for android = do not use voice interface
+//if firefox = do not use voice interface
+//if safari = do not use voice interface
+//if explorer = do not use voice interface
 var is_chrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
 
 var passportButtons;
 var passportsDiv;
 
+var speakButton;
+
 var speechToText = "";
 var speechDetected = false;
 
+var showPassportOptions = false;
+var passportHover = "";
+
+var passportSentencesPT = [
+  ['"Eu só quero ficar aqui"', '"Eu só posso ficar aqui"', '"Eu só posso ficar aqui"',
+    '"Eu só posso ficar aqui"', '"Eu só posso ficar aqui"', '"Eu só posso ficar aqui"'], //A: monochromatic
+  ['"Os meus vizinhos são como tu"', '"Os meus vizinhos são como eu"', '"Os meus vizinhos são como eu"',
+    '"Os meus vizinhos são como eu"', '"Os meus vizinhos são como eu"', '"Os meus vizinhos são como eu"'], //B: analogous
+  ['"Ao fundo do corredor são as ex-países"', '"Ao fundo do corredor são as ex-colónias"', '"Ao fundo do corredor são as ex-colónias"',
+    '"Ao fundo do corredor são as ex-colónias"', '"Ao fundo do corredor são as ex-colónias"', '"Ao fundo do corredor são as ex-colónias"'], //C: complementary
+  ['"Eu vivo numa fortaleza"', '"Eu vivo num união"', '"Eu vivo num união"',
+    '"Eu vivo num união"', '"Eu vivo num união"', '"Eu vivo num união"'], //D: triad
+  ['"Eu posso ir onde quero"', '"Eu posso ir onde quero"', '"Eu posso ir onde quero"',
+    '"Eu posso ir onde quero"', '"Eu posso ir onde quero"', '"Eu posso ir onde quero"'], //E: open borders
+  ['"Nunca mais posso voltar a minha terra"', '"Nunca mais posso voltar a minha terra"', '"Nunca mais posso voltar a minha terra"',
+    '"Nunca mais posso voltar a minha terra"', '"Nunca mais posso voltar a minha terra"', '"Nunca mais posso voltar a minha terra"']  //F: exile
+];
+
+var passportSentencesEN = [
+  ['"I can only stay here"', '"I can only stay here"', '"I can only stay here"',
+    '"I can only stay here"', '"I can only stay here"', '"I can only stay here"'], //A: monochromatic
+  ['"My neighbors are so similar to you"', '"My neighbors are so similar to me"', '"My neighbors are so similar to me"',
+    '"My neighbors are so similar to me"', '"My neighbors are so similar to me"', '"My neighbors are so similar to me"'], //B: analogous
+  ['"There is a bridge to our former colonies"', '"There is a bridge to our former colonies"', '"There is a bridge to our former colonies"',
+    '"There is a bridge to our former colonies"', '"There is a bridge to our former colonies"', '"There is a bridge to our former colonies"'], //C: complementary
+  ['"I live in a fortress"', '"I live in a union"', '"I live in a union"',
+    '"I live in a union"', '"I live in a union"', '"I live in a union"'], //D: triad
+  ['"I can go whereever I want"', '"I can go whereever I want"', '"I can go whereever I want"',
+    '"I can go whereever I want"', '"I can go whereever I want"', '"I can go whereever I want"'], //E: open borders
+  ['"I can never return"', '"I can never return"', '"I can never return"',
+    '"I can never return"', '"I can never return"', '"I can never return"']  //F: exile
+];
+
+var textDisplayCounter = 0;
+var saturation = 255;
 /*
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
@@ -272,12 +315,19 @@ function windowResized() {
 
 function setup() {
 
-  attractorQualities = [...attractorQualitiesPT];
+  //attractorQualities = [...attractorQualitiesPT];
   if (window.parent.location.href.indexOf("/en/") > -1) {
+    //if the string "/en/ is included in the href of the parent window"
+    //ie if the url above the iframe is ...raum.pt/en/terhi-marttila, then:
+    //but again, the user cannot change this afterwards.
+    //this is all initialised at setup.
         lang = "en";
         attractorQualities = [...attractorQualitiesEN];
         //console.log("Changed attractorQualities to attractorQualitiesEN!");
   } else {
+        //for testing:
+        //lang = "en";
+        //attractorQualities = [...attractorQualitiesEN];
         lang = "pt";
         attractorQualities = [...attractorQualitiesPT];
         //console.log("Changed attractorQualities to attractorQualitiesPT!")
@@ -352,8 +402,11 @@ function setup() {
         passportButtons[i].style("border-radius", "50px");
         passportButtons[i].style("background-color", "white");
         passportButtons[i].style("font-weight", "bold");
+        passportButtons[i].mouseOver(showPassportInfo);
+        passportButtons[i].mouseOut(hidePassPortInfo);
         if(is_chrome){
               passportButtons[i].mousePressed(iywstcPlay);//for chrome users,
+              //passportButtons[i].mouseOver();
         } else {
               passportButtons[i].mousePressed(passportChosen);
         }
@@ -369,6 +422,58 @@ function setup() {
   //buttonDiv.hide();
   //console.log("hid button div");
 
+/*
+  textSize(20);
+  //A: monochromatic
+  text('"Eu só preciso de ficar aqui"', canvasX-400, 0*50+55);
+  //B: analogous
+  text('"Os meus vizinhos são tão similares"', canvasX-400, 1*50+55);
+  //C: complementary
+  text('"Ao fundo do corredor são as ex-colónias"', canvasX-400, 2*50+55);
+  //D: triad //south-south, north-north
+  text('"Eu vivo num união"', canvasX-400, 3*50+55);
+  //E: access all areas
+  text('"Eu posso ir onde quero"', canvasX-400, 4*50+55);
+  //F: exile
+  text('"Nunca mais posso voltar a minha terra"', canvasX-400, 5*50+55);
+  */
+
+  //cute idea, BUT this flickers out because draw() continuously
+  //overwrites this even when mouse is over the button...
+  function showPassportInfo() {
+        showPassportOptions = true;
+        passportHover = this.id();
+        //passportHover = this;
+        //use switch instead?
+        /*
+        if(this.id() == 0){
+            //passportHover =
+            //show text for this button
+            //text('"Eu só preciso de ficar aqui"', canvasX-400, 0*50+55);
+            //passportHover = this.;
+        }
+        if(this.id() == 1){
+            //text('"Os meus vizinhos são tão similares"', canvasX-400, 1*50+55);
+        }
+        if(this.id() == 2){
+            //text('"Ao fundo do corredor são as ex-colónias"', canvasX-400, 2*50+55);
+        }
+        if(this.id() == 3){
+            //text('"Eu vivo num união"', canvasX-400, 3*50+55);
+        }
+        if(this.id() == 4){
+            //text('"Eu posso ir onde quero"', canvasX-400, 4*50+55);
+        }
+        if(this.id() == 5){
+            //text('"Nunca mais posso voltar a minha terra"', canvasX-400, 5*50+55);
+        }
+        */
+  }
+
+  function hidePassPortInfo() {
+        showPassportOptions = false;
+  }
+
   function passportChosen() {
         //passportMode = passportID;
         //this.value();
@@ -383,6 +488,7 @@ function setup() {
         this.style("color", "white");
         //console.log("Passport changed to: " + passportMode);
   }
+
 
   /*
   //create i-button:
@@ -400,30 +506,30 @@ function setup() {
   button.style("font-weight", "bold");
   */
 
-  var speak;
+
 
   if(lang=="pt"){
-        speak = createButton("Quero falar");
+        speakButton = createButton("Quero falar");
   } else if (lang=="en"){
-        speak = createButton("Speak out");
+        speakButton = createButton("Speak out");
   }
   //window.innerWidth
   //RETHINK THIS!
-  //speak.id("speak");
+  //speakButton.id("speak");
 
   if(!is_chrome) {
-        speak.hide();
+        speakButton.hide();
   }
 
-  speak.class("speak-out-toggle");
-  speak.position(window.innerWidth-170, window.innerHeight-70);
-  speak.style("cursor", "pointer");
-  speak.style("border-radius", "50px");
-  speak.style("background-color", "white");
-  speak.size(90,40);
-  speak.style("border", "3px solid black");
-  speak.style("font-weight", "bold");
-  speak.mousePressed(speakButtonPressed);
+  speakButton.class("speak-out-toggle");
+  speakButton.position(window.innerWidth-170, window.innerHeight-70);
+  speakButton.style("cursor", "pointer");
+  speakButton.style("border-radius", "50px");
+  speakButton.style("background-color", "white");
+  speakButton.size(90,40);
+  speakButton.style("border", "3px solid black");
+  speakButton.style("font-weight", "bold");
+  speakButton.mousePressed(speakButtonPressed);
 
   //might be best to just work directly with the speechrecogniser element
   //instead of the p5.js wraparound...
@@ -492,6 +598,8 @@ function setup() {
     }
     if(lang == "pt"){//listener expects to hear portuguese
           listener.lang = 'pt-PT';
+    } else {//if lang is not either of these, defaults to english:
+        listener.lang = 'en-US';
     }
     listener.interimResults = true;
     var transcript = '';
@@ -509,27 +617,31 @@ function setup() {
       */
 
   var intervalId;
-  speak.mousePressed( () => {
+  speakButton.mousePressed( () => {
         speakButtonPressed();
         intervalId = setInterval(do_something, 30);
-        //speakButtonPressed();
+        //speakButtonButtonPressed();
         //console.log("Started listening");
   }).mouseReleased( () => {
         clearInterval(intervalId);
+        //showPassportOptions = false;
         console.log("Mouse was released");
-        speak.style("background-color", "white");
-        speak.style("color", "black");
+        speakButton.style("background-color", "white");
+        speakButton.style("color", "black");
         listener.stop();
         speechDetected = false;
         speechToText = "";
         console.log(" *** Stopping listener");
         console.log(" *** speechDetected is now: " + speechDetected);
+        //textDisplayCounter = 0;
+        //saturation = 255;
         //foo.stop(); //this is not a method in p5.speech...
-        //speak.style("textContent", "Speak out");
+        //speakButton.style("textContent", "Speak out");
   });
-  speak.mouseOut( () => {
+  speakButton.mouseOut( () => {
         clearInterval(intervalId);
-        //speechDetected = false;
+        speechDetected = false;
+        speechToText = "";
         console.log(" *** mouseOut of button");
         console.log(" *** speechDetected is now: " + speechDetected);
   });
@@ -540,7 +652,8 @@ function setup() {
       speechToText = event.results[0][0].transcript;
       console.log(" *** *** " + speechToText);
       //THIS WORKS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      if(speechToText === "Eu quero ter acesso ao todo o mundo"){
+      detectSelection(speechToText);
+      /*if(speechToText === "Eu quero ter acesso ao todo o mundo"){
             console.log("They said the right thing!");
             for (let i = 0; i < passportButtons.length; i++) {
                 passportButtons[i].style("background-color", "white");
@@ -550,6 +663,111 @@ function setup() {
             passport4.style("color", "white");
             passportMode = 4;
       }
+      */
+
+  }
+
+  function detectSelection(speechToText) {
+    /*
+    //A: monochromatic
+    text('"Eu só preciso de ficar aqui"', canvasX-400, 0*50+55);
+    //B: analogous
+    text('"Os meus vizinhos são tão similares"', canvasX-400, 1*50+55);
+    //C: complementary
+    text('"Existe um ponte para as ex-colónias"', canvasX-400, 2*50+55);
+    //D: triad //south-south, north-north
+    text('"Eu vivo num união"', canvasX-400, 3*50+55);
+    //E: access all areas
+    text('"Eu posso ir onde quero"', canvasX-400, 4*50+55);
+    //F: exile
+    text('"Nunca mais posso voltar a minha terra"', canvasX-400, 5*50+55);
+    */
+
+    /*
+    //A: monochromatic
+    text("'I don't need to go anywhere'", canvasX-400, 0*50+55);
+    //B: analogous
+    text("'My neighbors are so similar to me'", canvasX-400, 1*50+55);
+    //C: complementary
+    text("'There is a bridge to our former colonies'", canvasX-400, 2*50+55);
+    //D: triad //south-south, north-north
+    text("'I live in a union'", canvasX-400, 3*50+55);
+    //E: access all areas
+    text("'I can go whereever I want'", canvasX-400, 4*50+55);
+    //F: exile
+    text("'I can never return'", canvasX-400, 5*50+55);
+    */
+
+    //A
+    if(speechToText.includes("ficar aqui") || speechToText.includes("can only") ){
+          console.log("They selected A");
+          for (let i = 0; i < passportButtons.length; i++) {
+              passportButtons[i].style("background-color", "white");
+              passportButtons[i].style("color", "black");
+          }
+          passport0.style("background-color", "#3333cc");
+          passport0.style("color", "white");
+          passportMode = 0;
+    }
+    //B
+    if(speechToText.includes("vizinhos") || speechToText.includes("neighbors")){
+          console.log("They selected B");
+          for (let i = 0; i < passportButtons.length; i++) {
+              passportButtons[i].style("background-color", "white");
+              passportButtons[i].style("color", "black");
+          }
+          passport1.style("background-color", "#3333cc");
+          passport1.style("color", "white");
+          passportMode = 1;
+    }
+    //C
+    if(speechToText.includes("corredor") || speechToText.includes("bridge")){
+          console.log("They selected C");
+          for (let i = 0; i < passportButtons.length; i++) {
+              passportButtons[i].style("background-color", "white");
+              passportButtons[i].style("color", "black");
+          }
+          passport2.style("background-color", "#3333cc");
+          passport2.style("color", "white");
+          passportMode = 2;
+    }
+    //D
+    if(speechToText.includes("União") || speechToText.includes("fortaleza")|| speechToText.includes("Fortaleza") || speechToText.includes("união")
+   || speechToText.includes("union") || speechToText.includes("fortress")){
+          console.log("They selected D");
+          for (let i = 0; i < passportButtons.length; i++) {
+              passportButtons[i].style("background-color", "white");
+              passportButtons[i].style("color", "black");
+          }
+          passport3.style("background-color", "#3333cc");
+          passport3.style("color", "white");
+          passportMode = 3;
+    }
+    //E
+    if(speechToText.includes("posso ir") || speechToText.includes("wherever")
+   || speechToText.includes("where ever")){
+          console.log("They selected E");
+          for (let i = 0; i < passportButtons.length; i++) {
+              passportButtons[i].style("background-color", "white");
+              passportButtons[i].style("color", "black");
+          }
+          passport4.style("background-color", "#3333cc");
+          passport4.style("color", "white");
+          passportMode = 4;
+    }
+    //F
+    if(speechToText.includes("Nunca mais posso voltar") || speechToText.includes("never return")){
+          console.log("They selected F");
+          for (let i = 0; i < passportButtons.length; i++) {
+              passportButtons[i].style("background-color", "white");
+              passportButtons[i].style("color", "black");
+          }
+          passport5.style("background-color", "#3333cc");
+          passport5.style("color", "white");
+          passportMode = 5;
+    }
+
+
   }
 
   /*
@@ -559,19 +777,21 @@ function setup() {
   */
 
   function do_something() {
+        //showPassportOptions = true;
         console.log("Mouse is pressed down continually");
-        //speak.class("active");
+        //speakButton.class("active");
         //colors the button red while it is being held down
         //the idea here would be to "activate" speech recognition ONLY
         //when the user is holding down the *(microphone icon)
-        speak.style("color", "white");
-        //speak.style("textContent", "Listening...");
-        speak.style("background-color", "#3333cc");
+        speakButton.style("color", "white");
+        //speakButton.style("textContent", "Listening...");
+        speakButton.style("background-color", "#3333cc");
 
-        textSize(20);
-        text("Eu quero ter acesso ao todo o mundo", canvasX-400, 4*50+47);
-        //speak.style("background-color", "red");
-        //speak.style();
+        /*
+s
+        */
+        //speakButton.style("background-color", "red");
+        //speakButton.style();
         /*
         if(speechDetected == true){
               showRecognitionResults();
@@ -588,7 +808,8 @@ function setup() {
 
   function speakButtonPressed(){
         console.log("Speak out button pressed!");
-        //speak.html("Listening...");
+        //showPassportOptions = true;
+        //speakButton.html("Listening...");
         /*if(lang == "pt"){
               sqvamtqf.pause();
               sqvamtqf.currentTime = 0;
@@ -908,6 +1129,8 @@ function mouseClicked() { //may behave differently across browsers
 
 function draw() {
 
+
+
   if (keyIsDown(LEFT_ARROW)){
       youParticle.userDirectionVector.add(-0.9, 0);
   }
@@ -1042,9 +1265,128 @@ if(speechDetected == true){
       //showRecognitionResults();
       //console.log("*** *** " + speechToText);
       console.log("*** DRAW *** speechDetected is now: " + speechDetected);
-      textSize(54);
+      textSize(20);
+      //textSize(54);
       fill("black");
-      text(speechToText, 20, 60);
+      text('"' + speechToText + '"', canvasX/4, canvasY/2);
+      //text(speechToText, 20, 60);
+}
+
+if(showPassportOptions == true){
+      //attempt to make instructions pulse, but doesn't work:
+      //BECAUSE, while holding the quero falar -button down,
+      //the recogniser is listening to you...
+
+      //BETTER IDEA: make the sentence to be spoken out appear when the
+      //user hovers over the button:
+
+      //console.log("Text display counter is:" + textDisplayCounter);
+      //textDisplayCounter += 1;
+      //if(textDisplayCounter > 0 && textDisplayCounter < 150){
+            //maybe make this text shimmer/pulse/etc:
+            if(lang == "pt"){
+
+                  //textSize(30);
+                  //text("Diz assim:", canvasX-450, 0*50+55-25);
+
+                  //HERE: create various sentences that can be randomly chosen!!!
+                  //Each will trigger the button!! Because they will all share
+                  //a common word:
+
+                  textSize(20);
+                  text(random(passportSentencesPT[passportHover]), canvasX/4, canvasY/2);
+                  /*
+                  if(passportHover == 0){
+                      //problem is that this is being redrawn at every draw() cycle....
+                      //passportHover =
+                      //show text for this button
+                      //text('"Eu só posso ficar aqui"', canvasX/4, canvasY/2);
+                      text(random(passportSentencesPT[passportHover]), canvasX/4, canvasY/2);
+                      //text('"Eu só preciso de ficar aqui"', canvasX/4, canvasY/2);
+                      //text('"Eu só preciso de ficar aqui"', canvasX-400, 0*50+55);
+                      //passportHover = this.;
+                  }
+                  if(passportHover == 1){
+                      text('"Os meus vizinhos são como eu"', canvasX/4, canvasY/2);
+                      //text('"Os meus vizinhos são como eu"', canvasX-400, 1*50+55);
+                  }
+                  if(passportHover == 2){
+                      text('"Ao fundo do corredor são as ex-colónias"', canvasX/4, canvasY/2);
+                      //text('"Ao fundo do corredor são as ex-colónias"', canvasX-400, 2*50+55);
+                  }
+                  if(passportHover == 3){
+                      text('"Eu vivo num união"', canvasX/4, canvasY/2);
+                      //text('"Eu vivo num união"', canvasX-400, 3*50+55);
+                  }
+                  if(passportHover == 4){
+                      text('"Eu posso ir onde quero"', canvasX/4, canvasY/2);
+                      //text('"Eu posso ir onde quero"', canvasX-400, 4*50+55);
+
+                  }
+                  if(passportHover == 5){
+                      text('"Nunca mais posso voltar a minha terra"', canvasX/4, canvasY/2);
+                      //text('"Nunca mais posso voltar a minha terra"', canvasX-400, 5*50+55);
+                  }
+                  */
+
+
+                  //textDisplayCounter += 1;
+                  console.log("*** DRAW *** Speak button is pressed!, drawing text.");
+                  //textSize(20);
+                  //textSize(20);
+                  //fill(0, 0, 0, saturation);
+                  //  rotate(QUARTER_PI);
+                  /*
+                  push();
+                  translate(canvasX-450, 0*50+47-30);
+                  rotate(HALF_PI);
+                  text("Diz uma destas frases:", 0,0);
+                  //rotate(radians(270));
+                  pop();
+                  */
+                  /*
+                  //textAlign(LEFT);
+                  textSize(20);
+                  //A: monochromatic
+                  text('"Eu só preciso de ficar aqui"', canvasX-400, 0*50+55);
+                  //B: analogous
+                  text('"Os meus vizinhos são tão similares"', canvasX-400, 1*50+55);
+                  //C: complementary
+                  text('"Ao fundo do corredor são as ex-colónias"', canvasX-400, 2*50+55);
+                  //D: triad //south-south, north-north
+                  text('"Eu vivo num união"', canvasX-400, 3*50+55);
+                  //E: access all areas
+                  text('"Eu posso ir onde quero"', canvasX-400, 4*50+55);
+                  //F: exile
+                  text('"Nunca mais posso voltar a minha terra"', canvasX-400, 5*50+55);
+                  */
+                //  saturation -= 5;
+
+            } else { //show instructions in english:
+
+                  textSize(20);
+                  text(random(passportSentencesEN[passportHover]), canvasX/4, canvasY/2);
+                  /*
+                  //A: monochromatic
+                  text("'I don't need to go anywhere'", canvasX-400, 0*50+55);
+                  //B: analogous
+                  text("'My neighbors are so similar to me'", canvasX-400, 1*50+55);
+                  //C: complementary
+                  text("'There is a bridge to our former colonies'", canvasX-400, 2*50+55);
+                  //D: triad //south-south, north-north
+                  text("'I live in a union'", canvasX-400, 3*50+55);
+                  //E: access all areas
+                  text("'I can go whereever I want'", canvasX-400, 4*50+55);
+                  //F: exile
+                  text("'I can never return'", canvasX-400, 5*50+55);
+                  */
+            }
+
+    //  } else if (textDisplayCounter > 150){
+    //        textDisplayCounter = 0;
+    //        saturation = 255;
+      //}
+
 }
 
 
@@ -1066,7 +1408,7 @@ spawnNewParticle();
 
 
 if (frameCount%20 == 0) {
-      if(particles.length < 200){//limit the maximum number of particles in the world:
+      if(particles.length < 100){//limit the maximum number of particles in the world:
             spawnNewParticles();
       } else {
         console.log(" * -- max number of particles reached --*")
@@ -1094,7 +1436,7 @@ if (frameCount == 20){
       youParticle.infoText = "Tu";
       youParticle.isAttractedTo = "o impossível";
 
-  } else if (lang == "en"){
+  } else { //otherwise show in english
       youParticle.infoText = "You";
       youParticle.isAttractedTo = "the impossible";
   }
