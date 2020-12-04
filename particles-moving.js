@@ -305,13 +305,12 @@ var passportSentencesEN = [
 
 var textDisplayCounter = 0;
 var saturation = 255;
-/*
+
 function windowResized() {
-    resizeCanvas(windowWidth, windowHeight);
-    clear();
-    doVoronoiSetupStuff();
+    console.log("Reloading!");
+    window.location.reload();
 }
-*/
+
 
 function setup() {
 
@@ -326,10 +325,10 @@ function setup() {
         //console.log("Changed attractorQualities to attractorQualitiesEN!");
   } else {
         //for testing:
-        //lang = "en";
-        //attractorQualities = [...attractorQualitiesEN];
-        lang = "pt";
-        attractorQualities = [...attractorQualitiesPT];
+        lang = "en";
+        attractorQualities = [...attractorQualitiesEN];
+        //lang = "pt";
+        //attractorQualities = [...attractorQualitiesPT];
         //console.log("Changed attractorQualities to attractorQualitiesPT!")
   }
   //console.log("Language of the parent window is:" + lang);
@@ -398,7 +397,7 @@ function setup() {
         //if with words passaporte/passport:
         //passportButtons[i].size(120, 40);
         passportButtons[i].style("cursor", "pointer");
-        passportButtons[i].style("border", "3px solid black");
+        passportButtons[i].style("border", "2px solid black");
         passportButtons[i].style("border-radius", "50px");
         passportButtons[i].style("background-color", "white");
         passportButtons[i].style("font-weight", "bold");
@@ -527,7 +526,7 @@ function setup() {
   speakButton.style("border-radius", "50px");
   speakButton.style("background-color", "white");
   speakButton.size(90,40);
-  speakButton.style("border", "3px solid black");
+  speakButton.style("border", "2px solid black");
   speakButton.style("font-weight", "bold");
   speakButton.mousePressed(speakButtonPressed);
 
