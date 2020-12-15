@@ -27,11 +27,29 @@
 
 <script>
         $(document).ready(function() {
-            $('.tooltip').tooltipster();
+
+          $('.tooltip').tooltipster({
+              theme: 'tooltipster-noir'
+            });
         });
-        $('.tooltip').tooltipster({
+
+
+        //$('.tooltip').tooltipster();
+        /*
+          $('.tooltipstered').tooltipster({
             theme: 'tooltipster-noir'
           });
+          */
+
+          //for all with class tooltip-left:
+          $('.tooltip-left').tooltipster({
+            functionPosition: function(instance, helper, position){
+              position.side = "left";
+              return position;
+            }
+          });
+          
+
 </script>
 
 </head>

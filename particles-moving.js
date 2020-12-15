@@ -367,7 +367,7 @@ function setup() {
   passportButtons = selectAll(".passportButton");
   for (let i = 0; i < passportButtons.length; i++) {
         passportButtons[i].parent(passportsDiv);
-        passportButtons[i].addClass("buttonStyle toggle passports-toggle tooltip tooltipstered");
+        passportButtons[i].addClass("buttonStyle toggle passports-toggle tooltip tooltip-left");
         //not in user anymore, using tooltips now:
         //passportButtons[i].mouseOver(showPassportInfo);
         //passportButtons[i].mouseOut(hidePassPortInfo);
@@ -426,11 +426,17 @@ function setup() {
         speakButton.hide();
   }
 
-  speakButton.addClass("speak-out-toggle buttonStyle tooltip tooltipstered");
-  $('.tooltip').tooltipster();
+  speakButton.addClass("speak-out-toggle buttonStyle tooltip");
   $('.tooltip').tooltipster({
+      theme: 'tooltipster-noir'
+    });
+
+  /*
+  $('.tooltipstered').tooltipster();
+  $('.tooltipstered').tooltipster({
     theme: 'tooltipster-noir'
   });
+  */
   speakButton.mousePressed(speakButtonPressed);
 
     /*
