@@ -1,0 +1,66 @@
+@font-face {
+  font-family: 'Patron Medium';
+  src: url("fonts/patron/PatronWEB-Medium.woff"),
+  url("fonts/patron/PatronWEB-Medium.woff2");
+  font-weight: normal;
+  font-style: normal;
+}
+
+body, html {
+  font-family: 'Patron Medium';
+  width:100%;
+  height:100%;
+  padding:0;
+  margin:0;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.buttonStyle {
+  background: #FFF;
+  color: #000;
+  border-radius: 50px;
+  border: 2px solid #000;
+  z-index: 10;
+  transition: color 0.2s, background 0.2s;
+  position: fixed;
+  height: 45px;
+  text-align: center;
+  font-size: 18px;
+}
+
+.toggle:hover {
+  background: #000;
+  color:#FFF;
+}
+
+.toggle:focus {
+  outline: none;
+}
+
+.speak-out-toggle {
+  cursor: pointer;
+  bottom: 30px;
+  right: 140px;
+  width: auto;
+}
+
+.speak-out-toggle:active {
+  background: #000;
+  color:#FFF;
+}
+
+.passports-toggle {
+  top: 60px;
+  right: 40px;
+  width: 45px;
+  height: 45px;
+}
+
+.passports-toggle:active {
+  background: #000;
+  color:#FFF;
+}

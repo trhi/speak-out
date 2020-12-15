@@ -262,6 +262,8 @@ var lang = ""; //use this to set the language of the speech recogniser as well
 //if explorer = do not use voice interface
 var is_chrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
 
+var raumPatron;
+
 var passportButtons;
 var passportsDiv;
 
@@ -308,25 +310,27 @@ var saturation = 255;
 
 function windowResized() {
     console.log("Reloading!");
-    window.location.reload();
+  //  window.location.reload();
 }
 
 
+function preload(){
+  raumPatron = loadFont('css/fonts/patron/PatronWEB-Medium.woff');
+}
+
 function setup() {
 
-  //attractorQualities = [...attractorQualitiesPT];
   if (window.parent.location.href.indexOf("/en/") > -1) {
     //if the string "/en/ is included in the href of the parent window"
     //ie if the url above the iframe is ...raum.pt/en/terhi-marttila, then:
-    //but again, the user cannot change this afterwards.
-    //this is all initialised at setup.
+    //raum always refreshes when the user selects a new language
         lang = "en";
         attractorQualities = [...attractorQualitiesEN];
         //console.log("Changed attractorQualities to attractorQualitiesEN!");
   } else {
         //for testing:
-        lang = "en";
-        attractorQualities = [...attractorQualitiesEN];
+        lang = "pt";
+        attractorQualities = [...attractorQualitiesPT];
         //lang = "pt";
         //attractorQualities = [...attractorQualitiesPT];
         //console.log("Changed attractorQualities to attractorQualitiesPT!")
@@ -334,8 +338,6 @@ function setup() {
   //console.log("Language of the parent window is:" + lang);
 
   myCanvas = createCanvas(canvasX, canvasY);
-  //for some reason, I have noSmooth() here!! why??
-  //noSmooth();
 
   //had frameRate(19); changed to frameRate(50);
   //to see how the program processes the particles
@@ -346,33 +348,6 @@ function setup() {
 
   var iywstc = createAudio('sound/iywstc-XX.mp3');
   //var sqvamtqf = createAudio('sound/sqvamtqf-XX.mp3');
-  //audioElement.autoplay(true);
-  //console.log("Created audioElement. It is:");
-  //console.log(audioElement);
-
-  /*
-  //if using the words "passport"/"passaporte" in the buttons:
-
-  if (lang="pt") {
-
-        passport0 = createButton("passaporte A", 0);//monochromatic = 0
-        passport1 = createButton("passaporte B", 1);//analogous = 1
-        passport2 = createButton("passaporte C", 2);//complementary = 2
-        passport3 = createButton("passaporte D", 3);//triad = 3
-        passport4 = createButton("passaporte E", 4);//all = 4
-        passport5 = createButton("passaporte F", 5);//all but my own = 5
-
-
-  } else if (lang="en"){
-        passport0 = createButton("passport A", 0);//monochromatic = 0
-        passport1 = createButton("passport B", 1);//analogous = 1
-        passport2 = createButton("passport C", 2);//complementary = 2
-        passport3 = createButton("passport D", 3);//triad = 3
-        passport4 = createButton("passport E", 4);//all = 4
-        passport5 = createButton("passaporte F", 5);//all but my own = 5
-
-  }
-  */
 
   passport0 = createButton("A", 0);//monochromatic = 0
   passport1 = createButton("B", 1);//analogous = 1
@@ -392,83 +367,34 @@ function setup() {
   passportButtons = selectAll(".passportButton");
   for (let i = 0; i < passportButtons.length; i++) {
         passportButtons[i].parent(passportsDiv);
-        //if just A, B, C, etc:
-        passportButtons[i].size(40, 40);
-        //if with words passaporte/passport:
-        //passportButtons[i].size(120, 40);
-        passportButtons[i].style("cursor", "pointer");
-        passportButtons[i].style("border", "2px solid black");
-        passportButtons[i].style("border-radius", "50px");
-        passportButtons[i].style("background-color", "white");
-        passportButtons[i].style("font-weight", "bold");
-        passportButtons[i].mouseOver(showPassportInfo);
-        passportButtons[i].mouseOut(hidePassPortInfo);
+        passportButtons[i].addClass("buttonStyle toggle passports-toggle tooltip tooltipstered");
+        //not in user anymore, using tooltips now:
+        //passportButtons[i].mouseOver(showPassportInfo);
+        //passportButtons[i].mouseOut(hidePassPortInfo);
         if(is_chrome){
               passportButtons[i].mousePressed(iywstcPlay);//for chrome users,
               //passportButtons[i].mouseOver();
         } else {
               passportButtons[i].mousePressed(passportChosen);
         }
-
-
-        //if just A, B, C, etc:
-        passportButtons[i].position(canvasX-50, i*50+30);
-        //if with words passaporte/passport:
-        //passportButtons[i].position(canvasX-130, i*50+30);
+        if(lang == "en"){
+            passportButtons[i].attribute('title', random(passportSentencesEN[i]));
+        } else if (lang == "pt"){
+            var randomTitle = random(passportSentencesPT[i]);
+            //console.log("Setting passport attribute title to:", randomTitle);
+            passportButtons[i].attribute('title', randomTitle);
+        }
+        passportButtons[i].position("right: 40px", i*50+30);
         passportButtons[i].id(i);
   }
 
-  //buttonDiv.hide();
-  //console.log("hid button div");
-
-/*
-  textSize(20);
-  //A: monochromatic
-  text('"Eu só preciso de ficar aqui"', canvasX-400, 0*50+55);
-  //B: analogous
-  text('"Os meus vizinhos são tão similares"', canvasX-400, 1*50+55);
-  //C: complementary
-  text('"Ao fundo do corredor são as ex-colónias"', canvasX-400, 2*50+55);
-  //D: triad //south-south, north-north
-  text('"Eu vivo num união"', canvasX-400, 3*50+55);
-  //E: access all areas
-  text('"Eu posso ir onde quero"', canvasX-400, 4*50+55);
-  //F: exile
-  text('"Nunca mais posso voltar a minha terra"', canvasX-400, 5*50+55);
-  */
-
-  //cute idea, BUT this flickers out because draw() continuously
-  //overwrites this even when mouse is over the button...
+  //not in use anymore:
   function showPassportInfo() {
         showPassportOptions = true;
         passportHover = this.id();
-        //passportHover = this;
-        //use switch instead?
-        /*
-        if(this.id() == 0){
-            //passportHover =
-            //show text for this button
-            //text('"Eu só preciso de ficar aqui"', canvasX-400, 0*50+55);
-            //passportHover = this.;
-        }
-        if(this.id() == 1){
-            //text('"Os meus vizinhos são tão similares"', canvasX-400, 1*50+55);
-        }
-        if(this.id() == 2){
-            //text('"Ao fundo do corredor são as ex-colónias"', canvasX-400, 2*50+55);
-        }
-        if(this.id() == 3){
-            //text('"Eu vivo num união"', canvasX-400, 3*50+55);
-        }
-        if(this.id() == 4){
-            //text('"Eu posso ir onde quero"', canvasX-400, 4*50+55);
-        }
-        if(this.id() == 5){
-            //text('"Nunca mais posso voltar a minha terra"', canvasX-400, 5*50+55);
-        }
-        */
   }
 
+  //not in use anymore:
   function hidePassPortInfo() {
         showPassportOptions = false;
   }
@@ -488,63 +414,24 @@ function setup() {
         //console.log("Passport changed to: " + passportMode);
   }
 
-
-  /*
-  //create i-button:
-  button = createButton("i");
-  //button.size(30);
-  button.size(40,40);
-  button.position(canvasX-50, canvasY-50);
-  button.style("border-radius", "50%");
-  button.mousePressed(iywstcPlay);
-  button.style("cursor", "pointer");
-  button.style("border", "3px solid black");
-  //button.style("color", "white");
-  button.style("background-color", "white");
-  button.style("background-color", "white");
-  button.style("font-weight", "bold");
-  */
-
-
-
   if(lang=="pt"){
         speakButton = createButton("Quero falar");
+        speakButton.attribute("title", "[mantenha carregado para gravar a sua voz]");
   } else if (lang=="en"){
         speakButton = createButton("Speak out");
+        speakButton.attribute("title", "[press continuously to record your voice]");
   }
-  //window.innerWidth
-  //RETHINK THIS!
-  //speakButton.id("speak");
 
   if(!is_chrome) {
         speakButton.hide();
   }
 
-  speakButton.class("speak-out-toggle");
-  speakButton.position(window.innerWidth-170, window.innerHeight-70);
-  speakButton.style("cursor", "pointer");
-  speakButton.style("border-radius", "50px");
-  speakButton.style("background-color", "white");
-  speakButton.size(90,40);
-  speakButton.style("border", "2px solid black");
-  speakButton.style("font-weight", "bold");
+  speakButton.addClass("speak-out-toggle buttonStyle tooltip tooltipstered");
+  $('.tooltip').tooltipster();
+  $('.tooltip').tooltipster({
+    theme: 'tooltipster-noir'
+  });
   speakButton.mousePressed(speakButtonPressed);
-
-  //might be best to just work directly with the speechrecogniser element
-  //instead of the p5.js wraparound...
-
-
-    /*
-    //WORKS:
-    //create a button
-    //once pressed, this button initiates voice capture:
-    button = createButton('speak');
-    button.position(canvasX-100, canvasY-50);
-    button.mousePressed(listenToMe);
-
-    //initialise the microphone connect
-    mic = new p5.AudioIn();
-    */
 
     /*
     *
@@ -552,43 +439,13 @@ function setup() {
     *
     */
 
-    //unfortunately the p5 implementation wraps around an implementation
-    //of the SpeechRecognition API that creates an instance of
-    //webkitSpeechRecognition. For this reason, the new p5.SpeechRec()
-    //will create a new recogniser that only works in chrome.
-    //In order to work in firefox (after having enabled the flags through
-    //about:config), we would need to create the instance of the speech
-    //recogniser as:
-    //var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition
-    //thus firefox could point the SpeechRecognition variable to
-    //SpeechRecognition, while chrome could point to webkitSpeechRecognition
-    //var foo = new p5.SpeechRec(); // speech recognition object (will prompt for mic access)
-    //foo.onResult = showResult; // bind callback function to trigger when speech is recognized
-    //foo.start(); // start listening
-    //every time that the user clicks this button,
-    //they also have to allow the recogniser to listen to them...
-    //OR: continous recognition, BUT, only when the user holds down the mouse
-    //is when we log the recognition results.
+    //continous recognition, BUT, og the recognition results
+    //only when the user holds down the mouse
+    //and turn off recogniser once the user lets go of the mouse
     //foo.continuous = true;
     //button.mousePressed(listenToMe);
     //setTimeout(foo.start(), 200);
     //foo.onEnd = restart;
-
-    /*function restart(){
-      console.log("Restarting recognition");
-      foo.start();
-    }
-
-    function listenToMe()
-    {
-      //foo.start();
-    }
-
-    function showResult()
-    {
-      console.log(foo.resultString); // log the result
-    }
-    */
 
     window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
     var listener = new SpeechRecognition;
@@ -601,19 +458,9 @@ function setup() {
         listener.lang = 'en-US';
     }
     listener.interimResults = true;
+    listener.continuous = true;
     var transcript = '';
     var final_transcript = '';
-
-    //var foo = new p5.SpeechRec(); // speech recognition object (will prompt for mic access)
-    //foo.onResult = showResult; // bind callback function to trigger when speech is recognized
-     // start listening
-    //console.log("Started listening");
-
-      /*
-            n.b. p5.SpeechRec() won’t work unless using a secure (HTTPS) server.
-            if you never get a prompt from the browser to allow access to your microphone,
-            that should be the first thing you troubleshoot.
-      */
 
   var intervalId;
   speakButton.mousePressed( () => {
@@ -625,8 +472,9 @@ function setup() {
         clearInterval(intervalId);
         //showPassportOptions = false;
         console.log("Mouse was released");
-        speakButton.style("background-color", "white");
-        speakButton.style("color", "black");
+        //for showing that the selection is active:
+        //speakButton.style("background-color", "white");
+        //speakButton.style("color", "black");
         listener.stop();
         speechDetected = false;
         speechToText = "";
@@ -638,9 +486,10 @@ function setup() {
         //speakButton.style("textContent", "Speak out");
   });
   speakButton.mouseOut( () => {
-        clearInterval(intervalId);
         speechDetected = false;
         speechToText = "";
+        listener.stop();
+        clearInterval(intervalId);
         console.log(" *** mouseOut of button");
         console.log(" *** speechDetected is now: " + speechDetected);
   });
@@ -650,57 +499,19 @@ function setup() {
       speechDetected = true;
       speechToText = event.results[0][0].transcript;
       console.log(" *** *** " + speechToText);
-      //THIS WORKS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       detectSelection(speechToText);
-      /*if(speechToText === "Eu quero ter acesso ao todo o mundo"){
-            console.log("They said the right thing!");
-            for (let i = 0; i < passportButtons.length; i++) {
-                passportButtons[i].style("background-color", "white");
-                passportButtons[i].style("color", "black");
-            }
-            passport4.style("background-color", "#3333cc");
-            passport4.style("color", "white");
-            passportMode = 4;
-      }
-      */
-
   }
 
   function detectSelection(speechToText) {
-    /*
-    //A: monochromatic
-    text('"Eu só preciso de ficar aqui"', canvasX-400, 0*50+55);
-    //B: analogous
-    text('"Os meus vizinhos são tão similares"', canvasX-400, 1*50+55);
-    //C: complementary
-    text('"Existe um ponte para as ex-colónias"', canvasX-400, 2*50+55);
-    //D: triad //south-south, north-north
-    text('"Eu vivo num união"', canvasX-400, 3*50+55);
-    //E: access all areas
-    text('"Eu posso ir onde quero"', canvasX-400, 4*50+55);
-    //F: exile
-    text('"Nunca mais posso voltar a minha terra"', canvasX-400, 5*50+55);
-    */
 
-    /*
-    //A: monochromatic
-    text("'I don't need to go anywhere'", canvasX-400, 0*50+55);
-    //B: analogous
-    text("'My neighbors are so similar to me'", canvasX-400, 1*50+55);
-    //C: complementary
-    text("'There is a bridge to our former colonies'", canvasX-400, 2*50+55);
-    //D: triad //south-south, north-north
-    text("'I live in a union'", canvasX-400, 3*50+55);
-    //E: access all areas
-    text("'I can go whereever I want'", canvasX-400, 4*50+55);
-    //F: exile
-    text("'I can never return'", canvasX-400, 5*50+55);
-    */
+    //TO-DO next:
+    //display the recognition results in João lightbox:
 
     //A
     if(speechToText.includes("ficar aqui") || speechToText.includes("can only") ){
           console.log("They selected A");
           for (let i = 0; i < passportButtons.length; i++) {
+              //passportButtons[i].style(
               passportButtons[i].style("background-color", "white");
               passportButtons[i].style("color", "black");
           }
@@ -769,40 +580,9 @@ function setup() {
 
   }
 
-  /*
-  function showResult(){
-        console.log(foo.resultString);
-  }
-  */
-
   function do_something() {
         //showPassportOptions = true;
         console.log("Mouse is pressed down continually");
-        //speakButton.class("active");
-        //colors the button red while it is being held down
-        //the idea here would be to "activate" speech recognition ONLY
-        //when the user is holding down the *(microphone icon)
-        speakButton.style("color", "white");
-        //speakButton.style("textContent", "Listening...");
-        speakButton.style("background-color", "#3333cc");
-
-        /*
-s
-        */
-        //speakButton.style("background-color", "red");
-        //speakButton.style();
-        /*
-        if(speechDetected == true){
-              showRecognitionResults();
-              console.log("*** *** " + speechToText);
-              console.log("speechDetected is now: " + speechDetected);
-              textSize(54);
-              fill("black");
-              text(speechToText, 20, 60);
-        }
-        */
-        //DISPLAY INTERIM RESULTS!
-
   }
 
   function speakButtonPressed(){
@@ -816,13 +596,8 @@ s
               iywstc.pause();
               iywstc.currentTime = 0;
         //}
-        //display instructions for what to say in order to select
-        //a passport:
-        //eg. E: Eu quero ter acesso ao mundo todo!
-        //textSize(54);
-        //text("Eu quero ter acesso ao mundo todo", canvasX-200, 4*50+30);
         listener.start();
-        console.log(" *** Starting listener");
+        //console.log(" *** Starting listener");
   }
 
   //make a nicer track for
@@ -845,6 +620,7 @@ s
 // close setup()// close setup()// close setup()// close setup()// close setup()
 // close setup()// close setup()// close setup()// close setup()// close setup()
 // close setup()// close setup()// close setup()// close setup()// close setup()
+
 
 function doVoronoiSetupStuff(){
 
@@ -1232,20 +1008,19 @@ function draw() {
 
 for (let i = 0; i < particles.length; i++) {
   particles[i].move();
-  strokeWeight(1);
+  //strokeWeight(1);
   particles[i].display();
 
   if (frameCount >= 21){
-      //youParticle.infoText = "You";
       youParticle.giveInformation();
       //console.log("Cell ID that You particle is currently at:" + voronoiGetSite(youParticle.positionVector));
-      var currentCellID = voronoiGetSite(youParticle.positionVector.x, youParticle.positionVector.y);
-      if(currentCellID == undefined){
+      //var currentCellID = voronoiGetSite(youParticle.positionVector.x, youParticle.positionVector.y);
+      //if(currentCellID == undefined){
         //this only evaluates as undefined at the edges... grah!!!
         //at the borders it evaluates as either the one cell or the other..
         //console.log("Current cell is undefined at:" + youParticle.positionVector.x);
         //currentCell = this.cellID;
-      }
+      //}
     //youParticle.isAttractedTo = currentCellID + ", " + youParticle.cellID;
     //SO: when the particle is located over a voronoi cell border,
     //it is understood as not being in a cell at all,
@@ -1267,6 +1042,7 @@ if(speechDetected == true){
       textSize(20);
       //textSize(54);
       fill("black");
+      textFont(raumPatron);
       text('"' + speechToText + '"', canvasX/4, canvasY/2);
       //text(speechToText, 20, 60);
 }
@@ -1293,6 +1069,7 @@ if(showPassportOptions == true){
                   //a common word:
 
                   textSize(20);
+                  textFont(raumPatron);
                   text(random(passportSentencesPT[passportHover]), canvasX/4, canvasY/2);
                   /*
                   if(passportHover == 0){
@@ -1364,6 +1141,7 @@ if(showPassportOptions == true){
             } else { //show instructions in english:
 
                   textSize(20);
+                  textFont(raumPatron);
                   text(random(passportSentencesEN[passportHover]), canvasX/4, canvasY/2);
                   /*
                   //A: monochromatic
@@ -1446,7 +1224,7 @@ if (frameCount == 20){
   //console.log("Succesfully created you");
   //console.log("You are attracted to:" + youParticle.isAttractedTo);
   //console.log("Your lifespan is:" + youParticle.lifespan);
-  youParticle.giveInformation();
+  //youParticle.giveInformation();
   //console.log("My g is:" + youParticle.g);
 }//close if() for spawning youParticle
 
