@@ -270,7 +270,6 @@ var passportsDiv;
 var speakButton;
 
 var speechToText = "";
-var speechDetected = false;
 
 var showPassportOptions = false;
 var passportHover = "";
@@ -319,6 +318,7 @@ function preload(){
 }
 
 function setup() {
+
 
   if (window.parent.location.href.indexOf("/en/") > -1) {
     //if the string "/en/ is included in the href of the parent window"
@@ -464,48 +464,37 @@ function setup() {
 
   var intervalId;
   speakButton.mousePressed( () => {
+        $("#speak-out-text").text("");
+        $("#speak-out-div").show();
         speakButtonPressed();
         intervalId = setInterval(do_something, 30);
-        //speakButtonButtonPressed();
         //console.log("Started listening");
   }).mouseReleased( () => {
         clearInterval(intervalId);
-        //showPassportOptions = false;
         console.log("Mouse was released");
-        //for showing that the selection is active:
-        //speakButton.style("background-color", "white");
-        //speakButton.style("color", "black");
         listener.stop();
-        speechDetected = false;
-        speechToText = "";
+        $("#speak-out-text").text("");
+        $("#speak-out-div").hide();
         console.log(" *** Stopping listener");
-        console.log(" *** speechDetected is now: " + speechDetected);
-        //textDisplayCounter = 0;
-        //saturation = 255;
-        //foo.stop(); //this is not a method in p5.speech...
-        //speakButton.style("textContent", "Speak out");
   });
   speakButton.mouseOut( () => {
-        speechDetected = false;
         speechToText = "";
         listener.stop();
         clearInterval(intervalId);
+        speechToText = "";
+        $("#speak-out-div").hide();
         console.log(" *** mouseOut of button");
-        console.log(" *** speechDetected is now: " + speechDetected);
   });
 
 
   listener.onresult = (event) => {
-      speechDetected = true;
       speechToText = event.results[0][0].transcript;
+      $("#speak-out-text").text('"' + speechToText + '"');
       console.log(" *** *** " + speechToText);
       detectSelection(speechToText);
   }
 
   function detectSelection(speechToText) {
-
-    //TO-DO next:
-    //display the recognition results in João lightbox:
 
     //A
     if(speechToText.includes("ficar aqui") || speechToText.includes("can only") ){
@@ -581,14 +570,11 @@ function setup() {
   }
 
   function do_something() {
-        //showPassportOptions = true;
         console.log("Mouse is pressed down continually");
   }
 
   function speakButtonPressed(){
         console.log("Speak out button pressed!");
-        //showPassportOptions = true;
-        //speakButton.html("Listening...");
         /*if(lang == "pt"){
               sqvamtqf.pause();
               sqvamtqf.currentTime = 0;
@@ -1034,18 +1020,6 @@ for (let i = 0; i < particles.length; i++) {
   }
 
 } //close for
-
-if(speechDetected == true){
-      //showRecognitionResults();
-      //console.log("*** *** " + speechToText);
-      console.log("*** DRAW *** speechDetected is now: " + speechDetected);
-      textSize(20);
-      //textSize(54);
-      fill("black");
-      textFont(raumPatron);
-      text('"' + speechToText + '"', canvasX/4, canvasY/2);
-      //text(speechToText, 20, 60);
-}
 
 if(showPassportOptions == true){
       //attempt to make instructions pulse, but doesn't work:
