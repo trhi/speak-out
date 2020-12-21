@@ -35,6 +35,13 @@ function particle(tempX, tempY) {
         this.towardsAttractor = createVector();
         this.towardsAllowedCell = createVector(); //!!! used to be called this.towardsHome
 
+        //initiate passports by first pushing the right number of empty arrays into the variable,
+        //to avoid .... problems
+        for(var i=0; i<numberOfPassports; i++){
+          this.passports.push([]);
+        }
+        //console.log("my passports looks like this:");
+        //console.log(this.passports);
         //in fact, it would be a good idea to link the cellID at this point also,
         //since they do not change
         //eg. a second array
@@ -53,7 +60,6 @@ function particle(tempX, tempY) {
                 if(this.cellID == complementary[i][0]){
                     this.passports[2] = complementary[i];
                     //console.log("Putting complementary in passport.");
-
                 }
         }
         for(var i=0;i<triad.length;i++){
@@ -62,14 +68,11 @@ function particle(tempX, tempY) {
                     //console.log("Putting triad in passport.");
                 }
         }
-        this.passports.push([]);
         for(var i=0;i<theWorldSites.length;i++){
                     //build an array with all the cellIDs:
-
                     this.passports[4].push(i);
         }
         //console.log("This is the access all areas passport:" + this.passports[4]);
-        this.passports.push([]);
         for(var i=0;i<theWorldSites.length;i++){
                 //build the same array as before BUT
                 //splice one element == this.cellID
@@ -182,66 +185,14 @@ function particle(tempX, tempY) {
                   this.goTowardsClosestAllowedZone;
               }
               //universal code to check if I am allowed to be here:
-            //} for(var i=0; i<this.passports[passportMode];i++){
-            //            if(this.currentCellID == this.passports[passportMode][i]){
-                              //    console.log("I am allowed to be here");
-                                  //return true;
-        //  }
-          //}
-              else if (passportMode == 0){//monochromatic
-                  if(this.currentCellID == this.passports[0][0]){
-                          //console.log("I am in my home cell");
-                          this.gravityOfHome = this.originalGravityOfHome;
-                          return true;
-                  }
-              } else if (passportMode == 1){//analogous
-                //console.log("Passport mode is analogous");
-                  for(var i=0;i<this.passports[1].length;i++){
-                          if(this.currentCellID == this.passports[1][i]){
-                              //console.log(this.currentCellID + " I am not in my home cell, BUT I am in an analogous colored cell");
-                              this.gravityOfHome = this.originalGravityOfHome;
-                              return true;
-                          }
-                  }
-              } else if (passportMode == 2){//analogous
-                //console.log("Passport mode is complementary");
-                  for(var i=0;i<this.passports[2].length;i++){
-                          if(this.currentCellID == this.passports[2][i]){
-                              //console.log("I am not in my home cell, BUT I am in a complementary colored cell");
-                              this.gravityOfHome = this.originalGravityOfHome;
-                              return true;
-                          }
-                  }
-              } else if (passportMode == 3){//analogous
-                //console.log("Passport mode is triad");
-                  for(var i=0;i<this.passports[3].length;i++){
-                          if(this.currentCellID == this.passports[3][i]){
-                              //console.log("I am not in my home cell, BUT I am in one of my triad color cells");
-                              this.gravityOfHome = this.originalGravityOfHome;
-                              return true;
-                          }
-                  }
-              } else if (passportMode == 4) {//all
-                //console.log("Passport mode is all!");
-                    for(var i=0;i<this.passports[4].length;i++){
-                            if(this.currentCellID == this.passports[4][i]){
-                                //console.log("I am not in my home cell, BUT I am in one of my triad color cells");
-                                this.gravityOfHome = this.originalGravityOfHome;
-                                return true;
-                            }
-                    }
-              } else if (passportMode == 5) {//all but my own
-                //console.log("Passport mode is all but my own!");
-                      for(var i=0;i<this.passports[5].length;i++){
-                              if(this.currentCellID == this.passports[5][i]){
-                                  //console.log("I am not in my home cell, BUT I am in one of my triad color cells");
+             for(var i=0; i<this.passports[passportMode].length; i++){
+                        if(this.currentCellID == this.passports[passportMode][i]){
+                                  //console.log("I am allowed to be here");
                                   this.gravityOfHome = this.originalGravityOfHome;
                                   return true;
-                              }
-                      }
-              } else {
-                    return false;
+                        }
               }
+              return false;
         }//close amIAllowedToBeHere
 
         //inside this function: is there a repulsor in one of my allowed cells?
@@ -252,7 +203,6 @@ function particle(tempX, tempY) {
               //If I have been assigned an attractor (this.myDestiny != "undefined"),
               //AND this attractor is still defined:
               if(this.myDestiny !== "undefined" && this.myDestiny.existance !== "undefined"){
-                    //console.log("XXXXXXXXXX I (still) have a destiny! It is this one: " + this.myDestiny.quality);
                     return true; //and go towards this one
               }//My attractor still exists
               else { //I need to see if there is an attractor out there for me:

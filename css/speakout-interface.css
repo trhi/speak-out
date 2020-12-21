@@ -54,7 +54,6 @@ button {
 }
 
 .passports-toggle {
-  top: 60px;
   right: 40px;
   width: 45px;
   height: 45px;
@@ -62,6 +61,11 @@ button {
 
 .passports-toggle:active {
   background: #000;
+  color:#FFF;
+}
+
+.passports-toggle:focus {
+  background: #3333cc;
   color:#FFF;
 }
 
