@@ -183,12 +183,19 @@ function doInterface(){
     //checking against keywords:
 
     //@
-    if(speechToText.includes("ficar aqui")
+    if(
+      speechToText.includes("ficar aqui")
     || speechToText.includes("irei partir")
     || speechToText.includes("não preciso ir")
     || speechToText.includes("não quero ficar aqui")
     || speechToText.includes("nunca poderei sair")
-    || speechToText.includes("can only") ){
+    || speechToText.includes("to stay here")
+    || speechToText.includes("my only choice")
+    || speechToText.includes("never leave")
+    || speechToText.includes("do not need to go")
+    || speechToText.includes("do not want to stay here")
+    || speechToText.includes("can never leave")
+  ){
       document.getElementById("0").focus();
       passportMode = 0;
 
@@ -198,13 +205,20 @@ function doInterface(){
     }
 
     //€
-    if(speechToText.includes("somos parecidos")
+    if(
+      speechToText.includes("somos parecidos")
     || speechToText.includes("não tenho medo")
     || speechToText.includes("integramos algo")
     || speechToText.includes("outros são diferentes")
     || speechToText.includes("quem são os outros")
     || speechToText.includes("não podem entrar")
-    || speechToText.includes("neighbors")){
+    || speechToText.includes("very similar")
+    || speechToText.includes("not scared")
+    || speechToText.includes("something greater")
+    || speechToText.includes("others are different")
+    || speechToText.includes("who are the others")
+    || speechToText.includes("they cannot enter")
+  ){
       document.getElementById("1").focus();
       passportMode = 1;
 
@@ -212,13 +226,20 @@ function doInterface(){
       $('#1').tooltipster('content', newTitle).tooltipster('show');
     }
     //>
-    if(speechToText.includes("o descobrimento")
+    if(
+      speechToText.includes("o descobrimento")
     || speechToText.includes("a colonização")
     || speechToText.includes("tem o poder")
     || speechToText.includes("quem está mais fraco")
     || speechToText.includes("era a nossa")
     || speechToText.includes("continua a nossa")
-    || speechToText.includes("bridge")){
+    || speechToText.includes("exploration and colonization")
+    || speechToText.includes("position of power")
+    || speechToText.includes("colonization and exploration")
+    || speechToText.includes("conquer the")
+    || speechToText.includes("was our land")
+    || speechToText.includes("land continues to be ours")
+  ){
       document.getElementById("2").focus();
       passportMode = 2;
 
@@ -226,14 +247,20 @@ function doInterface(){
       $('#2').tooltipster('content', newTitle).tooltipster('show');
     }
     //§
-    if(speechToText.includes("fortaleza")
+    if(
+      speechToText.includes("fortaleza")
     || speechToText.includes("uma porta")
     || speechToText.includes("a não abro")
     || speechToText.includes("preciso ar")
     || speechToText.includes("respirar cá fora")
     || speechToText.includes("nasci aqui")
-    || speechToText.includes("union")
-    || speechToText.includes("fortress")){
+    || speechToText.includes("live in a fortress")
+    || speechToText.includes("see a door")
+    || speechToText.includes("do not open the door")
+    || speechToText.includes("need air")
+    || speechToText.includes("try to breathe out here")
+    || speechToText.includes("was born here")
+  ){
       document.getElementById("3").focus();
       passportMode = 3;
 
@@ -241,7 +268,8 @@ function doInterface(){
       $('#3').tooltipster('content', newTitle).tooltipster('show');
     }
     //⊙
-    if(speechToText.includes("posso ir")
+    if(
+      speechToText.includes("posso ir")
     || speechToText.includes("vou ir")
     || speechToText.includes("onde posso")
     || speechToText.includes("posso querer ir")
@@ -249,7 +277,12 @@ function doInterface(){
     || speechToText.includes("agora vou")
     || speechToText.includes("tenho terra")
     || speechToText.includes("wherever")
-    || speechToText.includes("where ever")){
+    || speechToText.includes("where ever")
+    || speechToText.includes("will go")
+    || speechToText.includes("may want to go")
+    || speechToText.includes("I can go")
+    || speechToText.includes("have no land")
+  ){
       document.getElementById("4").focus();
       passportMode = 4;
 
@@ -257,13 +290,20 @@ function doInterface(){
       $('#4').tooltipster('content', newTitle).tooltipster('show');
     }
     //!
-    if(speechToText.includes("muito medo de voltar")
+    if(
+      speechToText.includes("muito medo de voltar")
     || speechToText.includes("posso voltar")
     || speechToText.includes("ninguém me espera")
     || speechToText.includes("a minha terra")
     || speechToText.includes("já não é minha")
     || speechToText.includes("já não é minha")
-    || speechToText.includes("never return")){
+    || speechToText.includes("scared of returning")
+    || speechToText.includes("can never return")
+    || speechToText.includes("waiting for me")
+    || speechToText.includes("no longer wanted")
+    || speechToText.includes("miss what is or was mine")
+    || speechToText.includes("no longer needed")
+  ){
       document.getElementById("5").focus();
       passportMode = 5;
 

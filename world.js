@@ -23,7 +23,7 @@ var attractors = [];
 // var repulsorQualititesPT = ["uma coisa má"];
 
 var attractorQualities = [];
-var attractorQualitiesEN = ["nothing", "nothing", "nothing", "nothing", "nothing",
+var attractorQualitiesEN = [
 "a good thing", "yourself", "the impossible", "myself", "my true self",
 "work", "work", "work", "work", "work", "work", "work", "work", "work", "work",
 "my retirement",
@@ -33,24 +33,26 @@ var attractorQualitiesEN = ["nothing", "nothing", "nothing", "nothing", "nothing
 "a home", "a house", "a shelter", "a roof over my head", "a piece of land",
 "a job", "a clothing store", "a park", "study",
 "dignity", "freedom", "to do what I love", "to love what I do", "a place to breathe",
+"a way out", "a solution",
 "peace", "some peace of mind", "some time for myself", "time", "some time",
 "exploration", "a mountain", "a better life",
 "a flower shop", "a supermarket", "ikea", "coca cola dreams"];
 
-var attractorQualitiesPT = ["nada", "nada", "nada", "nada", "nada",
+var attractorQualitiesPT = [
 "o impossível", "eu próprio", "ela", "ele",
 "uma coisa boa", "uma surpresa",
 "a minha família",
 "o autocarro", "o onibus", "o meu carro",
 "trabalho", "trabalho", "trabalho", "trabalho", "trabalho", "trabalho", "emprego",
 "almoço", "jantar", "comida", "um café",
-"algo", "?", "?", "?",
+"algo", "?",
 "a escola", "a universidade", "o creche", "o meu lar", "o escritório", "a obra",
 "dinheiro", "um pouco dinheiro", "muito dinheiro",
 "tempo para mim", "tempo", "mais tempo",
-"uma casa", "um abrigo", "um terreno",
+"uma casa", "um abrigo", "um terreno", "terra",
 "um parque", "o meu sonho", "uma floresta",
 "ikea", "uma loja", "um café", "uma florista",
+"uma solução",
 "liberdade", "um sítio seguro", "segurança", "respirar sem medo", "um começo", "um começo"];
 
 var you = ["You"];
@@ -171,42 +173,42 @@ var passportSentencesPT = [
 ];
 
 var passportSentencesEN = [
-  ['"I can only stay here"',
-  '"I can only stay here"',
-  '"I can only stay here"',
-  '"I can only stay here"',
-  '"I can only stay here"',
-  '"I can only stay here"'], //@: monochromatic
-  ['"My neighbors are so similar to you"',
-  '"My neighbors are so similar to me"',
-  '"My neighbors are so similar to me"',
-  '"My neighbors are so similar to me"',
-  '"My neighbors are so similar to me"',
-  '"My neighbors are so similar to me"'], //€: analogous
-  ['"There is a bridge to our former colonies"',
-  '"There is a bridge to our former colonies"',
-  '"There is a bridge to our former colonies"',
-  '"There is a bridge to our former colonies"',
-  '"There is a bridge to our former colonies"',
-  '"There is a bridge to our former colonies"'], //>: complementary
+  ['"I want to stay here"',
+  '"or maybe that is my only choice?"',
+  '"I will never leave"',
+  '"because I do not need to go"',
+  '"I do not want to stay here"',
+  '"but I can never leave"'], //@: monochromatic
+  ['"we are very similar"',
+  '"I am not scared"',
+  '"we are part of something greater"',
+  '"the others are different"',
+  '"who are the others?"',
+  '"they cannot enter"'], //€: analogous
+  ['"what is the difference between exploration and colonization?"',
+  '"only one of us is in a position of power"',
+  '"what is the difference between colonization and exploration?"',
+  '"it is easy to conquer the weak"',
+  '"this was our land"',
+  '"this land continues to be ours"'], //>: complementary
   ['"I live in a fortress"',
-  '"I live in a union"',
-  '"I live in a union"',
-  '"I live in a union"',
-  '"I live in a union"',
-  '"I live in a union"'], //§: triad
-  ['"I can go whereever I want"',
+  '"I see a door"',
+  '"I do not open the door"',
+  '"I need air"',
+  '"I try to breathe out here"',
+  '"I was born here"'], //§: triad
+  ['"I can go where I want"',
+  '"I will go"',
+  '"I may want to go"',
   '"I can go whereever I want"',
-  '"I can go whereever I want"',
-  '"I can go whereever I want"',
-  '"I can go whereever I want"',
-  '"I can go whereever I want"'], //⊙: open borders
-  ['"I can never return"',
+  '"I will go now"',
+  '"I have no land"'], //⊙: open borders
+  ['"I am scared of returning"',
   '"I can never return"',
-  '"I can never return"',
-  '"I can never return"',
-  '"I can never return"',
-  '"I can never return"']  //!: exile
+  '"nobody is waiting for me"',
+  '"I am no longer wanted"',
+  '"I miss what is or was mine"',
+  '"I am no longer needed"']  //!: exile
 ];
 
 function preload(){
