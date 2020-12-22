@@ -25,7 +25,8 @@ function doInterface(){
     console.log("Speech recognition is not supported");
   }
 
-  iywstc = createAudio('sound/iywstc-XX.mp3');
+  //iywstc = createAudio('sound/iywstc-XX.mp3');
+  iywstc = createAudio('sound/iywstc-III.m4a');
   //var sqvamtqf = createAudio('sound/sqvamtqf-XX.mp3');
 
 
@@ -59,12 +60,12 @@ function doInterface(){
   *
   */
 
-  passport0 = createButton("A", 0);//monochromatic = 0
-  passport1 = createButton("B", 1);//analogous = 1
-  passport2 = createButton("C", 2);//complementary = 2
-  passport3 = createButton("D", 3);//triad = 3
-  passport4 = createButton("E", 4);//all = 4
-  passport5 = createButton("F", 5);//all but my own = 5
+  passport0 = createButton("@", 0);//monochromatic = 0
+  passport1 = createButton("€", 1);//analogous = 1
+  passport2 = createButton(">", 2);//complementary = 2
+  passport3 = createButton("§", 3);//triad = 3
+  passport4 = createButton("⊙", 4);//all = 4
+  passport5 = createButton("!", 5);//exile = 5
 
   passport0.class("passportButton");
   passport1.class("passportButton");
@@ -87,7 +88,6 @@ function doInterface(){
     passportButtons[i].id(i); // for mapping between button and passportMode
   }
 
-
   function passportChosen() {
     passportMode = this.id();
     for (let i = 0; i < passportButtons.length; i++) {
@@ -97,7 +97,6 @@ function doInterface(){
     this.style("background-color", "#3333cc");
     this.style("color", "white");
   }
-
 
 
   /*
@@ -181,47 +180,100 @@ function doInterface(){
   */
 
   function detectSelection(speechToText) {
-    //A
-    if(speechToText.includes("ficar aqui") || speechToText.includes("can only") ){
-      //console.log("They selected A");
+    //checking against keywords:
+
+    //@
+    if(speechToText.includes("ficar aqui")
+    || speechToText.includes("irei partir")
+    || speechToText.includes("não preciso ir")
+    || speechToText.includes("não quero ficar aqui")
+    || speechToText.includes("nunca poderei sair")
+    || speechToText.includes("can only") ){
       document.getElementById("0").focus();
       passportMode = 0;
+
+      //this can change many times during one utterance, which is fine:
+      var newTitle = random(passportSentences[0]);
+      $('#0').tooltipster('content', newTitle).tooltipster('show');
     }
-    //B
-    if(speechToText.includes("vizinhos") || speechToText.includes("neighbors")){
-      //console.log("They selected B");
+
+    //€
+    if(speechToText.includes("somos parecidos")
+    || speechToText.includes("não tenho medo")
+    || speechToText.includes("integramos algo")
+    || speechToText.includes("outros são diferentes")
+    || speechToText.includes("quem são os outros")
+    || speechToText.includes("não podem entrar")
+    || speechToText.includes("neighbors")){
       document.getElementById("1").focus();
       passportMode = 1;
+
+      var newTitle = random(passportSentences[1]);
+      $('#1').tooltipster('content', newTitle).tooltipster('show');
     }
-    //C
-    if(speechToText.includes("corredor") || speechToText.includes("bridge")){
-      //console.log("They selected C");
+    //>
+    if(speechToText.includes("o descobrimento")
+    || speechToText.includes("a colonização")
+    || speechToText.includes("tem o poder")
+    || speechToText.includes("quem está mais fraco")
+    || speechToText.includes("era a nossa")
+    || speechToText.includes("continua a nossa")
+    || speechToText.includes("bridge")){
       document.getElementById("2").focus();
       passportMode = 2;
+
+      var newTitle = random(passportSentences[2]);
+      $('#2').tooltipster('content', newTitle).tooltipster('show');
     }
-    //D
-    if(speechToText.includes("União") || speechToText.includes("fortaleza")|| speechToText.includes("Fortaleza") || speechToText.includes("união")
-    || speechToText.includes("union") || speechToText.includes("fortress")){
-      // console.log("They selected D");
+    //§
+    if(speechToText.includes("fortaleza")
+    || speechToText.includes("uma porta")
+    || speechToText.includes("a não abro")
+    || speechToText.includes("preciso ar")
+    || speechToText.includes("respirar cá fora")
+    || speechToText.includes("nasci aqui")
+    || speechToText.includes("union")
+    || speechToText.includes("fortress")){
       document.getElementById("3").focus();
       passportMode = 3;
+
+      var newTitle = random(passportSentences[3]);
+      $('#3').tooltipster('content', newTitle).tooltipster('show');
     }
-    //E
-    if(speechToText.includes("posso ir") || speechToText.includes("wherever")
+    //⊙
+    if(speechToText.includes("posso ir")
+    || speechToText.includes("vou ir")
+    || speechToText.includes("onde posso")
+    || speechToText.includes("posso querer ir")
+    || speechToText.includes("que fosse")
+    || speechToText.includes("agora vou")
+    || speechToText.includes("tenho terra")
+    || speechToText.includes("wherever")
     || speechToText.includes("where ever")){
-      //console.log("They selected E");
       document.getElementById("4").focus();
       passportMode = 4;
+
+      var newTitle = random(passportSentences[4]);
+      $('#4').tooltipster('content', newTitle).tooltipster('show');
     }
-    //F
-    if(speechToText.includes("Nunca mais posso voltar") || speechToText.includes("never return")){
-      //console.log("They selected F");
+    //!
+    if(speechToText.includes("muito medo de voltar")
+    || speechToText.includes("posso voltar")
+    || speechToText.includes("ninguém me espera")
+    || speechToText.includes("a minha terra")
+    || speechToText.includes("já não é minha")
+    || speechToText.includes("já não é minha")
+    || speechToText.includes("never return")){
       document.getElementById("5").focus();
       passportMode = 5;
-    }
-  }
 
-} // close function detectSelection
+      var newTitle = random(passportSentences[5]);
+      $('#5').tooltipster('content', newTitle).tooltipster('show');
+    }
+
+  }// close function detectSelection
+
+} // close if ( isSpeechRecognitionSupported
 
 
 } // close doInterface()
@@ -242,7 +294,8 @@ function iywstcPlay(){
   sqvamtqf.play();
 } else {
 */
-iywstc.volume(0.02);
+//iywstc.volume(0.02);
+iywstc.volume(0.1);
 iywstc.loop = false;
 iywstc.play();
 //}

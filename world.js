@@ -129,35 +129,84 @@ var complementaryColors = JSON.parse(JSON.stringify(complementary));
 var triadColors = JSON.parse(JSON.stringify(triad));
 
 // TO-DO: poetry.
+// each passport mode has 6 lines of poetry, that can be recombined
 var passportSentences = [];
 var passportSentencesPT = [
-  ['"Eu só quero ficar aqui"', '"Eu só posso ficar aqui"', '"Eu só posso ficar aqui"',
-  '"Eu só posso ficar aqui"', '"Eu só posso ficar aqui"', '"Eu só posso ficar aqui"'], //A: monochromatic
-  ['"Os meus vizinhos são como tu"', '"Os meus vizinhos são como eu"', '"Os meus vizinhos são como eu"',
-  '"Os meus vizinhos são como eu"', '"Os meus vizinhos são como eu"', '"Os meus vizinhos são como eu"'], //B: analogous
-  ['"Ao fundo do corredor são as ex-países"', '"Ao fundo do corredor são as ex-colónias"', '"Ao fundo do corredor são as ex-colónias"',
-  '"Ao fundo do corredor são as ex-colónias"', '"Ao fundo do corredor são as ex-colónias"', '"Ao fundo do corredor são as ex-colónias"'], //C: complementary
-  ['"Eu vivo numa fortaleza"', '"Eu vivo numa união"', '"Eu vivo numa união"',
-  '"Eu vivo numa união"', '"Eu vivo numa união"', '"Eu vivo numa união"'], //D: triad
-  ['"Eu posso ir onde quero"', '"Eu posso ir onde quero"', '"Eu posso ir onde quero"',
-  '"Eu posso ir onde quero"', '"Eu posso ir onde quero"', '"Eu posso ir onde quero"'], //E: open borders
-  ['"Nunca mais posso voltar a minha terra"', '"Nunca mais posso voltar a minha terra"', '"Nunca mais posso voltar a minha terra"',
-  '"Nunca mais posso voltar a minha terra"', '"Nunca mais posso voltar a minha terra"', '"Nunca mais posso voltar a minha terra"']  //F: exile
+  ['"quero ficar aqui"',
+  '"ou: só posso ficar aqui?"',
+  '"nunca irei partir"',
+  '"porque não preciso ir"',
+  '"não quero ficar aqui"',
+  '"mas nunca poderei sair"'], //@: monochromatic
+  ['"somos parecidos"',
+  '"não tenho medo"',
+  '"integramos algo maior"',
+  '"os outros são diferentes"',
+  '"quem são os outros?"',
+  '"felizmente não podem entrar"'], //€: analogous
+  ['"qual a diferença entre o descobrimento e a colonização?"',
+  '"só um de nós é que tem o poder"',
+  '"qual a diferença entre a colonização e o descobrimento?"',
+  '"é fácil conquistar quem está mais fraco"',
+  '"esta terra era a nossa"',
+  '"esta terra continua a nossa"'], //>: complementary
+  ['"vivo numa fortaleza"',
+  '"vejo uma porta"',
+  '"mas a não abro"',
+  '"preciso ar"',
+  '"tento respirar cá fora"',
+  '"nasci aqui"'], //§: triad
+  ['"posso ir onde quero"',
+  '"vou ir"',
+  '"poderei querer ir"',
+  '"posso ir onde quer que fosse"',
+  '"agora vou"',
+  '"não tenho terra"'], //⊙: open borders
+  ['"tenho muito medo de voltar"',
+  '"nunca mais posso voltar"',
+  '"ninguém me espera"',
+  '"a minha terra já não é minha"',
+  '"tenho saudades da minha terra"',
+  '"nunca mais posso voltar à minha terra"']  //!: exile
 ];
 
 var passportSentencesEN = [
-  ['"I can only stay here"', '"I can only stay here"', '"I can only stay here"',
-  '"I can only stay here"', '"I can only stay here"', '"I can only stay here"'], //A: monochromatic
-  ['"My neighbors are so similar to you"', '"My neighbors are so similar to me"', '"My neighbors are so similar to me"',
-  '"My neighbors are so similar to me"', '"My neighbors are so similar to me"', '"My neighbors are so similar to me"'], //B: analogous
-  ['"There is a bridge to our former colonies"', '"There is a bridge to our former colonies"', '"There is a bridge to our former colonies"',
-  '"There is a bridge to our former colonies"', '"There is a bridge to our former colonies"', '"There is a bridge to our former colonies"'], //C: complementary
-  ['"I live in a fortress"', '"I live in a union"', '"I live in a union"',
-  '"I live in a union"', '"I live in a union"', '"I live in a union"'], //D: triad
-  ['"I can go whereever I want"', '"I can go whereever I want"', '"I can go whereever I want"',
-  '"I can go whereever I want"', '"I can go whereever I want"', '"I can go whereever I want"'], //E: open borders
-  ['"I can never return"', '"I can never return"', '"I can never return"',
-  '"I can never return"', '"I can never return"', '"I can never return"']  //F: exile
+  ['"I can only stay here"',
+  '"I can only stay here"',
+  '"I can only stay here"',
+  '"I can only stay here"',
+  '"I can only stay here"',
+  '"I can only stay here"'], //@: monochromatic
+  ['"My neighbors are so similar to you"',
+  '"My neighbors are so similar to me"',
+  '"My neighbors are so similar to me"',
+  '"My neighbors are so similar to me"',
+  '"My neighbors are so similar to me"',
+  '"My neighbors are so similar to me"'], //€: analogous
+  ['"There is a bridge to our former colonies"',
+  '"There is a bridge to our former colonies"',
+  '"There is a bridge to our former colonies"',
+  '"There is a bridge to our former colonies"',
+  '"There is a bridge to our former colonies"',
+  '"There is a bridge to our former colonies"'], //>: complementary
+  ['"I live in a fortress"',
+  '"I live in a union"',
+  '"I live in a union"',
+  '"I live in a union"',
+  '"I live in a union"',
+  '"I live in a union"'], //§: triad
+  ['"I can go whereever I want"',
+  '"I can go whereever I want"',
+  '"I can go whereever I want"',
+  '"I can go whereever I want"',
+  '"I can go whereever I want"',
+  '"I can go whereever I want"'], //⊙: open borders
+  ['"I can never return"',
+  '"I can never return"',
+  '"I can never return"',
+  '"I can never return"',
+  '"I can never return"',
+  '"I can never return"']  //!: exile
 ];
 
 function preload(){
@@ -261,65 +310,43 @@ function doPassports() {
     worldGIndex[i] = worldColors[i][1];
   }
 
-  console.log(theWorld);
-  console.log(worldGIndex)
-
-  //console.log("This is the monochrome passport written in g values");
-  //console.log(worldGIndex);
+    /*
+    *
+    *   three passports, manually.
+    *
+    */
 
   for(var i=0; i<analogousColors.length; i++){
     for(var k=0; k<analogousColors[i].length;k++){
       for(var j=0; j<worldGIndex.length; j++){
         if(analogousColors[i][k] == worldGIndex[j]){
-          //map g to cellID:
-          analogous[i][k] = j;
+          analogous[i][k] = j; // map g to cellID
         }
       }
     }
   }
-  /*
-  console.log("This is the analogousColors reference variable (mapping of allowed g values)");
-  console.log(analogousColors);
-  console.log("This is the unique, analogous passport, written in cellIDs, after mapping");
-  console.log(analogous);
-
-  console.log("This is the complementaryColors reference variable (mapping of allowed g values)");
-  console.log(complementaryColors);
-  console.log("This a copy of it, before mapping actual passports");
-  console.log(complementary);
-  */
 
   for(var i=0; i<complementaryColors.length; i++){
     for(var k=0; k<complementaryColors[i].length;k++){
       for(var j=0; j<worldGIndex.length; j++){
         if(complementaryColors[i][k] == worldGIndex[j]){
-          //map g to cellID:
-          complementary[i][k] = j;
+          complementary[i][k] = j; // map g to cellID
         }
       }
     }
   }
-  //console.log("This is the complementaryColors passport written in g values");
-  //console.log(complementaryColors);
-  //console.log("This is the complementary passport written in cellIDs");
-  //console.log(complementary);
 
   for(var i=0; i<triadColors.length; i++){
     for(var k=0; k<triadColors[i].length;k++){
       for(var j=0; j<worldGIndex.length; j++){
         if(triadColors[i][k] == worldGIndex[j]){
-          //map g to cellID:
-          triad[i][k] = j;
+          triad[i][k] = j; // map g to cellID
         }
       }
     }
   }
-  //console.log("This is the triad passport written in g values");
-  //console.log(triadColors);
-  //console.log("This is the triad passport written in cellIDs");
-  //console.log(triad);
 
-} //close passports
+} //close doPassports
 
 
 /*
@@ -329,7 +356,8 @@ function doPassports() {
 */
 
 function mousePressed(){
-  if((mouseX > window.innerWidth-70 && mouseY < 320) || (mouseX > window.innerWidth-190 && mouseY > window.innerHeight-80)){
+  //zone of passports OR zone of other buttons:
+  if((mouseX > window.innerWidth-90 && mouseY < 320) || (mouseX > window.innerWidth-270 && mouseY > window.innerHeight-80)){
     //don't do anything if the user clicks in the zone of the buttons.
   } else {
     spawnNewAttractor(mouseX, mouseY);
