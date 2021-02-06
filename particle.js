@@ -96,7 +96,7 @@ function particle(tempX, tempY) {
     if(this.infoText == ""){
       this.infoText = this.isAttractedTo;
     }
-    textFont(raumPatron);
+    //textFont(myFont);
     text(this.infoText, this.positionVector.x + 1.0*particleDiameter, this.positionVector.y + 0.5*particleDiameter);
   }
 

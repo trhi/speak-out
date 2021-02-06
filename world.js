@@ -7,7 +7,7 @@ var canvasY = window.innerHeight;
 var myCanvas;
 
 var lang = ""; // browser language -> sets language of recogniser and all texts
-var raumPatron; // raum.pt font
+var myFont; // raum.pt font
 
 // TO-DO: create unlimited zones using fixed 12 color palette.
 const zones = 12; // currently: maximum value is 12, as there are only 12 colors on the palette
@@ -60,6 +60,23 @@ var youParticle;
 
 var passportMode = 3;
 var numberOfPassports = 6;
+
+/*
+* passports:
+* 0 : just my cell
+* 1: analogous
+* 2: complementary
+* 3: triad
+* 4: all cells
+* 5: all cells except mine
+* ->6: [initial state] I access only my half of the screen
+*/
+
+// TO-DO: 7th passport mode: "/"
+
+// TO-DO: make it easier to continue adding passport modes
+// (ie. make it so that Particle doesn't need to be aware of how many passport modes there are)
+// ie. set it here, with numberOfPassports.
 
 var worldColors = []; // index of the RGBA of all cells in order of cellID
 var worldGIndex = []; // index of the G value of all cells in order of cellID
@@ -211,12 +228,23 @@ var passportSentencesEN = [
   '"I am no longer needed"']  //!: exile
 ];
 
+var fontDone;
+
 function preload(){
-  raumPatron = loadFont('css/fonts/patron/PatronWEB-Medium.woff');
+  myFont = loadFont("css/fonts/PoppinsLatin-Medium.otf", fontLoaded);
+}
+
+function fontLoaded(){
+    fontDone = true;
 }
 
 function setup() {
 
+  lang="en";
+  attractorQualities = [...attractorQualitiesEN];
+  passportSentences = [...passportSentencesEN];
+
+/*//for raum:
   if (window.parent.location.href.indexOf("/en/") > -1) {
     //for raum.pt:
     //if the string "/en/ is included in the href of the parent window"
@@ -230,6 +258,7 @@ function setup() {
     attractorQualities = [...attractorQualitiesPT];
     passportSentences = [...passportSentencesPT];
   }
+  */
 
   myCanvas = createCanvas(canvasX, canvasY);
   frameRate(30);
@@ -237,10 +266,16 @@ function setup() {
   doInterface();
   doPassports();
 
+  if(fontDone){
+      textFont(myFont);
+  }
+
+
 } // close setup()
 
 
 function doVoronoiSetupStuff(){
+
 
   /*
   *

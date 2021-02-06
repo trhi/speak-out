@@ -26,7 +26,7 @@ function attractor(quality, attractorX, attractorY, lifespan) {
     textSize(20);
     fill("black");
     noStroke();
-    textFont(raumPatron);
+    //textFont(myFont);
     text(this.quality, this.attractorPosition.x + 0.75*attractorDiameter, this.attractorPosition.y + 0.21*attractorDiameter);
   }
 
