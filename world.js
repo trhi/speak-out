@@ -1,16 +1,25 @@
 var drawingBorderX = 0;
 var drawingBorderY = 0;
 
-var canvasX = window.innerWidth;
-var canvasY = window.innerHeight;
+var canvasX = window.innerWidth; // use width instead (system variable)
+var canvasY = window.innerHeight; // use height instead (system variable)
 
 var myCanvas;
+var cursorPosition;
+var rainbow = 0;
+
+var frameRate = 30;
+var fpm = frameRate*60;
+console.log("fpm is: " + fpm);
 
 var lang = ""; // browser language -> sets language of recogniser and all texts
-var myFont; // raum.pt font
+var myFont; // custom font. Atm: poppins. Change also in css/speakout-interface.css
 
 // TO-DO: create unlimited zones using fixed 12 color palette.
+//atm: cannot change number of zones because creating the passports is
+//hardcoded for 12 colors == 12 zones:
 const zones = 12; // currently: maximum value is 12, as there are only 12 colors on the palette
+//const zones = 6; // currently: maximum value is 12, as there are only 12 colors on the palette
 var randomSites = [];
 var theWorld;
 var theWorldSites = []; //this is an array of p5.Vectors in order of cellID
@@ -23,8 +32,31 @@ var attractors = [];
 // var repulsorQualititesPT = ["uma coisa má"];
 
 var attractorQualities = [];
-var attractorQualitiesEN = [
-"a good thing", "yourself", "the impossible", "myself", "my true self",
+var worldAttractions = [];
+
+
+//small list to keep it simple
+var attractorQualitiesEN =
+[
+  "work", "food", "love", "freedom", "a way out", "time",
+  "a hug", "sleep", "some rest", "a glass of water", "a timeout",
+  "entertainment", "peace of mind", "warmth", "a success", "a coffee",
+  "a bite to eat", "a painkiller"
+];
+
+var attractorQualitiesENtons =
+[
+  "work", "food", "love", "freedom", "a way out", "time",
+  "a hug", "sleep", "some rest", "a glass of water", "a timeout",
+  "entertainment", "mental health"
+];
+
+
+/*
+// big list of lots of things
+var attractorQualitiesEN =
+[
+  "a good thing", "yourself", "the impossible", "myself", "my true self",
 "work", "work", "work", "work", "work", "work", "work", "work", "work", "work",
 "my retirement",
 "opportunity", "love", "shelter", "food",
@@ -36,7 +68,9 @@ var attractorQualitiesEN = [
 "a way out", "a solution",
 "peace", "some peace of mind", "some time for myself", "time", "some time",
 "exploration", "a mountain", "a better life",
-"a flower shop", "a supermarket", "ikea", "coca cola dreams"];
+"a flower shop", "a supermarket", "ikea", "coca cola dreams"
+];
+*/
 
 var attractorQualitiesPT = [
 "o impossível", "eu próprio", "ela", "ele",
@@ -57,9 +91,12 @@ var attractorQualitiesPT = [
 
 var you = ["You"];
 var youParticle;
+var lifeAchievements = 0;
+//var lifeAchievements = '';
 
-var passportMode = 3;
-var numberOfPassports = 6;
+var passportMode = 4;
+//document.getElementById("4").focus();
+var numberOfPassports = 7;
 
 /*
 * passports:
@@ -71,6 +108,12 @@ var numberOfPassports = 6;
 * 5: all cells except mine
 * ->6: [initial state] I access only my half of the screen
 */
+
+function changePassportMode(){
+  passportMode = round(random(0, numberOfPassports-2));
+  document.getElementById(passportMode).focus();
+  console.log("Changed passportMode to:" + passportMode);
+}
 
 // TO-DO: 7th passport mode: "/"
 
@@ -96,7 +139,39 @@ var palette = [
   [139, 186, 37, 117], // green yellow
 ]
 
+// analogous, complementary and triad represent hard-coded rules about what colors can go where
+
+var complementary = [
+  [223, 36, 181, 54],
+  [181, 54, 223, 36],
+  [135, 120, 97, 168],
+  [97, 168, 135, 120],
+  [39, 142, 2, 186],
+  [2, 186, 39, 142],
+  [36, 223, 181, 54],
+  [54, 181, 36, 223],
+  [120, 135, 168, 97],
+  [168, 97, 120, 135],
+  [142, 39, 186, 2],
+  [186, 2, 186, 2]
+];
+
 var analogous = [
+  [223, 97, 135, 181, 39, 2],
+  [181, 223, 135, 97, 39, 2],
+  [135, 223, 97, 181, 39, 2],
+  [97, 223, 135, 181, 39, 2],
+  [39, 223, 135, 181, 97, 2],
+  [2, 223, 135, 181, 39, 97],
+  [36, 54, 120, 168, 142, 186],
+  [54, 36, 120, 168, 142, 186],
+  [120, 54, 36, 168, 142, 186],
+  [168, 54, 120, 36, 142, 186],
+  [142, 54, 120, 168, 36, 186],
+  [186, 54, 120, 168, 142, 36]
+];
+
+var oldAnalogous = [ // €
   [223, 181, 135, 97],
   [181, 223, 135, 97],
   [135, 223, 181, 97],
@@ -111,7 +186,9 @@ var analogous = [
   [186, 142, 223]
 ];
 
-var complementary = [
+
+
+var oldComplementary = [
   [223, 36],
   [181, 54],
   [135, 120],
@@ -240,8 +317,12 @@ function fontLoaded(){
 
 function setup() {
 
+  //document.getElementById("4").focus();
+
+  textFont(myFont);
   lang="en";
   attractorQualities = [...attractorQualitiesEN];
+  worldAttractions = [...attractorQualities];
   passportSentences = [...passportSentencesEN];
 
 /*//for raum:
@@ -262,8 +343,10 @@ function setup() {
 
   myCanvas = createCanvas(canvasX, canvasY);
   frameRate(30);
+
   doVoronoiSetupStuff();
   doInterface();
+  document.getElementById(passportMode).focus();
   doPassports();
 
   if(fontDone){
@@ -321,6 +404,8 @@ function doVoronoiSetupStuff(){
 *   Calculate passports.
 *   TO-DO: do this in a more elegant manner,
 *   considering also possibility of multiple zones with same color.
+*   as well as the possibility of less zones with same color!
+*   ie. first map: 1) cellID to RGBA
 *
 */
 
@@ -332,7 +417,11 @@ function doPassports() {
   *
   */
 
-  for(var i=0;i<palette.length;i++){
+
+  for(var i=0;i<palette.length;i++){ //this works
+  //or just go through theWorld.cells.length //<-- but passports are harcoded for zones = 12 = palette.length
+  //for(var i=0;i<theWorld.cells.length;i++){
+  //for(var i=0;i<zones;i++){
     worldColors[i] = voronoiGetColor(i);
   }
 
@@ -344,8 +433,11 @@ function doPassports() {
   */
 
   for(var i=0;i<palette.length;i++){
+    for(var i=0;i<zones;i++){
+
     worldGIndex[i] = worldColors[i][1];
   }
+}
 
     /*
     *
@@ -397,29 +489,46 @@ function mousePressed(){
   if((mouseX > window.innerWidth-90 && mouseY < 320) || (mouseX > window.innerWidth-270 && mouseY > window.innerHeight-80)){
     //don't do anything if the user clicks in the zone of the buttons.
   } else {
-    spawnNewAttractor(mouseX, mouseY);
+    //when all movement is allowed, also allow making opportunities anywhere:
+    //if(passportMode == 4){
+    //when movement is restricted, allow making opportunities:
+    //if(passportMode != 4){
+      //before spawning new attractor: check if any attractorqualities are left:
+      //if yes, spawn new attractor using one of them:
+      if(frameCount > 200){ // so that the user cannot be clicking all the time to make attractors:
+        if(worldAttractions.length > 0 ){
+          //spawnNewAttractor(mouseX, mouseY);
+        }
+      }
+      //then remove it from the array
+      //else: do nothing
+    //}
   }
   return false;
 }
 
 function draw() {
 
-  if (keyIsDown(65) || keyIsDown(66) || keyIsDown(67)  || keyIsDown(68)  || keyIsDown(69)  || keyIsDown(70) ){
-    iywstcPlay();
+  //was doing this for each particle individually, although
+  //you could be doing this universally at draw()
+  cursorPosition = createVector(mouseX, mouseY);
+
+  //a factor of 0.9 seems to be good:
+  if(youParticle){
+    if (keyIsDown(LEFT_ARROW)){
+      youParticle.intentionVector.add(-1.3, 0);
+    }
+    if (keyIsDown(RIGHT_ARROW)){
+      youParticle.intentionVector.add(1.3, 0);
+    }
+    if (keyIsDown(UP_ARROW)){
+      youParticle.intentionVector.add(0, -1.3);
+    }
+    if (keyIsDown(DOWN_ARROW)){
+      youParticle.intentionVector.add(0, 1.3);
+    }
   }
 
-  if (keyIsDown(LEFT_ARROW)){
-    youParticle.userDirectionVector.add(-0.9, 0);
-  }
-  if (keyIsDown(RIGHT_ARROW)){
-    youParticle.userDirectionVector.add(0.9, 0);
-  }
-  if (keyIsDown(UP_ARROW)){
-    youParticle.userDirectionVector.add(0, -0.9);
-  }
-  if (keyIsDown(DOWN_ARROW)){
-    youParticle.userDirectionVector.add(0, 0.9);
-  }
 
   clear(); //remove trace of former particles
   cursor(ARROW);
@@ -427,6 +536,29 @@ function draw() {
   //Draw diagram in coordinates 0, 0
   //Filled and without jitter
   voronoiDraw(drawingBorderX, drawingBorderY, true, false);
+
+
+  //textSize(18);
+
+  //strokeWeight(1);
+  //stroke("white");
+
+  if(frameCount%5 == 0){
+    rainbow++;
+    if(rainbow == palette.length-1){
+      rainbow = 0;
+    }
+  }
+
+  fill(palette[rainbow]);
+
+  $('#score').css("color", 'rgba( ' + palette[rainbow][0] + ',' + palette[rainbow][1] + ',' + palette[rainbow][2] + ',' +palette[rainbow][3]  + ')' );
+  $('#score').text('Score: ' + lifeAchievements);
+
+
+  //text('score: ' + lifeAchievements, 45, 80);
+  //fill('black');
+  //noStroke();
 
 
   /*
@@ -437,6 +569,7 @@ function draw() {
 
   for (let i=0; i < attractors.length; i++) {
     if(attractors[i].existance == "defined"){
+      attractors[i].move();
       attractors[i].display();
     }
   } //close for()
@@ -449,12 +582,29 @@ function draw() {
   */
 
   for (let i = 0; i < particles.length; i++) {
+    //when youParticle.giveInformation is first,
+    //colors are changed always for Score!?
+
     particles[i].move();
     particles[i].display();
-    if (frameCount >= 21){
+    if (youParticle){ //once its defined==truthy, resolves as true in boolean
       youParticle.giveInformation();
     }
+
+
   } //close for()
+
+    /*
+    *
+    *   Change destiny of You particle every 500 or 700 frames
+    *
+    */
+
+
+  if(frameCount % 500 == 0){
+    //youParticle.isAttractedTo = random(attractorQualities);
+    //console.log("Changed youParticles destiny to: " + youParticle.isAttractedTo);
+  }
 
 
   /*
@@ -474,14 +624,78 @@ function draw() {
 
   /*
   *
+  *   Randomly change passportMode first after 2 minutes and then every 2-4 minutes.
+  *
+  */
+
+  if (frameCount == fpm) { //once one minute has passed
+    changePassportMode();
+  } else if ( ( frameCount%( fpm*round(random(1,2)) ) ) == 0 ){
+    changePassportMode();
+  }//close if(framecount)
+
+
+
+
+  /*
+  *
   *   Spawn new attractor.
   *
   */
 
-  if (frameCount%200 == 0) {
+  if (frameCount >= 600 && frameCount%50 == 0) {
+    //find Y coordinate of cell in the middle,
+    //create all random attractors only above this middle
+
+    /*
+    var middleGround = theWorldSites[theWorldSites.length/2].y; //Y coordinate of middle ground
     var randomX = random(0, canvasX);
-    var randomY = random(0, canvasY);;
-    spawnNewAttractor(randomX, randomY);
+    var randomY = random(0, middleGround);
+    */
+
+    /*
+    var privilegedArea = 4;
+    var randomX = random(0, canvasX-70);
+    var randomY = random(30, canvasY/privilegedArea);
+    */
+
+    var randomX;
+    var randomY;
+
+    randomX = random(50, width-100);
+    randomY = random(50, height-100);
+
+/*
+//make attractors appear in different zones depending on passportmode:
+    if(passportMode != 4){ //if its not access all areas, create opportunities in all areas:
+      //if(passportMode == 4){ //if its access all areas, create opportunities in all areas:
+      randomX = random(33, width-133);
+      randomY = random(33, canvasY-33);
+    }else { // if it [is NOT/is] restricted, only create opportunities in the center of the screen:
+      randomX = random(0.33*width, 0.66*width);
+      randomY = random(0.33*height, 0.66*height);
+    }
+    */
+
+    if(worldAttractions.length > 0){
+      if(passportMode == 1){
+        spawnNewAttractor(random(20, 100), random(30, 100));
+        /*
+        var privilege = true;
+        while(privilege){
+          randomX = random(50, width-100);
+          randomY = random(50, height-100);
+          //check whether cellID at (randomX, randomY) is equal to
+          //the cells allowed for You -particle.
+          // if(randomPoint is in area allowed for You particle)
+          //choose new random Point
+          //once randomPoint is outside of the area allowed for YouParticle,
+          */
+
+      }else{
+        spawnNewAttractor(randomX, randomY);
+      }
+    }
   } //close if(framecount)
 
 
@@ -498,8 +712,11 @@ function draw() {
       youParticle.infoText = "Tu";
       youParticle.isAttractedTo = "o impossível";
     } else { //otherwise show in english
-      youParticle.infoText = "You";
-      youParticle.isAttractedTo = "the impossible";
+
+      //youParticle.isAttractedTo = "the impossible";
+      youParticle.isAttractedTo = random(attractorQualities);
+      youParticle.infoText = 'You (' + youParticle.isAttractedTo + ')';
+      console.log("Initialised: You particle is attracted to: " + youParticle.isAttractedTo);
     }
     youParticle.lifespan = 100000; // may You have a long life
   }//close if(framecount)
@@ -514,11 +731,22 @@ function draw() {
 */
 
 function spawnNewParticles() {
-  var numberOfNewParticles = random([0,0,0,0,0,1,2]); // randomly choose how many are born, weighted at 0:
+  //var numberOfNewParticles = random([0,0,0,0,0,1,2]); // randomly choose how many are born, weighted at 0:
+  //fill the screen immediately with lots of particles:
+  //if(frameCount < 2000){
+    var numberOfNewParticles = random([0,5,10,0,5,20,2]); // randomly choose how many are born, weighted at 0:
+  //} else {
+  //  var numberOfNewParticles = random([0,0,0,0,0,1,2]);
+  //}
+
   for(let i = 0 ; i < numberOfNewParticles ; i++){
     //randomly choose the cell they are born into:
-    var newHome = round(random(0, theWorld.cells.length-1));
-    var newParticle = new particle(theWorld.cells[newHome].site.x, theWorld.cells[newHome].site.y);
+    var newHome = round(random(0, theWorldSites.length-1));
+    var newParticle = new particle(theWorldSites[newHome].x, theWorldSites[newHome].y);
+
+    // OR: birth particles selectively from different cells.
+    // eg. lots from small ones, few from large ones.
+
     particles.push(newParticle);
   }
 } //close spawnNewParticles()
@@ -531,7 +759,13 @@ function spawnNewParticles() {
 */
 
 function createRandomSites() {
-  for (i = 0; i < zones; i++) {
+  for (var i = 0; i < zones; i++) {
+    //let's put them in order by Y already at this point,
+    //so that we have more control over what cells have what colors:
+
+    //create an array of random x values:
+    //then,
+
     randomSites.push(
       [random(drawingBorderX, canvasX),
         random(drawingBorderY, canvasY),
@@ -565,7 +799,16 @@ function spawnNewAttractor(attractorX, attractorY) {
     attractorX = random(0, canvasX);
     attractorY = random(0, canvasY);
   }
-  let quality = random(attractorQualities);
-  let lifespan = random(100,500);
+  //let quality = random(attractorQualities);
+  //we've already done the check for if its possible to make an attractor,
+  //so now just make it:
+  //choose a random quality from the worldAttractions
+  let qualityIndex = round(random(0, worldAttractions.length-1));
+  //now weve chosen the index of the attractor from the attractions array: qualityIndex
+  //now, set quality to
+  let quality = worldAttractions[qualityIndex];
+  //then remember to remove it from the worldAttractions
+  worldAttractions.splice(qualityIndex, 1); //remove 1 element starting from qualityIndex
+  let lifespan = random(40,60);
   attractors.push(new attractor(quality, attractorX, attractorY, lifespan));
 } //close spawnNewAttractor

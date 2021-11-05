@@ -13,7 +13,7 @@ function particle(tempX, tempY) {
   this.counter = 0;
   this.diameter = particleDiameter;
   this.infoText = "";
-  this.cellID = voronoiGetSite(tempX, tempY, false);
+  this.cellID = voronoiGetSite(tempX, tempY, false); //constant: cellID of birthplace
   this.particleBirthColor = voronoiGetColor(this.cellID);
   this.currentCellID = this.cellID; //later: this is changed to the ID of the I wander into.
 
@@ -30,7 +30,7 @@ function particle(tempX, tempY) {
   this.yoff = random(0, 10000);
 
   this.positionVector = createVector(tempX, tempY);
-  this.userDirectionVector = createVector(0, 0);
+  this.intentionVector = createVector(0, 0);
 
 
   /*
@@ -57,19 +57,33 @@ function particle(tempX, tempY) {
       this.passports[2] = complementary[i];
     }
   }
+  //instead of complementary above, try:
+  //divide into top and bottom zones
+
+
   for(var i=0;i<triad.length;i++){
     if(this.cellID == triad[i][0]){ // same as above.
       this.passports[3] = triad[i];
     }
   }
   for(var i=0;i<theWorldSites.length;i++){
-    this.passports[4].push(i); // all cellIDs
+    this.passports[4].push(i); // all cellIDs ->
   }
   for(var i=0;i<theWorldSites.length;i++){
     this.passports[5].push(i);
   }
   this.passports[5].splice(this.cellID, 1); // all cellIDs but splice my own
 
+  if(this.cellID < theWorldSites.length/2){
+    for(var i=0;i<theWorldSites.length/2;i++){
+      this.passports[6].push(i);
+    }
+  } else {
+    var counter = theWorldSites.length/2;
+    for(counter;counter<theWorldSites.length;counter++){
+      this.passports[6].push(counter);
+    }
+  }
 
   /*
   *
@@ -88,17 +102,27 @@ function particle(tempX, tempY) {
   *
   */
 
-  this.giveInformation = function () {
+  this.giveInformation = function (info = "") {
     textSize(particleDiameter);
     noStroke();
     smooth();
     fill("black");
+    //this will always get overdriven by the one below:
     if(this.infoText == ""){
+      //this.infoText = 'They (' + this.isAttractedTo + ')';
       this.infoText = this.isAttractedTo;
     }
+    if(!this.infoText.includes("You")){
+      this.infoText = 'someone else (' + this.isAttractedTo + ')';
+    }
+    if(this.infoText.includes("You")){
+
+    }
+
     //textFont(myFont);
     text(this.infoText, this.positionVector.x + 1.0*particleDiameter, this.positionVector.y + 0.5*particleDiameter);
-  }
+
+  }// close giveInformation
 
   /*
   *
@@ -114,18 +138,34 @@ function particle(tempX, tempY) {
       this.diameter = particleDiameter;
     }
 
-    var cursorPosition = createVector(mouseX, mouseY);
     var particleCursorDistance = p5.Vector.dist(this.positionVector, cursorPosition);
+
+    //check if cursor is on top of particle:
+    //for other particles
     if(particleCursorDistance < particleDiameter){
       cursor(HAND);
-      if(this.infoText == "You"){
+      this.giveInformation();
+      if(!this.infoText.includes("You")){
+        //this.positionVector = cursorPosition;
+      }
+    }
+
+      /*
+      if(this.infoText.includes("You")){
+          //this.infoText = "You (" + this.isAttractedTo + ")";
         //do nothing, because its already displaying information
       }else{
         this.giveInformation();
       }
+
       // stop the particle when you mouse over it:
-      this.positionVector = cursorPosition;
+
+    } else {
+      if(this.infoText.includes("You")){
+          //this.infoText = "You";
+        }
     }
+    */
 
     // draw the particle:
     fill(this.particleBirthColor);
@@ -157,8 +197,16 @@ function particle(tempX, tempY) {
       if(this.doIFeelThePullOfAnAttractor()){
         //if yes:
         //then go towards the attractor,
-        this.goTowardsAttractor();
-      }
+        //if(this.infoText != "You" && || this.infoText != "Tu"){
+        //if(this.infoText != "You"){
+          this.goTowardsAttractor();
+        }
+
+          // add here the condition that if I am inside an attractor that matches
+          //my isAttractedTo, then do something visual and change what I am
+          //attracted to
+        //}
+
     } else {
       //if no, I am not allowed to be here
       //then, go towards the closest site that you are allowed to be at,
@@ -185,6 +233,23 @@ function particle(tempX, tempY) {
         return true;
       }
     }
+
+    if(this.infoText.includes("You")){
+      if(this.doIFeelThePullOfAnAttractor()){
+
+        var attractorDistance = createVector();
+        attractorDistance = p5.Vector.dist(this.positionVector, this.myDestiny.attractorPosition);
+
+        if (attractorDistance < (attractorDiameter/2)) {
+          this.isAttractedTo = random(attractorQualities);
+          this.myDestiny.color = "black";
+          //this.myDestiny.color = this.particleBirthColor;
+          this.myDestiny = "undefined";
+          this.infoText = ("You (" +   this.isAttractedTo + ")");
+          lifeAchievements++;
+        }
+    }
+  }
     return false;
   }//close amIAllowedToBeHere
 
@@ -194,6 +259,40 @@ function particle(tempX, tempY) {
   *   Check whether a destiny exists for me.
   *
   */
+
+
+/*
+  // TO-DO: my destiny is in a cell that I cannot go into -> find a new one!
+
+  //is my destiny in a not allowed zone?
+  //if it is, go towards it
+  //if it is not, try to flip it!
+
+
+  //if the particle enters this function, its because it has an attractor that is defined:
+  //flip a coin here: if this.myDestiny is in a cell that I am not allowed in,
+  //50% chance of selecting another one:
+  let attractorCellID = voronoiGetSite(this.myDestiny.attractorPosition.x, this.myDestiny.attractorPosition.y);
+  //check if attractorCellID corresponds to an allowed
+  for(counter=0; counter <= this.passports[passportMode].length ; counter++){
+    //console.log("attractorCellID is: " + attractorCellID);
+    if(counter < this.passports[passportMode].length){
+      if(attractorCellID == this.passports[passportMode][counter]){
+        //do nothing
+      }
+    }  else {
+      console.log("I have a destiny, I am going to try to change it now, if its not in my allowed zones");
+      if(counter == this.passports[passportMode].length ){
+        console.log("finished for loop: " + counter);
+        let flipACoin = random(["tryAgain", "fail"]);
+        if(flipACoin == "tryAgain"){
+          this.myDestiny = "undefined";
+        }
+      }
+    }
+  }
+*/
+
 
   // TO-DO: isThereARepulsorInMyAllowedCell?
   this.doIFeelThePullOfAnAttractor = function(){
@@ -216,6 +315,7 @@ function particle(tempX, tempY) {
       else { // there are things that move me!
         let randomDestiny = random(destinies); //choose one of them randomly
         this.myDestiny = randomDestiny;
+
         return true; // I have a destiny, next up: go towards it!
       }
     }
@@ -228,21 +328,66 @@ function particle(tempX, tempY) {
   */
 
   this.goTowardsAttractor = function(){
-    var towardsAttractor = createVector();
-    towardsAttractor = p5.Vector.sub(this.myDestiny.attractorPosition, this.positionVector);
-    towardsAttractor.normalize();
 
-    var attractorDistance = createVector();
-    attractorDistance = p5.Vector.dist(this.positionVector, this.myDestiny.attractorPosition);
-    if (attractorDistance < (attractorDiameter/2)-10) { //-10 or -5
-      if(this.infoText != "You" && this.infoText != "Tu"){
-        this.lifespan = this.myDestiny.lifespan; // will lead to this.remove(); once attractor goes out
+      var towardsAttractor = createVector();
+      towardsAttractor = p5.Vector.sub(this.myDestiny.attractorPosition, this.positionVector);
+      towardsAttractor.normalize();
+
+      var attractorDistance = createVector();
+      attractorDistance = p5.Vector.dist(this.positionVector, this.myDestiny.attractorPosition);
+
+      if(this.infoText.includes("You")){
+        if (attractorDistance < (attractorDiameter/2)) {
+          this.isAttractedTo = random(attractorQualities);
+          this.myDestiny.color = "black";
+          //this.myDestiny.color = this.particleBirthColor;
+          this.myDestiny = "undefined";
+          this.infoText = ("You (" +   this.isAttractedTo + ")");
+          //lifeAchievements += ". ";
+          lifeAchievements++;
+          //lifeAchievements.replace()
+        }
       }
-      // if I am inside my attrator already, break out of this function and -> moveRandomly()
-    } else { // first go towards attractor:
-      towardsAttractor.mult(this.myDestiny.gravityOfAttractor);
-      this.positionVector.add(towardsAttractor);
-    }
+
+      if (attractorDistance < (attractorDiameter/2)-10) { //-10 or -5 -> ie. I am inside my attractor:
+        //if the particle is inside the attractor, then it also stays within the attractor:
+        //if(this.infoText != "You" || this.infoText != "Tu"){ //if it's anything other than the You particle:
+          if(this.infoText.includes("You")){ //if it's anything other than the You particle:
+            // if the You particle has reached its destiny, change what it is attracted to:
+
+            //this.
+            //fill("white");
+            //ellipse(this.myDestiny.attractorPosition.x, this.myDestiny.attractorPosition.y, 20, 20);
+            //this.giveInformation();
+
+            /*
+            this.isAttractedTo = random(attractorQualities);
+            this.myDestiny.color = this.particleBirthColor;
+            this.infoText = ("You (" +   this.isAttractedTo + ")");
+            */
+
+            //this.giveInformation("    (" +   this.isAttractedTo + ")");
+            //this.infoText = "You (" + this.isAttractedTo + ")";
+            //this.giveInformation();
+            //console.log("In GoTowardsAttractor: Changed you particle destiny to:" + this.isAttractedTo);
+            //this.color = "white";
+            //In fact: make it so that the You particle never surges towards the attractor!!!
+            //this.gravityOfHome += 0.5;
+
+        //} else if ( this.infoText == "You") { // if the You particle has reached its destiny, change what it is attracted to:
+        } else {
+            this.lifespan = this.myDestiny.lifespan; // will lead to this.remove(); once attractor goes out
+        }
+        // if I am inside my attrator already, break out of this function and -> moveRandomly()
+      } else { // first go towards attractor:
+        if(this.infoText.includes("You")){
+          // do nothing
+        }  else { //for all other particles, go towards the attractor:
+          towardsAttractor.mult(this.myDestiny.gravityOfAttractor);
+          this.positionVector.add(towardsAttractor);
+      }// and if its the you particle, don't go towards the attractor...
+      }
+
   }//close goTowardsAttractor
 
   /*
@@ -278,7 +423,11 @@ function particle(tempX, tempY) {
     var towardsAllowed = createVector();
     towardsAllowed = p5.Vector.sub(closestAllowedCellSite, this.positionVector);
     towardsAllowed.normalize();
-    this.gravityOfHome += 0.05;
+
+    if(this.infoText.includes('You')){
+      this.gravityOfHome += 0.5;
+    } else { this.gravityOfHome += 0.05; }//this was initially 0.05
+
     towardsAllowed.mult(this.gravityOfHome);
     this.positionVector.add(towardsAllowed);
   }//close goTowardsClosestAllowedZone
@@ -310,24 +459,25 @@ function particle(tempX, tempY) {
     this.positionVector.add(randomXSpeedFactor, randomYSpeedFactor);
 
     //if the user hasnt pressed the keys:
-    if(this.userDirectionVector == (0,0)){
+    if(this.intentionVector == (0,0)){
       //do nothing
     }else{
+
       //else, move the particle,
       //and gradually diminsh the effect of
       //the users movement:
-      this.positionVector.add(this.userDirectionVector);
+      this.positionVector.add(this.intentionVector);
       //diminish the effect of the users input over time:
       //0.99 seems to be a good factor:
-      this.userDirectionVector.mult(0.99);
+      this.intentionVector.mult(0.99);
       //limit to magnitude 6 seems to be a good value:
       //this keeps the particle from bouncing back
       //too much from the border of a wrong cell..
-      this.userDirectionVector.limit(6);
+      this.intentionVector.limit(5);
     }
     //finally, don't let the particles go off the canvas:
-    this.positionVector.x = constrain(this.positionVector.x, drawingBorderX+2, canvasX-2)
-    this.positionVector.y = constrain(this.positionVector.y, drawingBorderY+2, canvasY-2)
+    this.positionVector.x = constrain(this.positionVector.x, drawingBorderX+2, canvasX-2);
+    this.positionVector.y = constrain(this.positionVector.y, drawingBorderY+2, canvasY-2);
   }//close this.move
 
 }//close function particle()
