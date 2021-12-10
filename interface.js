@@ -13,7 +13,7 @@ var invisibleButton;
 
 var score;
 
-var iywstc;
+
 
 /*
 *
@@ -31,11 +31,24 @@ function doInterface(){
     var listener = new SpeechRecognition;
     isSpeechRecognitionSupported = true;
   } catch (err) {
-    console.log("Speech recognition is not supported");
+    console.log("Speech recognition is not supported!!!");
+    window.alert("Please view this work in Chrome if you want to speak out");
   }
 
+/*
+  if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+    // Great, browser supports the Web Speech API - let's use it
+    console.log("Browser supports SpeechRecognition");
+  }else {
+    console.log("Speech recognition is not supported");
+    window.alert("Please view this work in Chrome");
+  }
+  */
+
+//if(isSpeechRecognitionSupported){
+
   //iywstc = createAudio('sound/iywstc-XX.mp3');
-  iywstc = createAudio('sound/iywstc-III.m4a');
+  //iywstc = createAudio('sound/iywstc-III.m4a');
   //var sqvamtqf = createAudio('sound/sqvamtqf-XX.mp3');
 
   /*
@@ -90,12 +103,19 @@ function doInterface(){
   infoButton.addClass("info-toggle toggle buttonStyle tooltip")
   //infoButton.mousePressed(infoButtonPressed);
 
-  speakButton.mousePressed(speakButtonPressed);
+  if(isSpeechRecognitionSupported){
+    speakButton.mousePressed(speakButtonPressed);
+  }
   speakButton.addClass("speak-out-toggle buttonStyle tooltip");
   speakButton.id('speak');
 
   if(!isSpeechRecognitionSupported){
-    speakButton.hide();
+    speakButton.attribute("title", "[view work in Chrome to speak out]");
+    speakButton.mousePressed(() => console.log("do nothing!"));
+    //$("#speak").text(" - ");
+    //$("#speak").prop("disabled",true);
+    //speakButton.disabled = true;
+
   }
 
   /*
@@ -142,10 +162,10 @@ function doInterface(){
   for (let i = 0; i < passportButtons.length; i++) {
     passportButtons[i].parent(passportsDiv);
     passportButtons[i].addClass("buttonStyle toggle passports-toggle tooltip tooltip-left");
-    if(isSpeechRecognitionSupported){
+    if(isSpeechRecognitionSupported || !isSpeechRecognitionSupported){
       passportButtons[i].mousePressed(iywstcPlay); // trigger iywstc if they try to click the passports
     } else {
-      passportButtons[i].mousePressed(passportChosen); // for others: allow them to select a passport by clicking
+      //passportButtons[i].mousePressed(passportChosen); // for others: allow them to select a passport by clicking
     }
     passportButtons[i].attribute('title', random(passportSentences[i]));
     passportButtons[i].position("right: 40px", i*50+70); // to leave space for raums top tab
@@ -271,6 +291,12 @@ function doInterface(){
   });
 
 
+  function stopAndClear(){
+    if(isSpeechRecognitionSupported){
+      listener.stop();
+    }
+    $("#speak-out-div").hide();
+  }
 
 
 
@@ -306,10 +332,8 @@ function doInterface(){
       stopAndClear();
     });
 
-    function stopAndClear(){
-      listener.stop();
-      $("#speak-out-div").hide();
-    }
+
+
 
     function speakButtonPressed(){
       /*if(lang == "pt"){
@@ -511,6 +535,7 @@ function doInterface(){
 } // close if ( isSpeechRecognitionSupported
 
 
+
 } // close doInterface()
 
 
@@ -521,17 +546,7 @@ function doInterface(){
 */
 
 function iywstcPlay(){
-  //console.log("playing iywstcPlay/sqvamtqf!");
-  //TO-DO: create PT version, or not.
-  /*if(lang == "pt"){
-  sqvamtqf.volume(0.02);
-  sqvamtqf.loop = false;
-  sqvamtqf.play();
-} else {
-*/
-//iywstc.volume(0.02);
-iywstc.volume(0.1);
-iywstc.loop = false;
-iywstc.play();
-//}
+    iywstc.volume(0.1);
+    iywstc.loop = false;
+    iywstc.play();
 } // close function iywstcPlay()

@@ -8,6 +8,8 @@ var myCanvas;
 var cursorPosition;
 var rainbow = 0;
 
+var iywstc;
+
 var frameRate = 30;
 var fpm = frameRate*60;
 console.log("fpm is: " + fpm);
@@ -38,8 +40,8 @@ var worldAttractions = [];
 //small list to keep it simple
 var attractorQualitiesEN =
 [
-  "work", "food", "love", "freedom", "a way out", "time",
-  "a hug", "sleep", "some rest", "a glass of water", "a timeout",
+  "work", "food", "love", "more love", "even more love", "freedom", "a way out", "time",
+  "a hug", "sleep", "some rest", "deep sleep", "a glass of water", "a timeout",
   "entertainment", "peace of mind", "warmth", "a success", "a coffee",
   "a bite to eat", "a painkiller"
 ];
@@ -309,6 +311,7 @@ var fontDone;
 
 function preload(){
   myFont = loadFont("css/fonts/PoppinsLatin-Medium.otf", fontLoaded);
+  iywstc = createAudio('sound/iywstc.mp3');
 }
 
 function fontLoaded(){
@@ -316,6 +319,10 @@ function fontLoaded(){
 }
 
 function setup() {
+
+  //iywstc.loop = false;
+  //getAudioContext().suspend();
+  //iywstc.play();
 
   //document.getElementById("4").focus();
 

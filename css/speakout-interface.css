@@ -66,6 +66,10 @@ button {
   color:#FFF;
 }
 
+.speak-out-toggle:disabled {
+  background: #dddddd;
+}
+
 .passports-toggle {
   right: 40px;
   width: 45px;
