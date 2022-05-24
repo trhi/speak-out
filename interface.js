@@ -1,18 +1,7 @@
-var passportButtons;
-var passportsDiv;
-var scoreDiv;
+var passportButtons, speakButton, infoButton, invisibleButton;
+var passportsDiv, scoreDiv, speakOutDiv, instructionsDiv;
 var score;
-var speakOutDiv;
-
-var speakButton;
 var speechToText = "";
-
-var infoButton;
-
-var invisibleButton;
-
-var score;
-
 
 
 /*
@@ -61,7 +50,8 @@ function doInterface(){
   scoreDiv.addClass('score-box tooltip-top tooltip');
   scoreDiv.id('score-div'); // for mapping between button and passportMode
   //scoreDiv.attribute("title", '[fulfil the needs and desires of _You_]');
-
+  //set it elsewhere in order to include the <em> tags around You!
+  //scoreDiv text content is updated at each draw() cycle :) in world.js
 
   score = createP();
   score.id('score'); // for mapping between button and passportMode
@@ -78,64 +68,75 @@ function doInterface(){
   speakOutDiv.id('speak-out-div');
   $("#speak-out-div").hide();
 
+    /*
+    *
+    *     Create instructions-div:
+    *     this is where the instructions are displayed
+    *     it is a child of the speak-out-div
+    *     because when not in use for displaying instructions,
+    *     then the transcript of speech is displayed here.
+    *
+    *
+    */
+
+  instructionsDiv = createDiv();
+  speakOutDiv.child(instructionsDiv);
+  instructionsDiv.id('instructions-div');
+  //$("#speak-out-div").hide();
+
+
   speakOutText = createP();
   speakOutText.id('speak-out-text');
   speakOutText.parent(speakOutDiv);
 
   /*
   *
-  *     Create speak out button.
+  *     Create speak out and info buttons.
   *
   */
 
+  //initialise all buttons and titles in english:
+  passportsDiv = createDiv();
+  passportsDiv.addClass('passportsDiv tooltip tooltip-left');
+
+  passportInstructions = createButton("↡");
+  passportInstructions.attribute('title', texts[lang].instructions.passportInstructionsHTML);
+  passportInstructions.id("passportInstructions");
+  passportInstructions.addClass("hiddeninfo buttonStyle toggle passports-toggle tooltip tooltip-left");
+  passportInstructions.position("right: 40px", 'top:10px');
+  passportInstructions.parent(passportsDiv);
+  passportInstructions.mousePressed( () => changeTitle([0,1,2,3,4,5]) );
+  //passportInstructions.mousePressed( () => changeTitle() );
+  //ABOVE: this just changes the line of the poem of the current passport mode
+
   infoButton = createButton("i");
-
-  if(lang=="pt"){
-    speakButton = createButton("Quero falar");
-    speakButton.attribute("title", "[mantenha carregado para gravar a sua voz]");
-    infoButton.attribute("title", "[instruções]");
-  } else if (lang=="en"){
-    speakButton = createButton("Speak out");
-    speakButton.attribute("title", "[press continuously, speak the sentences ↟, observe]");
-    infoButton.attribute("title", "[instructions]");
-  }
-
+  infoButton.id("i-button");
   infoButton.addClass("info-toggle toggle buttonStyle tooltip")
+  infoButton.attribute("title", texts[lang].instructions.iButtonTITLE);
   //infoButton.mousePressed(infoButtonPressed);
+
+  speakButton = createButton(texts[lang].instructions.speakButtonHTML);
+  speakButton.attribute("title", texts[lang].instructions.speakButtonTITLE);
+  speakButton.id('speak');
+  speakButton.addClass("speak-out-toggle buttonStyle tooltip");
 
   if(isSpeechRecognitionSupported){
     speakButton.mousePressed(speakButtonPressed);
-  }
-  speakButton.addClass("speak-out-toggle buttonStyle tooltip");
-  speakButton.id('speak');
-
-  if(!isSpeechRecognitionSupported){
-    speakButton.attribute("title", "[view work in Chrome to speak out]");
+  } else if (!isSpeechRecognitionSupported){ //or simply else:
+    speakButton.attribute("title", texts[lang].instructions.speakButtonNoVUI);
     speakButton.mousePressed(() => console.log("do nothing!"));
     //$("#speak").text(" - ");
     //$("#speak").prop("disabled",true);
     //speakButton.disabled = true;
-
   }
 
-  /*
-  *
-  *     Create invisible passportButton with tooltip instructions.
-  *
-  *
-  */
+/*
+  if(lang=="pt"){
+    speakButton = createButton("Quero falar");
+    speakButton.attribute("title", "[mantenha carregado para gravar a sua voz]");
+    infoButton.attribute("title", "[instruções]");
+  }*/
 
-  //simply add instructions to passportsDiv!
-  passportsDiv = createDiv();
-  //passportsDiv.attribute('title', 'Speak these sentences to toggle between rules.');
-  passportsDiv.addClass('passportsDiv tooltip tooltip-left');
-
-  passportInstructions = createButton("↡");
-  passportInstructions.attribute('title', '[speak these sentences to change the rules]');
-  passportInstructions.addClass("hiddeninfo buttonStyle toggle passports-toggle tooltip tooltip-left");
-  passportInstructions.position("right: 40px", 'top:10px');
-  passportInstructions.parent(passportsDiv);
-  //passportInstructions.hide();
 
   /*
   *
@@ -144,19 +145,13 @@ function doInterface(){
   *
   */
 
-  passport0 = createButton("@", 0);//monochromatic = 0
-  passport1 = createButton("€", 1);//analogous = 1
-  passport2 = createButton(">", 2);//complementary = 2
-  passport3 = createButton("§", 3);//triad = 3
-  passport4 = createButton("⊙", 4);//all = 4
-  passport5 = createButton("!", 5);//exile = 5
-
-  passport0.class("passportButton");
-  passport1.class("passportButton");
-  passport2.class("passportButton");
-  passport3.class("passportButton");
-  passport4.class("passportButton");
-  passport5.class("passportButton");
+  passport0 = createButton("@", 0).class("passportButton");//monochromatic = 0
+  passport1 = createButton("€", 1).class("passportButton");//analogous = 1
+  passport2 = createButton(">", 2).class("passportButton");//complementary = 2
+  passport3 = createButton("§", 3).class("passportButton");//triad = 3
+  passport4 = createButton("⊙", 4).class("passportButton");//all = 4
+  passport4.addClass('passports-toggle-focus');
+  passport5 = createButton("!", 5).class("passportButton");//exile = 5
   passportButtons = selectAll(".passportButton");
 
   for (let i = 0; i < passportButtons.length; i++) {
@@ -164,84 +159,107 @@ function doInterface(){
     passportButtons[i].addClass("buttonStyle toggle passports-toggle tooltip tooltip-left");
     if(isSpeechRecognitionSupported || !isSpeechRecognitionSupported){
       passportButtons[i].mousePressed(iywstcPlay); // trigger iywstc if they try to click the passports
+      //passportButtons[i].mousePressed( () => changeTitle( [i] ) );
+      // ABOVE: scramble new line, but this didnt work very well because
+      //  the title disappeared way too quickly!
     } else {
       //passportButtons[i].mousePressed(passportChosen); // for others: allow them to select a passport by clicking
     }
-    passportButtons[i].attribute('title', random(passportSentences[i]));
+    passportButtons[i].attribute('title', '"' + random(passportSentences[i]) + '"'); //TODO: substitute passportSentences for texts... etc?
     passportButtons[i].position("right: 40px", i*50+70); // to leave space for raums top tab
     passportButtons[i].id(i); // for mapping between button and passportMode
   }
 
 
-/*
-//cannot do any of this until the youParticle has come into existence:
-  console.log("color of youparticle is: " + youParticle.particleBirthColor);
-  document.getElementById("0").style.setProperty('color', 'rgba('
-  + youParticle.particleBirthColor[0]
-  + ',' + youParticle.particleBirthColor[1]
-  + ',' + youParticle.particleBirthColor[2]
-  + ',' + youParticle.particleBirthColor[3]
-  +')');
-  */
-
-  function passportChosen() {
-    passportMode = this.id();
-    for (let i = 0; i < passportButtons.length; i++) {
-      //or: toggle between css selector unselected
-      passportButtons[i].blur();
-      //passportButtons[i].style("background-color", "white");
-      //passportButtons[i].style("color", "black");
-    }
-    //or: toggle between css selector selected
-    this.focus();
-
-    /*
-    if(this.id == "0"){
-      passportButtons[i].style('background', 'rgba('
-      + youParticle.particleBirthColor[0]
-      + ',' + youParticle.particleBirthColor[1]
-      + ',' + youParticle.particleBirthColor[2]
-      + ',' + youParticle.particleBirthColor[3]
-      +')');
-
-    }
-    */
-    //this.style("background-color", "#3333cc");
-    //this.style("color", "white");
-  }
-
-
-
   /*
-      "Goal of the game: help all the small balls "
-    + "reach the bigger balls by changing the rules. "
-    + "<br><br>"
-    + "Speak the sentences displayed when you scroll over the buttons on the right"
+  *
+  *     Define infobutton
+  *
   */
 
-//        cut out from the instructions:
-//        + "<br><br>"
-//        + "Click to make large circles"
+$("#instructions-div").html( texts.instructionsDIV ); //initialise buttons and instructionsP under (i)
+$("#instructionsP").html( texts[lang].instructions.instructionsP ); //add instructionsP in lang
 
-  infoButton.mousePressed( () => {
-    if(lang == "en"){
-      $("#speak-out-text").html(
-        "Move <em>You</em>  with the arrow keys on the keyboard [ ◄ ▲ ▼ ►]"
-        + "<br><br>"
-        + "Increase your score by moving <em>You</em> to the large circles"
-        + "<br><br>"
-        + "<em>Speak out</em> to change the rules"
-        + "<br><br>"
-        + "Where can <em>You</em> move?"
-      );
-    } else if (lang == "pt") {
-      $("#speak-out-text").text("Procure ajudar as bolinhas a alcançar os seus objetivos");
-    }
-    $("#speak-out-div").show();
-  }).mouseOut( () => {
-    stopAndClear();
+var langButtons = selectAll(".lang-button");
+$("#lang-en").addClass("lang-button-selected"); //initialise in english
+
+$("#x-button").click( () =>  {
+   $("#instructions-div").hide();
+    $("#speak-out-div").hide();
   });
 
+/*
+/
+/     Switch language:
+/
+/
+*/
+
+  $("#lang-en").click( () =>  {
+    lang = "en";
+    updateLanguage();
+  });
+
+    //update language to fi:
+  $("#lang-fi").click( () =>  {
+    lang = "fi";
+    updateLanguage();
+  });
+
+    //update language to pt:
+  $("#lang-pt").click( () =>  {
+    lang = "pt";
+    updateLanguage();
+  });
+
+    //update language to de:
+    $("#lang-de").click( () =>  {
+      lang = "de";
+      updateLanguage();
+    });
+
+      function updateLanguage(){
+
+        for(let i=0; i < langButtons.length; i++){//dehighlight all lang buttons:
+          langButtons[i].removeClass("lang-button-selected");
+        }
+        $("#lang-" + lang).addClass("lang-button-selected"); //highlight selected lang button
+
+        for(let i=1; i < particles.length; i++){//at 0 we have the you particle!
+          particles[i].infoText = random(texts[lang].particle.someoneElse) + ' (' + texts[lang].attractor[particles[i].isAttractedTo] + ')';
+        }
+
+        $("#passportInstructions").tooltipster('content', texts[lang].instructions.passportInstructionsHTML );
+        $("#i-button").tooltipster('content', texts[lang].instructions.iButtonTITLE );
+        $("#speak").tooltipster('content', texts[lang].instructions.speakButtonTITLE );
+        $('.tooltip-top').tooltipster('content', texts[lang].instructions.scoreTITLE);
+        speakButton.html(texts[lang].instructions.speakButtonHTML);
+        if (!isSpeechRecognitionSupported){ //or simply else:
+          speakButton.attribute("title", texts[lang].instructions.speakButtonNoVUI);
+        }
+
+        //instruction text:
+        $("#instructionsP").html( texts[lang].instructions.instructionsP );
+
+        //poems:
+        passportSentences = [];
+        passportSentences.push(
+          texts[lang].poems.monochrome.lines,
+          texts[lang].poems.analogous.lines,
+          texts[lang].poems.complementary.lines,
+          texts[lang].poems.triad.lines,
+          texts[lang].poems.rainbow.lines,
+          texts[lang].poems.cloud.lines
+        );
+        changeTitle([0,1,2,3,4,5]);//change title of all passports
+      }
+
+
+  infoButton.mousePressed( () => {
+    $("#instructions-div").show();
+    $("#speak-out-div").show();
+  }).mouseOut( () => {//do nothing atm
+  });
 
 
 
@@ -266,7 +284,10 @@ function doInterface(){
   $('.tooltip-left').tooltipster({
     theme: 'tooltipster-noir',
     position: 'left',
-    delay: 0
+    autoClose: 'true',
+    delay: 200,
+    animation: 'fade',
+    timer: 5000
   });
 
   /*$('#score-div').tooltipster({
@@ -281,7 +302,8 @@ function doInterface(){
 
 
   $('.tooltip-top').tooltipster({
-    content: $('<span>[fulfil the needs and desires of <em>You</em>]</span>'),
+    //content: $('<span>[fulfil the needs and desires of <em>You</em>]</span>'),
+    content: texts[lang].instructions.scoreTITLE,
     theme: 'tooltipster-noir',
     position: 'top',
     delay: 0,
@@ -290,15 +312,18 @@ function doInterface(){
 
   });
 
-
   function stopAndClear(){
     if(isSpeechRecognitionSupported){
       listener.stop();
     }
-    $("#speak-out-div").hide();
+    //if displaying instructions, do not hide the div:
+    if( $("#instructions-div").is(':visible') ){
+      //console.log("instructionsDiv is visible");
+    } else {
+      $("#speak-out-text").text("");
+      $("#speak-out-div").hide();
+    }
   }
-
-
 
   /*
   *
@@ -309,18 +334,14 @@ function doInterface(){
   if (isSpeechRecognitionSupported){
     window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
     var listener = new SpeechRecognition;
-    if(lang == "en"){ // listener expects to hear english
-      listener.lang = 'en-US';
-    }
-    if(lang == "pt"){ // listener expects to hear portuguese
-      listener.lang = 'pt-PT';
-    } else { // if lang is not either of these, defaults to english:
-      listener.lang = 'en-US';
-    }
+    listener.lang = 'en-US'; //set to english by default
     listener.interimResults = true;
     listener.continuous = true;
 
     speakButton.mousePressed( () => {
+
+      listener.lang = texts[lang].listenerLANG;
+
       $("#speak-out-text").text("");
       $("#speak-out-div").show();
       speakButtonPressed();
@@ -332,41 +353,18 @@ function doInterface(){
       stopAndClear();
     });
 
-
-
-
     function speakButtonPressed(){
-      /*if(lang == "pt"){
-      sqvamtqf.pause();
-      sqvamtqf.currentTime = 0;
-    } else {*/
-    iywstc.pause();
-    iywstc.currentTime = 0;
-    //}
-    listener.start();
+      instructionsDiv.hide();
+      iywstc.pause();
+      iywstc.currentTime = 0;
+      listener.start();
   }
 
   listener.onresult = (event) => {
     speechToText = event.results[0][0].transcript;
     $("#speak-out-text").text('"' + speechToText + '"');
-    //console.log(" *** *** " + speechToText);
     detectSelection(speechToText);
-    //once the user has once pressed continuously, change the instructions behind this button:
-    //$('#speak').tooltipster('content', 'then observe what happens').tooltipster('show');
   }
-
-  /*
-  *
-  *     Change to new line of poem
-  *
-  */
-
-  function changeTitle(){
-
-    $('#' + passportMode.toString()).tooltipster('content', random(passportSentences[passportMode]));
-
-  }
-
 
   /*
   *
@@ -375,169 +373,59 @@ function doInterface(){
   */
 
   function detectSelection(speechToText) {
-    //checking against keywords:
 
-    //@
-    if(
-      speechToText.includes("ficar aqui")
-    || speechToText.includes("irei partir")
-    || speechToText.includes("não preciso ir")
-    || speechToText.includes("não quero ficar aqui")
-    || speechToText.includes("nunca poderei sair")
-    || speechToText.includes("to stay here")
-    || speechToText.includes("my only choice")
-    || speechToText.includes("never leave")
-    || speechToText.includes("do not need to go")
-    || speechToText.includes("do not want to stay here")
-    || speechToText.includes("can never leave")
-  ){
-      document.getElementById("0").focus();
+    var found = [
+      speechToText.match(texts[lang].poems.monochrome.regex),
+      speechToText.match(texts[lang].poems.analogous.regex),
+      speechToText.match(texts[lang].poems.complementary.regex),
+      speechToText.match(texts[lang].poems.triad.regex),
+      rainbowText = speechToText.match(texts[lang].poems.rainbow.regex),
+      cloudText = speechToText.match(texts[lang].poems.cloud.regex)
+    ];
 
-      //passportButtons[0].style('background-color', youParticle.particleBirthColor);
-      passportMode = 0;
-      //changeTitle(passportMode);
-      //OR: can even call this changeTitle(),
-      //since the value for passportMode has just been updated
-      changeTitle();
-
-      //this can change many times during one utterance, which is fine:
-      //var newTitle = random(passportSentences[0]);
-      //this approach allows more focus on the screen and bubbles:
-      //$('#0').tooltipster('content', newTitle);
-      //the problem with this approach is that the new sentence popping up
-      //takes all the attention away from the bubbles on the screen:
-      //$('#0').tooltipster('content', newTitle).tooltipster('show');
-    }
-
-    //€
-    if(
-      speechToText.includes("somos parecidos")
-    || speechToText.includes("não tenho medo")
-    || speechToText.includes("integramos algo")
-    || speechToText.includes("outros são diferentes")
-    || speechToText.includes("quem são os outros")
-    || speechToText.includes("não podem entrar")
-    || speechToText.includes("very similar")
-    || speechToText.includes("not scared")
-    || speechToText.includes("something greater")
-    || speechToText.includes("others are different")
-    || speechToText.includes("who are the others")
-    || speechToText.includes("they cannot enter")
-  ){
-      document.getElementById("1").focus();
-      passportMode = 1;
-      changeTitle();
-
-      /*var newTitle = random(passportSentences[1]);
-      $('#1').tooltipster('content', newTitle).tooltipster('show');
-      */
-    }
-    //>
-    if(
-      speechToText.includes("o descobrimento")
-    || speechToText.includes("a colonização")
-    || speechToText.includes("tem o poder")
-    || speechToText.includes("quem está mais fraco")
-    || speechToText.includes("era a nossa")
-    || speechToText.includes("continua a nossa")
-    || speechToText.includes("exploration and colonization")
-    || speechToText.includes("position of power")
-    || speechToText.includes("colonization and exploration")
-    || speechToText.includes("conquer the")
-    || speechToText.includes("was our land")
-    || speechToText.includes("land continues to be ours")
-  ){
-      document.getElementById("2").focus();
-      passportMode = 2;
-      changeTitle();
-
-      /*
-      var newTitle = random(passportSentences[2]);
-      $('#2').tooltipster('content', newTitle).tooltipster('show');
-      */
-    }
-    //§
-    if(
-      speechToText.includes("fortaleza")
-    || speechToText.includes("uma porta")
-    || speechToText.includes("a não abro")
-    || speechToText.includes("preciso ar")
-    || speechToText.includes("respirar cá fora")
-    || speechToText.includes("nasci aqui")
-    || speechToText.includes("live in a fortress")
-    || speechToText.includes("see a door")
-    || speechToText.includes("do not open the door")
-    || speechToText.includes("need air")
-    || speechToText.includes("try to breathe out here")
-    || speechToText.includes("was born here")
-  ){
-      document.getElementById("3").focus();
-      passportMode = 3;
-      changeTitle();
-
-      /*
-      var newTitle = random(passportSentences[3]);
-      $('#3').tooltipster('content', newTitle).tooltipster('show');
-      */
-    }
-    //⊙
-    if(
-      speechToText.includes("posso ir")
-    || speechToText.includes("vou ir")
-    || speechToText.includes("onde posso")
-    || speechToText.includes("posso querer ir")
-    || speechToText.includes("que fosse")
-    || speechToText.includes("agora vou")
-    || speechToText.includes("tenho terra")
-    || speechToText.includes("wherever")
-    || speechToText.includes("where ever")
-    || speechToText.includes("will go")
-    || speechToText.includes("may want to go")
-    || speechToText.includes("I can go")
-    || speechToText.includes("have no land")
-  ){
-      document.getElementById("4").focus();
-      passportMode = 4;
-      changeTitle();
-
-      /*
-      var newTitle = random(passportSentences[4]);
-      $('#4').tooltipster('content', newTitle).tooltipster('show');
-      */
-    }
-    //!
-    if(
-      speechToText.includes("muito medo de voltar")
-    || speechToText.includes("posso voltar")
-    || speechToText.includes("ninguém me espera")
-    || speechToText.includes("a minha terra")
-    || speechToText.includes("já não é minha")
-    || speechToText.includes("já não é minha")
-    || speechToText.includes("scared of returning")
-    || speechToText.includes("can never return")
-    || speechToText.includes("waiting for me")
-    || speechToText.includes("no longer wanted")
-    || speechToText.includes("miss what is or was mine")
-    || speechToText.includes("no longer needed")
-  ){
-      document.getElementById("5").focus();
-      passportMode = 5;
-      changeTitle();
-
-      /*
-      var newTitle = random(passportSentences[5]);
-      $('#5').tooltipster('content', newTitle).tooltipster('show');
-      */
+    for(let i=0; i<found.length; i++){
+      if( found[i] ){ //if there is a match for one of the lines of the six poems
+        //document.getElementById(i).focus(); //select that passport
+        togglePassports(i);
+      }
     }
 
   }// close function detectSelection
 
 } // close if ( isSpeechRecognitionSupported
 
-
-
 } // close doInterface()
 
+function togglePassports(passport){
+  for(let j=0; j < passportButtons.length; j++){
+    $("#" + j).removeClass('passports-toggle-focus')
+  }
+  document.getElementById(passport).classList.add('passports-toggle-focus');
+  passportMode = passport;
+  changeTitle(); //and display a new line from the poem
+}
+
+/*
+*
+*     Change to new line of poem
+*
+*/
+
+//TODO: make this function such that we can pass it all the passports ==
+//then it updates the title of all (when language is changed)
+//OR: if we pass it just one passport, then it just updates that button title:
+//if (passports) then changes all titles (ie. when language is changed)
+//if not, changes the title of the current passport mode
+function changeTitle(passports){ //(expects an array)
+  if (passports){ //if it is passed a parameter:
+    //change title of all passports that are passed to it:
+    for(let i=0; i<passports.length; i++){
+      $('#' + passports[i].toString()).tooltipster('content', '"' + random( passportSentences[ passports[i] ]) + '"').tooltipster('show');
+    }
+  } else { //if not, change title of the passport currently in vigor:
+    $('#' + passportMode.toString()).tooltipster('content', '"' + random(passportSentences[ passportMode ]) + '"').tooltipster('show');
+  }
+}
 
 /*
 *

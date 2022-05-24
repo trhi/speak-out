@@ -12,7 +12,7 @@ var iywstc;
 
 var frameRate = 30;
 var fpm = frameRate*60;
-console.log("fpm is: " + fpm);
+//console.log("fpm is: " + fpm);
 
 var lang = ""; // browser language -> sets language of recogniser and all texts
 var myFont; // custom font. Atm: poppins. Change also in css/speakout-interface.css
@@ -33,26 +33,13 @@ var attractors = [];
 // var repulsorQualititesEN = ["a bad thing"];
 // var repulsorQualititesPT = ["uma coisa má"];
 
-var attractorQualities = [];
 var worldAttractions = [];
-
-
-//small list to keep it simple
-var attractorQualitiesEN =
-[
-  "work", "food", "love", "more love", "even more love", "freedom", "a way out", "time",
+var attractorQualities = [ //a small list, to keep it simple:
+  "work", "food", "love", "more love", "even more love", "freedom", "a way out",
   "a hug", "sleep", "some rest", "deep sleep", "a glass of water", "a timeout",
   "entertainment", "peace of mind", "warmth", "a success", "a coffee",
-  "a bite to eat", "a painkiller"
+  "a bite to eat", "a painkiller", "a flower shop", "time"
 ];
-
-var attractorQualitiesENtons =
-[
-  "work", "food", "love", "freedom", "a way out", "time",
-  "a hug", "sleep", "some rest", "a glass of water", "a timeout",
-  "entertainment", "mental health"
-];
-
 
 /*
 // big list of lots of things
@@ -74,31 +61,17 @@ var attractorQualitiesEN =
 ];
 */
 
-var attractorQualitiesPT = [
-"o impossível", "eu próprio", "ela", "ele",
-"uma coisa boa", "uma surpresa",
-"a minha família",
-"o autocarro", "o onibus", "o meu carro",
-"trabalho", "trabalho", "trabalho", "trabalho", "trabalho", "trabalho", "emprego",
-"almoço", "jantar", "comida", "um café",
-"algo", "?",
-"a escola", "a universidade", "o creche", "o meu lar", "o escritório", "a obra",
-"dinheiro", "um pouco dinheiro", "muito dinheiro",
-"tempo para mim", "tempo", "mais tempo",
-"uma casa", "um abrigo", "um terreno", "terra",
-"um parque", "o meu sonho", "uma floresta",
-"ikea", "uma loja", "um café", "uma florista",
-"uma solução",
-"liberdade", "um sítio seguro", "segurança", "respirar sem medo", "um começo", "um começo"];
-
-var you = ["You"];
 var youParticle;
 var lifeAchievements = 0;
-//var lifeAchievements = '';
 
 var passportMode = 4;
 //document.getElementById("4").focus();
-var numberOfPassports = 7;
+var numberOfPassports = 7; //shouldn't this be 6?
+
+// TO-DO: poetry.
+// each passport mode has 6 lines of poetry, that can be recombined
+//this variable is no longer used?
+var passportSentences = [];
 
 /*
 * passports:
@@ -113,8 +86,9 @@ var numberOfPassports = 7;
 
 function changePassportMode(){
   passportMode = round(random(0, numberOfPassports-2));
-  document.getElementById(passportMode).focus();
-  console.log("Changed passportMode to:" + passportMode);
+  togglePassports(passportMode);
+  //document.getElementById(passportMode).focus();
+  //console.log("Changed passportMode to:" + passportMode);
 }
 
 // TO-DO: 7th passport mode: "/"
@@ -126,188 +100,21 @@ function changePassportMode(){
 var worldColors = []; // index of the RGBA of all cells in order of cellID
 var worldGIndex = []; // index of the G value of all cells in order of cellID
 
-var palette = [
-  [255, 223, 0, 117], // yellow
-  [241, 181, 11, 117], // yellow orange
-  [241, 135, 29, 117], // orange
-  [241, 97, 33, 117], // orange red
-  [241, 39, 39, 117], // red
-  [200, 2, 134, 117], // red purple
-  [109, 36, 139, 117], // purple
-  [68, 54, 162, 117], // purple blue
-  [18, 120, 196, 117], // blue
-  [0, 168, 196, 117], // blue green
-  [0, 142, 91, 117], // green
-  [139, 186, 37, 117], // green yellow
-]
-
-// analogous, complementary and triad represent hard-coded rules about what colors can go where
-
-var complementary = [
-  [223, 36, 181, 54],
-  [181, 54, 223, 36],
-  [135, 120, 97, 168],
-  [97, 168, 135, 120],
-  [39, 142, 2, 186],
-  [2, 186, 39, 142],
-  [36, 223, 181, 54],
-  [54, 181, 36, 223],
-  [120, 135, 168, 97],
-  [168, 97, 120, 135],
-  [142, 39, 186, 2],
-  [186, 2, 186, 2]
-];
-
-var analogous = [
-  [223, 97, 135, 181, 39, 2],
-  [181, 223, 135, 97, 39, 2],
-  [135, 223, 97, 181, 39, 2],
-  [97, 223, 135, 181, 39, 2],
-  [39, 223, 135, 181, 97, 2],
-  [2, 223, 135, 181, 39, 97],
-  [36, 54, 120, 168, 142, 186],
-  [54, 36, 120, 168, 142, 186],
-  [120, 54, 36, 168, 142, 186],
-  [168, 54, 120, 36, 142, 186],
-  [142, 54, 120, 168, 36, 186],
-  [186, 54, 120, 168, 142, 36]
-];
-
-var oldAnalogous = [ // €
-  [223, 181, 135, 97],
-  [181, 223, 135, 97],
-  [135, 223, 181, 97],
-  [97, 223, 181, 135],
-  [39, 97, 2, 36],
-  [2, 39, 36, 54],
-  [36, 2, 54, 120],
-  [54, 36, 120],
-  [120, 54, 168, 142],
-  [168, 120, 142, 186],
-  [142, 168, 186, 223],
-  [186, 142, 223]
-];
-
-
-
-var oldComplementary = [
-  [223, 36],
-  [181, 54],
-  [135, 120],
-  [97, 168],
-  [39, 142],
-  [2, 186],
-  [36, 223],
-  [54, 181],
-  [120, 135],
-  [168, 97],
-  [142, 39],
-  [186, 2]
-];
-
-var triad = [
-  [223, 39, 120],
-  [181, 2, 168],
-  [135, 36, 142],
-  [97, 54, 186],
-  [39, 120, 223],
-  [2, 168, 181],
-  [36, 142, 135],
-  [54, 186, 97],
-  [120, 223, 39],
-  [168, 181, 2],
-  [142, 135, 36],
-  [186, 97, 54]
-];
 
 //create a deep copy of the passport rules (color mappings)
 //so that passports can be built
+/*
 var analogousColors = JSON.parse(JSON.stringify(analogous));
 var complementaryColors = JSON.parse(JSON.stringify(complementary));
 var triadColors = JSON.parse(JSON.stringify(triad));
+//create them as strings because why?
+*/
 
-// TO-DO: poetry.
-// each passport mode has 6 lines of poetry, that can be recombined
-var passportSentences = [];
-var passportSentencesPT = [
-  ['"quero ficar aqui"',
-  '"ou: só posso ficar aqui?"',
-  '"nunca irei partir"',
-  '"porque não preciso ir"',
-  '"não quero ficar aqui"',
-  '"mas nunca poderei sair"'], //@: monochromatic
-  ['"somos parecidos"',
-  '"não tenho medo"',
-  '"integramos algo maior"',
-  '"os outros são diferentes"',
-  '"quem são os outros?"',
-  '"felizmente não podem entrar"'], //€: analogous
-  ['"qual a diferença entre o descobrimento e a colonização?"',
-  '"só um de nós é que tem o poder"',
-  '"qual a diferença entre a colonização e o descobrimento?"',
-  '"é fácil conquistar quem está mais fraco"',
-  '"esta terra era a nossa"',
-  '"esta terra continua a nossa"'], //>: complementary
-  ['"vivo numa fortaleza"',
-  '"vejo uma porta"',
-  '"mas a não abro"',
-  '"preciso ar"',
-  '"tento respirar cá fora"',
-  '"nasci aqui"'], //§: triad
-  ['"posso ir onde quero"',
-  '"vou ir"',
-  '"poderei querer ir"',
-  '"posso ir onde quer que fosse"',
-  '"agora vou"',
-  '"não tenho terra"'], //⊙: open borders
-  ['"tenho muito medo de voltar"',
-  '"nunca mais posso voltar"',
-  '"ninguém me espera"',
-  '"a minha terra já não é minha"',
-  '"tenho saudades da minha terra"',
-  '"nunca mais posso voltar à minha terra"']  //!: exile
-];
+var analogousColors = JSON.parse(JSON.stringify(texts.palettesAndPassports.analogous));
+var complementaryColors = JSON.parse(JSON.stringify(texts.palettesAndPassports.complementary));
+var triadColors = JSON.parse(JSON.stringify(texts.palettesAndPassports.triad));
 
-var passportSentencesEN = [
-  ['"I want to stay here"',
-  '"or maybe that is my only choice?"',
-  '"I will never leave"',
-  '"because I do not need to go"',
-  '"I do not want to stay here"',
-  '"but I can never leave"'], //@: monochromatic
-  ['"we are very similar"',
-  '"I am not scared"',
-  '"we are part of something greater"',
-  '"the others are different"',
-  '"who are the others?"',
-  '"they cannot enter"'], //€: analogous
-  ['"what is the difference between exploration and colonization?"',
-  '"only one of us is in a position of power"',
-  '"what is the difference between colonization and exploration?"',
-  '"it is easy to conquer the weak"',
-  '"this was our land"',
-  '"this land continues to be ours"'], //>: complementary
-  ['"I live in a fortress"',
-  '"I see a door"',
-  '"I do not open the door"',
-  '"I need air"',
-  '"I try to breathe out here"',
-  '"I was born here"'], //§: triad
-  ['"I can go where I want"',
-  '"I will go"',
-  '"I may want to go"',
-  '"I can go whereever I want"',
-  '"I will go now"',
-  '"I have no land"'], //⊙: open borders
-  ['"I am scared of returning"',
-  '"I can never return"',
-  '"nobody is waiting for me"',
-  '"I am no longer wanted"',
-  '"I miss what is or was mine"',
-  '"I am no longer needed"']  //!: exile
-];
-
-var fontDone;
+var fontDone = false;
 
 function preload(){
   myFont = loadFont("css/fonts/PoppinsLatin-Medium.otf", fontLoaded);
@@ -320,6 +127,8 @@ function fontLoaded(){
 
 function setup() {
 
+  //console.log("I have access to texts.js, see, texts.en.poems.monochrome.regex is equal to:" + texts.en.poems.monochrome.regex);
+
   //iywstc.loop = false;
   //getAudioContext().suspend();
   //iywstc.play();
@@ -328,25 +137,16 @@ function setup() {
 
   textFont(myFont);
   lang="en";
-  attractorQualities = [...attractorQualitiesEN];
   worldAttractions = [...attractorQualities];
-  passportSentences = [...passportSentencesEN];
-
-/*//for raum:
-  if (window.parent.location.href.indexOf("/en/") > -1) {
-    //for raum.pt:
-    //if the string "/en/ is included in the href of the parent window"
-    //ie if the url above the iframe is ...raum.pt/en/terhi-marttila, then:
-    //(raum always refreshes when the user selects a new language)
-    lang = "en";
-    attractorQualities = [...attractorQualitiesEN];
-    passportSentences = [...passportSentencesEN];
-  } else { // for raum:
-    lang = "pt";
-    attractorQualities = [...attractorQualitiesPT];
-    passportSentences = [...passportSentencesPT];
-  }
-  */
+  passportSentences = [];
+  passportSentences.push(
+    texts.en.poems.monochrome.lines,
+    texts.en.poems.analogous.lines,
+    texts.en.poems.complementary.lines,
+    texts.en.poems.triad.lines,
+    texts.en.poems.rainbow.lines,
+    texts.en.poems.cloud.lines
+  );
 
   myCanvas = createCanvas(canvasX, canvasY);
   frameRate(30);
@@ -377,6 +177,7 @@ function doVoronoiSetupStuff(){
   voronoiCellStrokeWeight(1); // thin borders
   voronoiSiteStrokeWeight(0); // make site hardly visible
 
+  //TODO: modify this function so that it spews out some random "image":
   createRandomSites(); // create randomSites for the voronoi diagram
   voronoiSites(randomSites); // create the voronoi
 
@@ -424,8 +225,8 @@ function doPassports() {
   *
   */
 
-
-  for(var i=0;i<palette.length;i++){ //this works
+  for(var i=0;i<texts.palettesAndPassports.palette.length;i++){ //this works
+  //for(var i=0;i<palette.length;i++){ //this works
   //or just go through theWorld.cells.length //<-- but passports are harcoded for zones = 12 = palette.length
   //for(var i=0;i<theWorld.cells.length;i++){
   //for(var i=0;i<zones;i++){
@@ -439,7 +240,9 @@ function doPassports() {
   *
   */
 
-  for(var i=0;i<palette.length;i++){
+  //for(var i=0;i<palette.length;i++){
+    for(var i=0;i<texts.palettesAndPassports.palette.length;i++){
+
     for(var i=0;i<zones;i++){
 
     worldGIndex[i] = worldColors[i][1];
@@ -456,7 +259,8 @@ function doPassports() {
     for(var k=0; k<analogousColors[i].length;k++){
       for(var j=0; j<worldGIndex.length; j++){
         if(analogousColors[i][k] == worldGIndex[j]){
-          analogous[i][k] = j; // map g to cellID
+          texts.palettesAndPassports.analogous[i][k] = j; // map g to cellID
+          //analogous[i][k] = j; // map g to cellID
         }
       }
     }
@@ -466,7 +270,8 @@ function doPassports() {
     for(var k=0; k<complementaryColors[i].length;k++){
       for(var j=0; j<worldGIndex.length; j++){
         if(complementaryColors[i][k] == worldGIndex[j]){
-          complementary[i][k] = j; // map g to cellID
+          texts.palettesAndPassports.complementary[i][k] = j; // map g to cellID
+          //complementary[i][k] = j; // map g to cellID
         }
       }
     }
@@ -476,7 +281,8 @@ function doPassports() {
     for(var k=0; k<triadColors[i].length;k++){
       for(var j=0; j<worldGIndex.length; j++){
         if(triadColors[i][k] == worldGIndex[j]){
-          triad[i][k] = j; // map g to cellID
+          texts.palettesAndPassports.triad[i][k] = j; // map g to cellID
+          //triad[i][k] = j; // map g to cellID
         }
       }
     }
@@ -491,7 +297,16 @@ function doPassports() {
 *
 */
 
+/*
 function mousePressed(){
+
+/*
+  for (let i=0; i < particles.length; i++) {
+      particles[i].clicked( mouseX, mouseY );
+    }
+    */
+
+/*
   //zone of passports OR zone of other buttons:
   if((mouseX > window.innerWidth-90 && mouseY < 320) || (mouseX > window.innerWidth-270 && mouseY > window.innerHeight-80)){
     //don't do anything if the user clicks in the zone of the buttons.
@@ -511,8 +326,9 @@ function mousePressed(){
       //else: do nothing
     //}
   }
-  return false;
+  //return false;
 }
+*/
 
 function draw() {
 
@@ -552,16 +368,16 @@ function draw() {
 
   if(frameCount%5 == 0){
     rainbow++;
-    if(rainbow == palette.length-1){
+    if(rainbow == texts.palettesAndPassports.palette.length-1){
       rainbow = 0;
     }
   }
 
-  fill(palette[rainbow]);
+  fill(texts.palettesAndPassports.palette[rainbow]);
 
-  $('#score').css("color", 'rgba( ' + palette[rainbow][0] + ',' + palette[rainbow][1] + ',' + palette[rainbow][2] + ',' +palette[rainbow][3]  + ')' );
-  $('#score').text('Score: ' + lifeAchievements);
-
+  $('#score').css("color", 'rgba( ' + texts.palettesAndPassports.palette[rainbow][0] + ',' + texts.palettesAndPassports.palette[rainbow][1] + ',' + texts.palettesAndPassports.palette[rainbow][2] + ',' + texts.palettesAndPassports.palette[rainbow][3]  + ')' );
+  //$('#score').text('Score: ' + lifeAchievements);
+  $('#score').text(texts[lang].instructions.scoreHTML + lifeAchievements);
 
   //text('score: ' + lifeAchievements, 45, 80);
   //fill('black');
@@ -594,9 +410,11 @@ function draw() {
 
     particles[i].move();
     particles[i].display();
+    /*
     if (youParticle){ //once its defined==truthy, resolves as true in boolean
       youParticle.giveInformation();
     }
+    */
 
 
   } //close for()
@@ -686,7 +504,10 @@ function draw() {
 
     if(worldAttractions.length > 0){
       if(passportMode == 1){
-        spawnNewAttractor(random(20, 100), random(30, 100));
+        //spawnNewAttractor(random(20, 100), random(30, 100));
+        //change this to relative to canvasX and canvasY:
+        spawnNewAttractor(random(canvasX/5, canvasX/4), random(canvasY/5, canvasY/4));
+
         /*
         var privilege = true;
         while(privilege){
@@ -712,9 +533,15 @@ function draw() {
   *
   */
 
-  if (frameCount == 20){
-    youParticle = new particle(canvasX/2, canvasY/2);
-    particles.splice(0, 0, youParticle);
+  if (frameCount == 15){
+    youParticle = new particle(canvasX/2, canvasY/2, true);
+    particles.splice(0, 0, youParticle); //can do the check based on indexOf!!! Because youParticle is always at index 0
+    youParticle.isAttractedTo = random(attractorQualities);
+    //youParticle.infoText = 'You';
+    youParticle.lifespan = 100000; // may You have a long life
+}//close if(framecount)
+
+/* //old approach to creating youParticle:
     if(lang == "pt"){
       youParticle.infoText = "Tu";
       youParticle.isAttractedTo = "o impossível";
@@ -726,7 +553,8 @@ function draw() {
       console.log("Initialised: You particle is attracted to: " + youParticle.isAttractedTo);
     }
     youParticle.lifespan = 100000; // may You have a long life
-  }//close if(framecount)
+    */
+
 
 } //close function draw()
 
@@ -766,32 +594,38 @@ function spawnNewParticles() {
 */
 
 function createRandomSites() {
-  for (var i = 0; i < zones; i++) {
-    //let's put them in order by Y already at this point,
-    //so that we have more control over what cells have what colors:
 
-    //create an array of random x values:
-    //then,
+  let maps = Object.values(texts.maps); //make array of all maps available
+  let chosenMap = random(maps); //choose random one
+  chosenMap(); //implement it
+  //texts.maps.attempt();
 
-    randomSites.push(
-      [random(drawingBorderX, canvasX),
-        random(drawingBorderY, canvasY),
-        palette[i]
-      ]
-    );
-    /*
+//strange result, but could work on making this algorithmic too:
+  var spiral = [
+      [canvasX/2, canvasY/2],
+      [canvasX/4, canvasY/4],
+      [canvasX/6, canvasY/6],
+      [canvasX/8, canvasY/8],
+      [canvasX/10, canvasY/10],
+      [canvasX/12, canvasY/12],
+      [(canvasX/2 + canvasX/16), (canvasY/2 + canvasY/14)],
+      [(canvasX/2 + canvasX/16), (canvasY/2 + canvasY/16)],
+      [(canvasX/2 + canvasX/18), (canvasY/2 + canvasY/18)],
+      [(canvasX/2 + canvasX/10), (canvasY/2 + canvasY/10)],
+      [(canvasX/2 + canvasX/12), (canvasY/2 + canvasY/12)],
+      [(canvasX/2 + canvasX/13), (canvasY/2 + canvasY/13)]
+  ];
+
     // TO-DO: make it so that any number of cells can be created
     // using the palette colors
     // PROBLEM: passports / goTowardsClosestAllowedZone
-    // are assuming that there is only one zone of each color
-    // randomSites.push(
-    //      [random(drawingBorderX, canvasX),
-    //        random(drawingBorderY, canvasY),
-    //        random(palette)
-    //      ]
-    // );
-    */
-  } //close for
+    // are assuming that there is only one zone of each color,
+    // ie, consequent TODO:
+    // rewrite goTowardsClosestAllowedZone: takes an array of allowed zones,
+    // everytime passport changes,
+    // create array of all allowedZones based on cellID (ie. color)
+    // checks what is closest OR chooses random one
+
 } //close createRandomSites
 
 

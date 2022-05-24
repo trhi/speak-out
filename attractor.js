@@ -68,7 +68,11 @@ function attractor(quality, attractorX, attractorY, lifespan) {
       noStroke();
       textSize(20);
       fill(this.color);
-      text(this.quality, this.attractorPosition.x + 0.75*attractorDiameter, this.attractorPosition.y + 0.21*attractorDiameter);
+      //if(lang == "fi"){
+        text( texts[lang].attractor[this.quality], this.attractorPosition.x + 0.75*attractorDiameter, this.attractorPosition.y + 0.21*attractorDiameter);
+      //} else {
+      //  text(this.quality, this.attractorPosition.x + 0.75*attractorDiameter, this.attractorPosition.y + 0.21*attractorDiameter);
+      //}
 
     }
 

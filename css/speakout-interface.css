@@ -11,6 +11,7 @@ body, html {
   height:100%;
   padding:0;
   margin:0;
+  overflow: hidden;
 }
 
 button {
@@ -23,7 +24,36 @@ button {
   top:10px;
 }
 
+.lang-button{
+  font-family: "Poppins";
+  background: #FFF;
+  color: #000;
+  border-radius: 50px;
+  border: 2px solid #000;
+  z-index: 10;
+  transition: color 0.2s, background 0.2s;
+  width: 40px;
+  height: 45px;
+  text-align: center;
+  font-size: 18px;
+}
 
+.lang-button:active {
+  background: #000;
+  color:#FFF;
+}
+
+.lang-button:hover {
+  background: #000;
+  color:#FFF;
+}
+
+.lang-button-selected {
+  background: #3333cc;
+  color:#FFF;
+  outline: none;
+
+}
 
 .buttonStyle {
   background: #FFF;
@@ -82,7 +112,7 @@ button {
   color:#FFF;
 }
 
-.passports-toggle:focus {
+.passports-toggle-focus {
   background: #3333cc;
   color:#FFF;
 }
@@ -90,7 +120,7 @@ button {
 .speak-out-box {
 position: absolute;
 width: 300px;
-max-height: 300px;
+max-height: 400px;
 left: 50%;
 top: 50%;
 transform: translate(-50%,-50%);
@@ -104,7 +134,9 @@ overflow: scroll;
 
 .score-box {
 position: fixed;
-width: 100px;
+/*width: 100px;*/
+padding-left: 10px;
+padding-right: 10px;
 height: 30px;
 left: 80px;
 top: 40px;

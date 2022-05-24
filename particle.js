@@ -7,15 +7,29 @@
 
 var particleDiameter = 15;
 
-function particle(tempX, tempY) {
+function particle(tempX, tempY, you) {
 
   this.lifespan = random(100,2000);
   this.counter = 0;
   this.diameter = particleDiameter;
   this.infoText = "";
+
+    try {
   this.cellID = voronoiGetSite(tempX, tempY, false); //constant: cellID of birthplace
+} catch (e) {
+  console.log("Didnt work, and tempX, tempY is:" + tempX, tempY);
+}
+
+  try {
   this.particleBirthColor = voronoiGetColor(this.cellID);
+} catch (e) {
+  console.log("Didnt work, and cell ID is:" + this.cellID);
+  console.log("color didnt work, maybe because tempX, tempY are:" + tempX, tempY);
+}
+
   this.currentCellID = this.cellID; //later: this is changed to the ID of the I wander into.
+  this.highlight = false;
+  this.you = you;
 
   this.passports = [];
 
@@ -32,6 +46,14 @@ function particle(tempX, tempY) {
   this.positionVector = createVector(tempX, tempY);
   this.intentionVector = createVector(0, 0);
 
+  //if ( this === particles[0] ){
+    if ( this.you ){
+    //console.log("I am at particles[0]:" + this.infoText);
+    this.infoText = texts[lang].particle.you + ' (' + texts[lang].attractor[this.isAttractedTo] + ')';
+  } else {
+    this.infoText = random(texts[lang].particle.someoneElse) + ' (' + texts[lang].attractor[this.isAttractedTo] + ')';
+  }
+
 
   /*
   *
@@ -47,23 +69,23 @@ function particle(tempX, tempY) {
     this.passports.push([]);
   }
   this.passports[0] = [this.cellID, this.cellID]; //monochrome
-  for(var i=0;i<analogous.length;i++){
-    if(this.cellID == analogous[i][0]){ // read passport rules for analogous until you find my cellID:
-      this.passports[1] = analogous[i]; // then copy that array into my passports
+  for(var i=0;i<texts.palettesAndPassports.analogous.length;i++){
+    if(this.cellID == texts.palettesAndPassports.analogous[i][0]){ // read passport rules for analogous until you find my cellID:
+      this.passports[1] = texts.palettesAndPassports.analogous[i]; // then copy that array into my passports
     }
   }
-  for(var i=0;i<complementary.length;i++){
-    if(this.cellID == complementary[i][0]){ // same as above.
-      this.passports[2] = complementary[i];
+  for(var i=0;i<texts.palettesAndPassports.complementary.length;i++){
+    if(this.cellID == texts.palettesAndPassports.complementary[i][0]){ // same as above.
+      this.passports[2] = texts.palettesAndPassports.complementary[i];
     }
   }
   //instead of complementary above, try:
   //divide into top and bottom zones
 
 
-  for(var i=0;i<triad.length;i++){
-    if(this.cellID == triad[i][0]){ // same as above.
-      this.passports[3] = triad[i];
+  for(var i=0;i<texts.palettesAndPassports.triad.length;i++){
+    if(this.cellID == texts.palettesAndPassports.triad[i][0]){ // same as above.
+      this.passports[3] = texts.palettesAndPassports.triad[i];
     }
   }
   for(var i=0;i<theWorldSites.length;i++){
@@ -108,21 +130,45 @@ function particle(tempX, tempY) {
     smooth();
     fill("black");
     //this will always get overdriven by the one below:
-    if(this.infoText == ""){
+    /*
+    if(this.infoText == ""){ //this is redundant?
       //this.infoText = 'They (' + this.isAttractedTo + ')';
-      this.infoText = this.isAttractedTo;
+      this.infoText = texts[lang].attractor[this.isAttractedTo];
+      //this.infoText = this.isAttractedTo;
     }
-    if(!this.infoText.includes("You")){
-      this.infoText = 'someone else (' + this.isAttractedTo + ')';
-    }
-    if(this.infoText.includes("You")){
+    */
 
+
+
+/*
+    if(this.infoText.includes('You')){
+      this.infoText = texts[lang].particle.you + ' (' + texts[lang].attractor[this.isAttractedTo] + ')';
+    //} else {
+    } if( !this.infoText.includes("You") ) {
+      this.infoText = texts[lang].particle.someoneElse + ' (' + texts[lang].attractor[this.isAttractedTo] + ')';
+      //this.infoText = 'someone else (' + texts[lang].attractor[this.isAttractedTo] + ')';
+      //this.infoText = 'someone else (' + this.isAttractedTo + ')';
     }
+    */
 
     //textFont(myFont);
     text(this.infoText, this.positionVector.x + 1.0*particleDiameter, this.positionVector.y + 0.5*particleDiameter);
 
   }// close giveInformation
+
+/*
+  this.clicked = function(clickX, clickY) {
+    if ( dist(clickX, clickY, this.positionVector.x, this.positionVector.y) < particleDiameter ) {
+      if(this.highlight === false){
+        this.highlight = true;
+      } else {
+        this.highlight = false;
+      }
+      //console.log("Clicked on me!");
+    }
+  }
+  */
+
 
   /*
   *
@@ -144,10 +190,27 @@ function particle(tempX, tempY) {
     //for other particles
     if(particleCursorDistance < particleDiameter){
       cursor(HAND);
+      //this.infoText = random(texts[lang].particle.someoneElse) + ' (' + texts[lang].attractor[this.isAttractedTo] + ')';
       this.giveInformation();
-      if(!this.infoText.includes("You")){
+      /*
+      if(this.highlight === false){
+        this.highlight = true;
+      } else {
+        this.highlight = false;
+      }
+      */
+      if( !this.you ){
+        //old approach: glue particles onto mouse
         //this.positionVector = cursorPosition;
       }
+    }
+    if( this.highlight ){
+      this.giveInformation();
+    }
+
+    if( this.you ){
+      this.infoText = texts[lang].particle.you + ' (' + texts[lang].attractor[this.isAttractedTo] + ')';
+      this.giveInformation();
     }
 
       /*
@@ -234,7 +297,8 @@ function particle(tempX, tempY) {
       }
     }
 
-    if(this.infoText.includes("You")){
+    //TODO: REDO THIS!!!
+    if( this.you ){
       if(this.doIFeelThePullOfAnAttractor()){
 
         var attractorDistance = createVector();
@@ -244,8 +308,10 @@ function particle(tempX, tempY) {
           this.isAttractedTo = random(attractorQualities);
           this.myDestiny.color = "black";
           //this.myDestiny.color = this.particleBirthColor;
-          this.myDestiny = "undefined";
-          this.infoText = ("You (" +   this.isAttractedTo + ")");
+          this.myDestiny = "undefined"; //what is this doing?
+          //change according to texts[lang]. etc :
+          this.infoText = texts[lang].particle.you + ' (' + texts[lang].attractor[this.isAttractedTo] + ')';
+          //this.infoText = ("You (" +   this.isAttractedTo + ")");
           lifeAchievements++;
         }
     }
@@ -336,13 +402,14 @@ function particle(tempX, tempY) {
       var attractorDistance = createVector();
       attractorDistance = p5.Vector.dist(this.positionVector, this.myDestiny.attractorPosition);
 
-      if(this.infoText.includes("You")){
+      if( this.you ){
         if (attractorDistance < (attractorDiameter/2)) {
           this.isAttractedTo = random(attractorQualities);
           this.myDestiny.color = "black";
           //this.myDestiny.color = this.particleBirthColor;
           this.myDestiny = "undefined";
-          this.infoText = ("You (" +   this.isAttractedTo + ")");
+          //this.infoText = ("You (" +   this.isAttractedTo + ")");
+          this.infoText = texts[lang].particle.you + ' (' + texts[lang].attractor[this.isAttractedTo] + ')';
           //lifeAchievements += ". ";
           lifeAchievements++;
           //lifeAchievements.replace()
@@ -352,7 +419,7 @@ function particle(tempX, tempY) {
       if (attractorDistance < (attractorDiameter/2)-10) { //-10 or -5 -> ie. I am inside my attractor:
         //if the particle is inside the attractor, then it also stays within the attractor:
         //if(this.infoText != "You" || this.infoText != "Tu"){ //if it's anything other than the You particle:
-          if(this.infoText.includes("You")){ //if it's anything other than the You particle:
+          if( this.you ){ //if it's anything other than the You particle:
             // if the You particle has reached its destiny, change what it is attracted to:
 
             //this.
@@ -380,7 +447,7 @@ function particle(tempX, tempY) {
         }
         // if I am inside my attrator already, break out of this function and -> moveRandomly()
       } else { // first go towards attractor:
-        if(this.infoText.includes("You")){
+        if( this.you ){
           // do nothing
         }  else { //for all other particles, go towards the attractor:
           towardsAttractor.mult(this.myDestiny.gravityOfAttractor);
@@ -424,7 +491,7 @@ function particle(tempX, tempY) {
     towardsAllowed = p5.Vector.sub(closestAllowedCellSite, this.positionVector);
     towardsAllowed.normalize();
 
-    if(this.infoText.includes('You')){
+    if( this.you ){
       this.gravityOfHome += 0.5;
     } else { this.gravityOfHome += 0.05; }//this was initially 0.05
 
