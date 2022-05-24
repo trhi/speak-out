@@ -478,13 +478,13 @@ var texts = {
             + "<br><br>"
             + "O que é que estás a procura?"
             + "<br><br>",
-          "passportInstructionsHTML" : "[! fala estas frases para mudar as regras, carrega para mudar as frases]",
+          "passportInstructionsHTML" : "[fala estas frases para mudar as regras, carrega para mudar as frases]",
           "speakButtonHTML" : "Quero falar",
-          "speakButtonTITLE" : "[mantenha carragado, fala as frases ↟, ! observe]",
+          "speakButtonTITLE" : "[mantenha pressionado, fala as frases ↟, observa]",
           "speakButtonNoVUI" : "[abre com Chrome para falar]",
           "iButtonTITLE" : "[instruções]",
           "scoreHTML" : 'Pontos: ',
-          "scoreTITLE" : $('<span>[alcance os objetivos de <em>Tu</em>]</span>')
+          "scoreTITLE" : $('<span>[alcance os teus objetivos]</span>')
           },
           "listenerLANG" : "pt-PT",
           "particle":
@@ -598,13 +598,13 @@ var texts = {
               + "<br><br>"
               + "Was such der <em>Du</em> im Leben?"
               + "<br><br>",
-            "passportInstructionsHTML" : "[! Spreche diese Sätze um die Regeln zu ändern, drücke um die Sätze zu ändern]",
+            "passportInstructionsHTML" : "[Sprich diese Sätze um die Regeln zu ändern, klicke um die Sätze zu ändern]",
             "speakButtonHTML" : "Ich möchte sprechen",
-            "speakButtonTITLE" : "[halte diese Taste gedrückt, spreche die Sätze ↟, beachte]",
+            "speakButtonTITLE" : "[halte diese Taste gedrückt, sprich die Sätze ↟, beobachte]",
             "speakButtonNoVUI" : "[benutze Chrome um sprechen zu können]",
-            "iButtonTITLE" : "[! instructions]",
+            "iButtonTITLE" : "[Anleitung]",
             "scoreHTML" : 'Punkte: ',
-            "scoreTITLE" : $('<span>[! erfülle die Lebensziele des <em>Du</em>]</span>')
+            "scoreTITLE" : $('<span>[erfülle die Lebensziele des <em>Du</em>]</span>')
             },
             "listenerLANG" : "de-DE",
             "particle":
@@ -616,23 +616,23 @@ var texts = {
              "food" : "Essen",
              "love" : "Liebe",
              "more love" : "mehr Liebe",
-             "even more love" : "! noch mehr Liebe",
+             "even more love" : "noch mehr Liebe",
              "freedom" : "Freiheit",
-             "a way out" : "! uma fuga",
+             "a way out" : "ein Fluchtweg",
              "time" : "Zeit",
-            "a hug" : "! Eine Umarmung",
+            "a hug" : "eine Umarmung",
             "sleep" : "Schlaf",
-            "some rest" : "Ausruhen",
+            "some rest" : "etwas Ruhe",
             "deep sleep" : "ein tiefes Schalf",
             "a glass of water" : "ein Glas Wasser",
-            "a timeout" : "! uma pausa",
-            "entertainment" : "! entretenimento",
-            "peace of mind" : "! tranquilidade",
-            "warmth" : "wärme",
-            "a success" : "! a success",
+            "a timeout" : "eine Auszeit",
+            "entertainment" : "Unterhaltung",
+            "peace of mind" : "Seelenfrieden",
+            "warmth" : "Wärme",
+            "a success" : "ein Erfolg",
             "a coffee" : "ein Kaffee",
             "a bite to eat" : "was zum Essen",
-            "a painkiller" : "! a painkiller",
+            "a painkiller" : "ein Schmerzmittel",
             "a flower shop" : "ein Blumenladen"
             }
           }
