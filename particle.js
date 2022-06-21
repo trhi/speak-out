@@ -306,7 +306,8 @@ function particle(tempX, tempY, you) {
 
         if (attractorDistance < (attractorDiameter/2)) {
           this.isAttractedTo = random(attractorQualities);
-          this.myDestiny.color = "black";
+          //this.myDestiny.color = "black"; //this would keep the attractor highlighted after You got it
+          this.myDestiny.color = "white"; //this makes it look like the other ones
           //this.myDestiny.color = this.particleBirthColor;
           this.myDestiny = "undefined"; //what is this doing?
           //change according to texts[lang]. etc :
@@ -405,7 +406,8 @@ function particle(tempX, tempY, you) {
       if( this.you ){
         if (attractorDistance < (attractorDiameter/2)) {
           this.isAttractedTo = random(attractorQualities);
-          this.myDestiny.color = "black";
+          //this.myDestiny.color = "black"; (this would leave the "eaten" attractor black)
+          this.myDestiny.color = "white";
           //this.myDestiny.color = this.particleBirthColor;
           this.myDestiny = "undefined";
           //this.infoText = ("You (" +   this.isAttractedTo + ")");

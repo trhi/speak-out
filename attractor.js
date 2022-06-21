@@ -62,12 +62,27 @@ function attractor(quality, attractorX, attractorY, lifespan) {
       if(this.quality == "repulsor"){ // not using atm
         fill(0);
       }
-      stroke(this.color);
+      if(this.quality === particles[0].isAttractedTo){
+        stroke("#3333cc");
+      } else {
+        stroke(this.color);
+      }
       ellipse(this.attractorPosition.x, this.attractorPosition.y, attractorDiameter, attractorDiameter);
 
       noStroke();
+
+      if(this.quality === particles[0].isAttractedTo){
+        textSize(30);
+        fill("#3333cc");
+      } else {
+        textSize(20);
+        fill(this.color);
+      }
+
+/*
       textSize(20);
       fill(this.color);
+      */
       //if(lang == "fi"){
         text( texts[lang].attractor[this.quality], this.attractorPosition.x + 0.75*attractorDiameter, this.attractorPosition.y + 0.21*attractorDiameter);
       //} else {
